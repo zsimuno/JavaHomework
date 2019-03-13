@@ -27,23 +27,19 @@ public class UniqueNumbers {
 	}
 
 	/**
-	 * Adds a new node to already existing tree or gives value to current node
+	 * Adds a new node to the tree
 	 * 
-	 * @param node     node that we assign value to or look for the necessary node
-	 *                 in its children nodes
+	 * @param node     root of the tree that we are adding the new node to
 	 * @param newValue value that we are looking to add to the tree
-	 * @return newly generated tree or node
+	 * @return newly generated tree
 	 */
 	public static TreeNode addNode(TreeNode node, int newValue) {
 		if (node == null) {
 			node = new TreeNode();
 			node.value = newValue;
-			System.out.println("Dodano.");
-		} else if (newValue == node.value) {
-			System.out.println("Broj već postoji. Preskačem.");
 		} else if (newValue < node.value) {
 			node.left = addNode(node.left, newValue);
-		} else {
+		} else if (newValue > node.value) {
 			node.right = addNode(node.right, newValue);
 		}
 
@@ -92,7 +88,7 @@ public class UniqueNumbers {
 	 * @param node tree that we print the nodes of
 	 */
 	public static void printSortedAscending(TreeNode node) {
-		if (node == null) {
+		if (treeSize(node) == 02) {
 			return;
 		}
 		printSortedAscending(node.left);
@@ -108,7 +104,7 @@ public class UniqueNumbers {
 	 * @param node tree that we print the nodes of
 	 */
 	public static void printSortedDescending(TreeNode node) {
-		if (node == null) {
+		if (treeSize(node) == 0) {
 			return;
 		}
 		printSortedDescending(node.right);
@@ -131,12 +127,17 @@ public class UniqueNumbers {
 			System.out.printf("Unesite broj > ");
 			if (sc.hasNextInt()) {
 				int inputNumber = sc.nextInt();
+				if (containsValue(stablo, inputNumber)) {
+					System.out.println("Broj već postoji. Preskačem.");
+					continue;
+				}
 				stablo = addNode(stablo, inputNumber);
+				System.out.println("Dodano.");
 
 			} else {
 				String input = sc.next();
 				if (input.equals("kraj")) {
-					if (stablo != null) {
+					if (treeSize(stablo) != 0) {
 						System.out.printf("%nIspis od najmanjeg:");
 						printSortedAscending(stablo);
 						System.out.printf("%nIspis od najvećeg:");

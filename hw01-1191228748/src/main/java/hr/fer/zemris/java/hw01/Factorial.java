@@ -6,8 +6,7 @@ package hr.fer.zemris.java.hw01;
 import java.util.Scanner;
 
 /**
- * Program that calculates a factorial of a number based on user input in real
- * time
+ * Program that calculates a factorial of a number based on user input
  * 
  * @author Zvonimir Šimunović
  *
@@ -15,9 +14,10 @@ import java.util.Scanner;
 public class Factorial {
 
 	/**
-	 * Method that starts the program
+	 * Method that starts the program and reads the user input and validates it.
+	 * Input needs to be number between 3 and 20.
 	 * 
-	 * @param args
+	 * @param args command line arguments
 	 */
 	public static void main(String[] args) {
 		Scanner sc = new Scanner(System.in);

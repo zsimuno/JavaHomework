@@ -37,17 +37,17 @@ public class Rectangle {
 		} else {
 			try {
 				width = Double.parseDouble(args[0]);
+				height = Double.parseDouble(args[1]);
 			} catch (NumberFormatException ex) {
-				System.out.println("Neispravan argument komandne linije!");
+				System.out.println("Neispravan argument komandne linije! Samo brojeve treba upisivati!");
 				return;
 			}
 
-			try {
-				height = Double.parseDouble(args[1]);
-			} catch (NumberFormatException ex) {
-				System.out.println("Neispravan argument komandne linije!");
+			if (width <= 0 || height <= 0) {
+				System.out.println("Neispravan argument komandne linije! Jedan broj je manji ili jednak nuli!");
 				return;
 			}
+
 		}
 
 		System.out.printf("Pravokutnik širine %s i visine %s ima površinu %s te opseg %s.", Double.toString(width),
@@ -75,13 +75,13 @@ public class Rectangle {
 					if (inputNumber < 0) {
 						System.out.println("Unijeli ste negativnu vrijednost.");
 					} else if (inputNumber == 0) {
-						System.out.println("Unijeli ste nulu");
+						System.out.println("Unijeli ste nulu.");
 					} else {
 						break;
 					}
 
 				} catch (NumberFormatException ex) {
-					System.out.printf("'%s' se ne može protumačiti kao broj..%n", input);
+					System.out.printf("'%s' se ne može protumačiti kao broj.%n", input);
 				}
 			}
 		}
