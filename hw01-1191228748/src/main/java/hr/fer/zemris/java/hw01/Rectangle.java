@@ -6,12 +6,16 @@ package hr.fer.zemris.java.hw01;
 import java.util.Scanner;
 
 /**
+ * Program that calculates circumference and area of a rectangle
+ * 
  * @author Zvonimir Šimunović
  *
  */
 public class Rectangle {
 
 	/**
+	 * Method that starts the program
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
@@ -22,28 +26,41 @@ public class Rectangle {
 		}
 
 		double width, height;
-		Scanner sc = new Scanner(System.in);
 
 		if (args.length == 0) {
+			Scanner sc = new Scanner(System.in);
 
 			width = readFromUser("širinu", sc);
 			height = readFromUser("visinu", sc);
 
+			sc.close();
 		} else {
-			width = readCommandLineArgument(args[0], "širinu", sc);
-			height = readCommandLineArgument(args[1], "visinu", sc);
+			try {
+				width = Double.parseDouble(args[0]);
+			} catch (NumberFormatException ex) {
+				System.out.println("Neispravan argument komandne linije!");
+				return;
+			}
+
+			try {
+				height = Double.parseDouble(args[1]);
+			} catch (NumberFormatException ex) {
+				System.out.println("Neispravan argument komandne linije!");
+				return;
+			}
 		}
 
 		System.out.printf("Pravokutnik širine %s i visine %s ima površinu %s te opseg %s.", Double.toString(width),
 				Double.toString(height), Double.toString(width * height), Double.toString(2 * (width + height)));
 
-		sc.close();
 	}
 
 	/**
-	 * @param value
-	 * @param sc
-	 * @return
+	 * Method that reads user input from keyboard and validates it
+	 * 
+	 * @param value value that we are looking from user to input
+	 * @param sc    scanner that reads the input
+	 * @return number that was read from user
 	 */
 	public static double readFromUser(String value, Scanner sc) {
 		double inputNumber = 0;
@@ -67,32 +84,6 @@ public class Rectangle {
 					System.out.printf("'%s' se ne može protumačiti kao broj..%n", input);
 				}
 			}
-		}
-
-		return inputNumber;
-	}
-
-	/**
-	 * @param argument
-	 * @param value
-	 * @param sc
-	 * @return
-	 */
-	public static double readCommandLineArgument(String argument, String value, Scanner sc) {
-		double inputNumber = 0;
-
-		try {
-			inputNumber = Double.parseDouble(argument);
-
-			if (inputNumber < 0) {
-				System.out.println("Unijeli ste negativnu vrijednost.");
-				inputNumber = readFromUser(value, sc);
-			} else if (inputNumber == 0) {
-				System.out.println("Unijeli ste nulu");
-				inputNumber = readFromUser(value, sc);
-			}
-		} catch (NumberFormatException ex) {
-			inputNumber = readFromUser(value, sc);
 		}
 
 		return inputNumber;
