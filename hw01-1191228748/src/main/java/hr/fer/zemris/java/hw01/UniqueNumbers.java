@@ -3,6 +3,8 @@
  */
 package hr.fer.zemris.java.hw01;
 
+import java.util.Scanner;
+
 /**
  * @author Zvonimir Šimunović
  *
@@ -28,6 +30,7 @@ public class UniqueNumbers {
 		if (node == null) {
 			node = new TreeNode();
 			node.value = newValue;
+			System.out.println("Dodano.");
 			return node;
 		}
 
@@ -36,7 +39,11 @@ public class UniqueNumbers {
 			return node;
 		}
 
-		checkNode((newValue < node.value) ? node.left : node.right, newValue);
+		if (newValue < node.value) {
+			node.left = checkNode(node.left, newValue);
+		} else {
+			node.right = checkNode(node.right, newValue);
+		}
 
 		return node;
 	}
@@ -52,7 +59,7 @@ public class UniqueNumbers {
 			node.value = newValue;
 			System.out.println("Dodano.");
 		} else {
-			addNode(node, newValue);
+			node = addNode(node, newValue);
 		}
 		return node;
 	}
@@ -76,26 +83,71 @@ public class UniqueNumbers {
 		return false;
 	}
 
+	/**
+	 * @param node
+	 * @return
+	 */
 	public static int treeSize(TreeNode node) {
 		return (node == null) ? 0 : 1 + treeSize(node.left) + treeSize(node.right);
+	}
+	
+	/**
+	 * @param node
+	 */
+	public static void printSortedFromLowest(TreeNode node) {
+		if(node.left != null) {
+			printSortedFromLowest(node.left);
+		}
+		
+		System.out.printf(" %d", node.value);
+		
+		if(node.right != null) {
+			printSortedFromLowest(node.right);
+		}
+	}
+	
+	/**
+	 * @param node
+	 */
+	public static void printSortedFromHighest(TreeNode node) {
+		if(node.right != null) {
+			printSortedFromHighest(node.right);
+		}
+		
+		System.out.printf(" %d", node.value);
+		
+		if(node.left != null) {
+			printSortedFromHighest(node.left);
+		}
 	}
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		TreeNode glava = null;
-		glava = addNode(glava, 42);
-		glava = addNode(glava, 76);
-		glava = addNode(glava, 21);
-		glava = addNode(glava, 76);
-		glava = addNode(glava, 35);
+		TreeNode stablo = null;
+		Scanner sc = new Scanner(System.in);
 
-		if (containsValue(glava, 76)) {
-			System.out.println("da");
+		while (true) {
+			System.out.printf("Unesite broj > ");
+			if (sc.hasNextInt()) {
+				int inputNumber = sc.nextInt();
+				stablo = addNode(stablo, inputNumber);
+
+			} else {
+				String input = sc.next();
+				if (input.equals("kraj")) {
+					System.out.printf("%nIspis od najmanjeg: ");
+					printSortedFromLowest(stablo);
+					System.out.printf("%nIspis od najvećeg: ");
+					printSortedFromHighest(stablo);
+					break;
+				}
+				System.out.printf("'%s' nije cijeli broj.%n", input);
+			}
 		}
 
-		System.out.println(treeSize(glava));
+		sc.close();
 
 	}
 
