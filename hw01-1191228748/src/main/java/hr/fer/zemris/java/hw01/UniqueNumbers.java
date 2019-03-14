@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 /**
  * Program that creates a sorted binary tree based on user input. Tree has no
- * repeating numbers
+ * repeating numbers.
  * 
  * @author Zvonimir Šimunović
  *
@@ -17,8 +17,6 @@ public class UniqueNumbers {
 	/**
 	 * Class that is used to represent the tree and its nodes
 	 * 
-	 * @author Zvonimir Šimunović
-	 *
 	 */
 	static class TreeNode {
 		TreeNode left, right;
@@ -88,7 +86,7 @@ public class UniqueNumbers {
 	 * @param node tree that we print the nodes of
 	 */
 	public static void printSortedAscending(TreeNode node) {
-		if (treeSize(node) == 02) {
+		if (node == null) {
 			return;
 		}
 		printSortedAscending(node.left);
@@ -104,7 +102,7 @@ public class UniqueNumbers {
 	 * @param node tree that we print the nodes of
 	 */
 	public static void printSortedDescending(TreeNode node) {
-		if (treeSize(node) == 0) {
+		if (node == null) {
 			return;
 		}
 		printSortedDescending(node.right);

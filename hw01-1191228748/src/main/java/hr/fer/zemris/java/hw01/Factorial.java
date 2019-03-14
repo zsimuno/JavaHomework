@@ -54,12 +54,12 @@ public class Factorial {
 	 * @throws IllegalArgumentException if argument is a negative number
 	 * 
 	 */
-	public static int factorial(int inputNumber) {
+	public static long factorial(int inputNumber) {
 		if (inputNumber < 0) {
 			throw new IllegalArgumentException("Broj je manji od nula");
 		}
 
-		int factorial = 1;
+		long factorial = 1;
 
 		while (inputNumber > 0) {
 			factorial *= inputNumber;

@@ -25,13 +25,20 @@ public class Rectangle {
 			return;
 		}
 
-		double width, height;
+		double width = 0, height = 0;
 
 		if (args.length == 0) {
 			Scanner sc = new Scanner(System.in);
 
-			width = readFromUser("širinu", sc);
-			height = readFromUser("visinu", sc);
+			while (width <= 0) {
+				System.out.printf("Unesite širinu > ");
+				width = readUserInput(sc);
+			}
+
+			while (height <= 0) {
+				System.out.printf("Unesite visinu > ");
+				height = readUserInput(sc);
+			}
 
 			sc.close();
 		} else {
@@ -56,33 +63,30 @@ public class Rectangle {
 	}
 
 	/**
-	 * Method that reads user input from keyboard and validates it
+	 * Method that reads user input from keyboard and validates it. Values must be
+	 * inputed with dot separator (example 2.1).
 	 * 
-	 * @param value value that we are looking from user to input
-	 * @param sc    scanner that reads the input
-	 * @return number that was read from user
+	 * @param sc Scanner that reads the input
+	 * @return number that was read from user or -1 if input was not valid
 	 */
-	public static double readFromUser(String value, Scanner sc) {
+	public static double readUserInput(Scanner sc) {
 		double inputNumber = 0;
 
-		while (true) {
-			System.out.printf("Unesite %s > ", value);
-
-			if (sc.hasNext()) {
-				String input = sc.next();
-				try {
-					inputNumber = Double.parseDouble(input);
-					if (inputNumber < 0) {
-						System.out.println("Unijeli ste negativnu vrijednost.");
-					} else if (inputNumber == 0) {
-						System.out.println("Unijeli ste nulu.");
-					} else {
-						break;
-					}
-
-				} catch (NumberFormatException ex) {
-					System.out.printf("'%s' se ne može protumačiti kao broj.%n", input);
+		if (sc.hasNext()) {
+			String input = sc.next();
+			try {
+				inputNumber = Double.parseDouble(input);
+				if (inputNumber < 0) {
+					System.out.println("Unijeli ste negativnu vrijednost.");
+					return -1;
+				} else if (inputNumber == 0) {
+					System.out.println("Unijeli ste nulu.");
+					return -1;
 				}
+
+			} catch (NumberFormatException ex) {
+				System.out.printf("'%s' se ne može protumačiti kao broj.%n", input);
+				return -1;
 			}
 		}
 

@@ -12,14 +12,17 @@ class FactorialTest {
 
 	@Test
 	void fiveFactorial() {
-		int n = factorial(5);
-		assertEquals(120, n);
+		assertEquals(120, factorial(5));
+	}
+	
+	@Test
+	void tenFactorial() {
+		assertEquals(3628800, factorial(10));
 	}
 
 	@Test
 	void zeroFactorial() {
-		int n = factorial(0);
-		assertEquals(1, n);
+		assertEquals(1, factorial(0));
 	}
 
 	@Test
