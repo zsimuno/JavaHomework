@@ -20,15 +20,22 @@ public class ArrayIndexedCollection extends Collection {
 	 */
 	private int capacity;
 	/**
-	 * An array of object references which length is determined by capacity variable.
+	 * An array of object references which length is determined by capacity
+	 * variable.
 	 */
 	Object[] elements;
+	/**
+	 * Capacity that will be used if the one isn't given in the constructor.
+	 */
+	private static final int defaultArrayCapacity = 16;
 
 	/**
 	 * @param initialCapacity
 	 * @param size
 	 */
 	private ArrayIndexedCollection(int initialCapacity, int size) {
+		// TODO provjerit trebamo li provjeravati initialCapacity ako je size veci od
+		// njega
 		if (initialCapacity < 1) {
 			throw new IllegalArgumentException();
 		}
@@ -48,7 +55,7 @@ public class ArrayIndexedCollection extends Collection {
 	 * 
 	 */
 	public ArrayIndexedCollection() {
-		this(16);
+		this(defaultArrayCapacity);
 	}
 
 	/**
@@ -70,7 +77,7 @@ public class ArrayIndexedCollection extends Collection {
 	 * @param collection
 	 */
 	public ArrayIndexedCollection(Collection collection) {
-		this(collection, 16);
+		this(collection, defaultArrayCapacity);
 	}
 
 	@Override

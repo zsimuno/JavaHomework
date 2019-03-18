@@ -4,7 +4,11 @@
 package hr.fer.zemris.java.custom.collections;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Objects;
+import java.util.LinkedList.Node;
+
+import com.sun.tools.javac.util.List;
 
 /**
  * Implementation of linked list-backed collection of objects.
@@ -28,6 +32,23 @@ public class LinkedListIndexedCollection extends Collection {
 		 * Pointer to next list node.
 		 */
 		ListNode next;
+		/**
+		 * Value stored on this node.
+		 */
+		Object value;
+		
+		/**
+		 * @param previous pointer to previous list node
+		 * @param next pointer to next list node
+		 * @param value value stored on this node
+		 */
+		public ListNode(ListNode previous, ListNode next, Object value) {
+			this.previous = previous;
+			this.next = next;
+			this.value = value;
+		}
+		
+		
 
 	}
 
@@ -55,14 +76,12 @@ public class LinkedListIndexedCollection extends Collection {
 
 	@Override
 	public boolean isEmpty() {
-		// TODO Auto-generated method stub
-		return super.isEmpty();
+		return (size == 0);
 	}
 
 	@Override
 	public int size() {
-		// TODO Auto-generated method stub
-		return super.size();
+		return this.size;
 	}
 
 	@Override
@@ -97,14 +116,35 @@ public class LinkedListIndexedCollection extends Collection {
 
 	@Override
 	public void add(Object value) {
-		// TODO Auto-generated method stub
-		super.add(value);
+		this.insert(value, this.size);
 	}
 
 	@Override
 	public void clear() {
-		// TODO Auto-generated method stub
-		super.clear();
+		// TODO Provjeriti treba li osoboditi sve reference
+		this.first = this.last = null;
+	}
+	
+	/**
+	 * Returns ListNode element stored at the position {@code index}
+	 * 
+	 * @param index index of the element to be returned
+	 * @return ListNode object that is stored at position {@code index}
+	 */
+	private ListNode getNode(int index) {
+		if(index < this.size/2){
+			ListNode current = this.first;
+			for (int i = 0; i < index; i++) {
+				current = current.next;
+			}
+			return current;
+        } else {
+        	ListNode current = this.last;
+        	for (int i = size - 1; i > index; i--) {
+        		current = current.previous;
+        	}
+        	return current;
+        }
 	}
 
 	// TODO see if this metod needs to write "throws exception"
@@ -115,8 +155,8 @@ public class LinkedListIndexedCollection extends Collection {
 	 * @return object that is stored at position {@code index}
 	 * @throws IndexOutOfBoundsException if index is not valid
 	 */
-	public Object get(int index) {
-		Objects.checkIndex(index, this.size);
+	public Object get(int index) {		
+		return this.getNode(Objects.checkIndex(index, this.size)).value;
 	}
 
 	// TODO Check if docs should write legal positions (The legal positions are 0 to
@@ -130,7 +170,19 @@ public class LinkedListIndexedCollection extends Collection {
 	 * @throws IndexOutOfBoundsException If {@code position} is invalid
 	 */
 	public void insert(Object value, int position) {
-		Objects.checkIndex(position, this.size + 1); // size+1 because size is inclusive
+		if( Objects.checkIndex(position, this.size + 1) == this.size) { // size+1 because size is inclusive
+			this.last = new ListNode(this.last, null, Objects.requireNonNull(value));
+			if(this.isEmpty()) {
+				this.first = this.last;
+			} else {
+				this.last.previous.next = this.last;
+			}
+		} else {
+			ListNode element = this.getNode(position);
+			element.previous = new ListNode(element.previous, element, value);
+		}
+		this.size++;
+		
 
 	}
 
@@ -144,18 +196,30 @@ public class LinkedListIndexedCollection extends Collection {
 	 *         {@code value} is not found.
 	 */
 	public int indexOf(Object value) {
-
+		if (value == null) {
+			return -1;
+		}
+		ListNode current = this.first;
+		while(current != null) {
+			if(current.value == value)
+			current = current.next;
+		}
+		return -1;
 	}
 
 	/**
 	 * 
 	 * Removes element at specified {@code index} from collection.
 	 * 
-	 * @param index index position of element to be removed
-	 * @throws IndexOutOfBoundsException If {@code position} is invalid
+	 * @param index position of element to be removed
+	 * @throws IndexOutOfBoundsException If {@code index} is invalid
 	 */
 	public void remove(int index) {
-		Objects.checkIndex(position, this.size);
+		ListNode element = this.getNode(Objects.checkIndex(index, this.size));
+		// TODO Napraviti kada nema elemenata
+		element.previous.next = element.next;
+		element.next.previous = element.previous;
+		this.size--;
 
 	}
 
