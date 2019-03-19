@@ -32,7 +32,7 @@ public class Collection {
 	/**
 	 * Adds the given object into this collection
 	 * 
-	 * @param value
+	 * @param value value to be added to the collection
 	 */
 	public void add(Object value) {
 
@@ -42,8 +42,9 @@ public class Collection {
 	 * Returns {@code true} only if the collection contains given {@code value} , as
 	 * determined by {@code equals} method
 	 * 
-	 * @param value
-	 * @return false
+	 * @param value value that we are looking if the method contains
+	 * @return {@code true} only if the collection contains given {@code value},
+	 *         {@code false} if it doesn't
 	 */
 	public boolean contains(Object value) {
 		return false;
@@ -54,8 +55,9 @@ public class Collection {
 	 * determined by {@code equals} method and removes one occurrence of it (in this
 	 * class it is not specified which one)
 	 * 
-	 * @param value
-	 * @return false
+	 * @param value value to be removed from the collection
+	 * @return {@code true} only if the collection contains given {@code value},
+	 *         {@code false} if it doesn't
 	 */
 	public boolean remove(Object value) {
 		return false;
@@ -66,7 +68,7 @@ public class Collection {
 	 * it with collection content and returns the array. This method never returns
 	 * {@code null}
 	 * 
-	 * @return
+	 * @return Object array made from collection content
 	 */
 	public Object[] toArray() {
 		throw new UnsupportedOperationException();
@@ -87,10 +89,14 @@ public class Collection {
 	 * Method adds into the current collection all elements from the given
 	 * collection
 	 * 
-	 * @param other
+	 * @param other other collection which we add elements from
 	 */
 	public void addAll(Collection other) {
-
+		// TODO fill javadoc
+		/**
+		 * @author Zvonimir Šimunović
+		 *
+		 */
 		class LocalProcessor extends Processor {
 
 			/**

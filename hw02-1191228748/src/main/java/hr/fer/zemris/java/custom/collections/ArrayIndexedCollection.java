@@ -16,10 +16,6 @@ public class ArrayIndexedCollection extends Collection {
 	 */
 	private int size;
 	/**
-	 * Capacity of the elements array.
-	 */
-	private int capacity;
-	/**
 	 * An array of object references which length is determined by capacity
 	 * variable.
 	 */
@@ -34,13 +30,10 @@ public class ArrayIndexedCollection extends Collection {
 	 * @param size
 	 */
 	private ArrayIndexedCollection(int initialCapacity, int size) {
-		// TODO provjerit trebamo li provjeravati initialCapacity ako je size veci od
-		// njega
 		if (initialCapacity < 1) {
 			throw new IllegalArgumentException();
 		}
-		this.capacity = (initialCapacity < size) ? size : initialCapacity;
-		this.elements = new Object[this.capacity];
+		this.elements = new Object[(initialCapacity < size) ? size : initialCapacity];
 		this.size = size;
 	}
 
@@ -82,38 +75,41 @@ public class ArrayIndexedCollection extends Collection {
 
 	@Override
 	public boolean isEmpty() {
-		// TODO Auto-generated method stub
-		return super.isEmpty();
+		return (this.size == 0);
 	}
 
 	@Override
 	public int size() {
-		// TODO Auto-generated method stub
-		return super.size();
+		return this.size();
 	}
 
 	@Override
 	public boolean contains(Object value) {
-		// TODO Auto-generated method stub
-		return super.contains(value);
+		return (this.indexOf(value) > -1);
 	}
 
 	@Override
 	public boolean remove(Object value) {
-		// TODO Auto-generated method stub
-		return super.remove(value);
+		int indexOf = this.indexOf(value);
+		
+		if (indexOf == -1) {
+			return false;
+		}
+		
+		this.remove(indexOf);
+		return true;
 	}
 
 	@Override
 	public Object[] toArray() {
-		// TODO Auto-generated method stub
-		return super.toArray();
+		return Arrays.copyOf(this.elements, this.size);
 	}
 
 	@Override
 	public void forEach(Processor processor) {
-		// TODO Auto-generated method stub
-		super.forEach(processor);
+		for (Object object : elements) {
+			processor.process(object);
+		}
 	}
 
 	@Override
@@ -135,7 +131,7 @@ public class ArrayIndexedCollection extends Collection {
 		this.insert(value, this.size);
 	}
 
-	// TODO see if this metod needs to write "throws exception"
+	// TODO see if this method needs to write "throws exception"
 	/**
 	 * Returns the object that is stored in backing array at position {@code index}.
 	 * 
@@ -160,9 +156,8 @@ public class ArrayIndexedCollection extends Collection {
 	public void insert(Object value, int position) {
 		Objects.checkIndex(position, this.size + 1); // size+1 because size is inclusive
 
-		if (this.size == this.capacity) {
-			this.capacity *= 2;
-			this.elements = Arrays.copyOf(this.elements, this.capacity);
+		if (this.size == elements.length) {
+			this.elements = Arrays.copyOf(this.elements, elements.length*2);
 			// TODO See if the implementation is valid ("do not allocate new array" ?)
 		}
 

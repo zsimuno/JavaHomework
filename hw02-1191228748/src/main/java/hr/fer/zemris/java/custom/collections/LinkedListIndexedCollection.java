@@ -4,11 +4,7 @@
 package hr.fer.zemris.java.custom.collections;
 
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.Objects;
-import java.util.LinkedList.Node;
-
-import com.sun.tools.javac.util.List;
 
 /**
  * Implementation of linked list-backed collection of objects.
@@ -36,19 +32,17 @@ public class LinkedListIndexedCollection extends Collection {
 		 * Value stored on this node.
 		 */
 		Object value;
-		
+
 		/**
 		 * @param previous pointer to previous list node
-		 * @param next pointer to next list node
-		 * @param value value stored on this node
+		 * @param next     pointer to next list node
+		 * @param value    value stored on this node
 		 */
 		public ListNode(ListNode previous, ListNode next, Object value) {
 			this.previous = previous;
 			this.next = next;
 			this.value = value;
 		}
-		
-		
 
 	}
 
@@ -86,26 +80,44 @@ public class LinkedListIndexedCollection extends Collection {
 
 	@Override
 	public boolean contains(Object value) {
-		// TODO Auto-generated method stub
-		return super.contains(value);
+		for(ListNode el = this.first; el != null; el = el.next) {
+			if (el.value.equals(value)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
 	public boolean remove(Object value) {
-		// TODO Auto-generated method stub
-		return super.remove(value);
+		int indexOf = this.indexOf(value);
+
+		if (indexOf == -1) {
+			return false;
+		}
+
+		this.remove(indexOf);
+		return true;
 	}
 
 	@Override
 	public Object[] toArray() {
-		// TODO Auto-generated method stub
-		return super.toArray();
+		// TODO Stavit kopiju reference ili vrijednosti?
+		Object[] array = new Object[this.size];
+		ListNode element = this.first;
+
+		for (int i = 0; i < this.size; ++i, element = element.next) {
+			array[i] = element.value;
+		}
+
+		return array;
 	}
 
 	@Override
 	public void forEach(Processor processor) {
-		// TODO Auto-generated method stub
-		super.forEach(processor);
+		for(ListNode el = this.first; el != null; el = el.next) {
+			processor.process(el.value);
+		}
 	}
 
 	@Override
@@ -124,7 +136,7 @@ public class LinkedListIndexedCollection extends Collection {
 		// TODO Provjeriti treba li osoboditi sve reference
 		this.first = this.last = null;
 	}
-	
+
 	/**
 	 * Returns ListNode element stored at the position {@code index}
 	 * 
@@ -132,19 +144,24 @@ public class LinkedListIndexedCollection extends Collection {
 	 * @return ListNode object that is stored at position {@code index}
 	 */
 	private ListNode getNode(int index) {
-		if(index < this.size/2){
+		// We check in which half is the index
+		if (index < this.size / 2) { // Start from beginning
 			ListNode current = this.first;
+
 			for (int i = 0; i < index; i++) {
 				current = current.next;
 			}
+
 			return current;
-        } else {
-        	ListNode current = this.last;
-        	for (int i = size - 1; i > index; i--) {
-        		current = current.previous;
-        	}
-        	return current;
-        }
+		} else { // Start from end
+			ListNode current = this.last;
+
+			for (int i = size - 1; i > index; i--) {
+				current = current.previous;
+			}
+
+			return current;
+		}
 	}
 
 	// TODO see if this metod needs to write "throws exception"
@@ -155,7 +172,7 @@ public class LinkedListIndexedCollection extends Collection {
 	 * @return object that is stored at position {@code index}
 	 * @throws IndexOutOfBoundsException if index is not valid
 	 */
-	public Object get(int index) {		
+	public Object get(int index) {
 		return this.getNode(Objects.checkIndex(index, this.size)).value;
 	}
 
@@ -170,9 +187,9 @@ public class LinkedListIndexedCollection extends Collection {
 	 * @throws IndexOutOfBoundsException If {@code position} is invalid
 	 */
 	public void insert(Object value, int position) {
-		if( Objects.checkIndex(position, this.size + 1) == this.size) { // size+1 because size is inclusive
+		if (Objects.checkIndex(position, this.size + 1) == this.size) { // size+1 because size is inclusive
 			this.last = new ListNode(this.last, null, Objects.requireNonNull(value));
-			if(this.isEmpty()) {
+			if (this.isEmpty()) {
 				this.first = this.last;
 			} else {
 				this.last.previous.next = this.last;
@@ -182,7 +199,6 @@ public class LinkedListIndexedCollection extends Collection {
 			element.previous = new ListNode(element.previous, element, value);
 		}
 		this.size++;
-		
 
 	}
 
@@ -199,11 +215,15 @@ public class LinkedListIndexedCollection extends Collection {
 		if (value == null) {
 			return -1;
 		}
+
 		ListNode current = this.first;
-		while(current != null) {
-			if(current.value == value)
-			current = current.next;
+
+		for (int i = 0; i < this.size; i++, current = current.next) {
+			if (current.value == value) {
+				return i;
+			}
 		}
+
 		return -1;
 	}
 
