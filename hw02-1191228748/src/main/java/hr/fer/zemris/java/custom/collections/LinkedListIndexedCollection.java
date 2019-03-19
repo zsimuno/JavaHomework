@@ -3,7 +3,6 @@
  */
 package hr.fer.zemris.java.custom.collections;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 /**

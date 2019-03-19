@@ -8,6 +8,13 @@ package hr.fer.zemris.java.custom.collections;
  *
  */
 public class Collection {
+	
+	/**
+	 * 
+	 */
+	protected Collection() {
+		
+	}
 
 	/**
 	 * returns {@code true} if collection contains no objects and {@code false}
@@ -92,7 +99,7 @@ public class Collection {
 	 * @param other other collection which we add elements from
 	 */
 	public void addAll(Collection other) {
-		// TODO fill javadoc
+		// TODO fill javadoc and see if the method shuld be maybe private or public
 		/**
 		 * @author Zvonimir Šimunović
 		 *

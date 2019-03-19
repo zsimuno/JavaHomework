@@ -19,7 +19,7 @@ public class ArrayIndexedCollection extends Collection {
 	 * An array of object references which length is determined by capacity
 	 * variable.
 	 */
-	Object[] elements;
+	private Object[] elements;
 	/**
 	 * Capacity that will be used if the one isn't given in the constructor.
 	 */
@@ -80,7 +80,7 @@ public class ArrayIndexedCollection extends Collection {
 
 	@Override
 	public int size() {
-		return this.size();
+		return this.size;
 	}
 
 	@Override
