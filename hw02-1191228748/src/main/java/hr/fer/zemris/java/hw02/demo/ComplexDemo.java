@@ -6,13 +6,17 @@ package hr.fer.zemris.java.hw02.demo;
 import hr.fer.zemris.java.hw02.ComplexNumber;
 
 /**
+ * Class that is used to demo the {@link ComplexNumber} class.
+ * 
  * @author Zvonimir Šimunović
  *
  */
 public class ComplexDemo {
 
 	/**
-	 * @param args
+	 * Method that starts the program.
+	 * 
+	 * @param args command line arguments (not used here)
 	 */
 	public static void main(String[] args) {
 		ComplexNumber c1 = new ComplexNumber(2, 3);

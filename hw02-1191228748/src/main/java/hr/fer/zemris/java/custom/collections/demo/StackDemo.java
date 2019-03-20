@@ -8,11 +8,11 @@ import java.util.Scanner;
 import hr.fer.zemris.java.custom.collections.ObjectStack;
 
 /**
- * 
- * Accepts a single command-line argument: expression which should be evaluated.
- * Expression must be in postfix representation. When starting program from
- * console, enclose whole expression into quotation marks, so that your program
- * always gets just one argument
+ * Class that is used to demo the {@link ObjectStack} class. Accepts a single
+ * command-line argument: expression which should be evaluated. Expression must
+ * be in postfix representation. When starting program from console, enclose
+ * whole expression into quotation marks, so that your program always gets just
+ * one argument
  * 
  * @author Zvonimir Šimunović
  *
@@ -20,7 +20,11 @@ import hr.fer.zemris.java.custom.collections.ObjectStack;
 public class StackDemo {
 
 	/**
-	 * @param args
+	 * Method that starts the program and evaluates the postfix expression given
+	 * trought a command line argument
+	 * 
+	 * @param args command line arguments. In this case it must be one and it must
+	 *             be an expression in postfix representation.
 	 */
 	public static void main(String[] args) {
 		if (args.length != 1) {
@@ -30,7 +34,8 @@ public class StackDemo {
 			return;
 		}
 
-		// TODO Validate the expression (eg. when there's an operation but only one number on the stack)
+		// TODO Validate the expression (eg. when there's an operation but only one
+		// number on the stack)
 		// TODO Is using a scanner a good method for this?
 		Scanner sc = new Scanner(args[0]);
 
@@ -40,12 +45,12 @@ public class StackDemo {
 				stack.push(sc.nextInt());
 			} else {
 				String input = sc.next();
-				
-				if(input == "\"") {
+
+				if (input == "\"") {
 					continue;
 				}
-				
-				if(stack.size() < 2) {
+
+				if (stack.size() < 2) {
 					// TODO Just syso and terminate or?
 					System.out.println("ERROR! Expression is not written correctly");
 					sc.close();
@@ -64,7 +69,7 @@ public class StackDemo {
 					stack.push(second - first);
 					break;
 				case "/":
-					if(first == 0) {
+					if (first == 0) {
 						System.out.println("ERROR! Division by zero is forbidden!");
 						sc.close();
 						return;
@@ -82,10 +87,10 @@ public class StackDemo {
 
 			}
 		}
-		
+
 		sc.close();
-		
-		if(stack.size() != 1) {
+
+		if (stack.size() != 1) {
 			// TODO Maybe exception?
 			System.out.println("ERROR!");
 		} else {

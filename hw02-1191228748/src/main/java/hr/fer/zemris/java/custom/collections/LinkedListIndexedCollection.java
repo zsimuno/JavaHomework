@@ -15,6 +15,8 @@ public class LinkedListIndexedCollection extends Collection {
 
 	/**
 	 * 
+	 * Class that is used to represent one node of the linked list
+	 * 
 	 * @author Zvonimir Šimunović
 	 *
 	 */
@@ -33,6 +35,8 @@ public class LinkedListIndexedCollection extends Collection {
 		Object value;
 
 		/**
+		 * Constructs a new {@link ListNode} object from the given values.
+		 * 
 		 * @param previous pointer to previous list node
 		 * @param next     pointer to next list node
 		 * @param value    value stored on this node
@@ -58,13 +62,23 @@ public class LinkedListIndexedCollection extends Collection {
 	 */
 	private ListNode last;
 
+	/**
+	 * Default constructor that constructs an empty
+	 * {@link LinkedListIndexedCollection} object
+	 */
 	public LinkedListIndexedCollection() {
-		first = last = null;
+		this.first = this.last = null;
 	}
 
+	/**
+	 * Constructor that constructs an {@link LinkedListIndexedCollection} object
+	 * that has the elements copied from the other {@code collection}
+	 * 
+	 * @param collection other {@code Collection} whose elements are copied into
+	 *                   this newly constructed collection
+	 */
 	public LinkedListIndexedCollection(Collection collection) {
-		// TODO
-
+		this.addAll(collection);
 	}
 
 	@Override
@@ -79,7 +93,7 @@ public class LinkedListIndexedCollection extends Collection {
 
 	@Override
 	public boolean contains(Object value) {
-		for(ListNode el = this.first; el != null; el = el.next) {
+		for (ListNode el = this.first; el != null; el = el.next) {
 			if (el.value.equals(value)) {
 				return true;
 			}
@@ -114,15 +128,9 @@ public class LinkedListIndexedCollection extends Collection {
 
 	@Override
 	public void forEach(Processor processor) {
-		for(ListNode el = this.first; el != null; el = el.next) {
+		for (ListNode el = this.first; el != null; el = el.next) {
 			processor.process(el.value);
 		}
-	}
-
-	@Override
-	public void addAll(Collection other) {
-		// TODO Auto-generated method stub
-		super.addAll(other);
 	}
 
 	@Override
@@ -163,7 +171,7 @@ public class LinkedListIndexedCollection extends Collection {
 		}
 	}
 
-	// TODO see if this metod needs to write "throws exception"
+	// TODO see if this method needs to write "throws exception"
 	/**
 	 * Returns the object that is stored in linked list at position {@code index}.
 	 * 
@@ -175,11 +183,10 @@ public class LinkedListIndexedCollection extends Collection {
 		return this.getNode(Objects.checkIndex(index, this.size)).value;
 	}
 
-	// TODO Check if docs should write legal positions (The legal positions are 0 to
-	// size (both are included))
+	// TODO see if this method needs to write "throws exception"
 	/**
 	 * Inserts (does not overwrite) the given {@code value} at the given
-	 * {@code position} in array.
+	 * {@code position} in array. (0 to {@code size - 1})
 	 * 
 	 * @param value    value to be inserted
 	 * @param position position to insert the element to
@@ -187,8 +194,10 @@ public class LinkedListIndexedCollection extends Collection {
 	 */
 	public void insert(Object value, int position) {
 		if (Objects.checkIndex(position, this.size + 1) == this.size) { // size+1 because size is inclusive
+			// Add to the end
 			this.last = new ListNode(this.last, null, Objects.requireNonNull(value));
-			if (this.isEmpty()) {
+
+			if (this.isEmpty()) { // this.size is not yet changed so this checks if it was empty before inserting
 				this.first = this.last;
 			} else {
 				this.last.previous.next = this.last;
@@ -226,18 +235,30 @@ public class LinkedListIndexedCollection extends Collection {
 		return -1;
 	}
 
+	// TODO see if this method needs to write "throws exception"
 	/**
 	 * 
-	 * Removes element at specified {@code index} from collection.
+	 * Removes element at specified {@code index} (0 to {@code size - 1}) from
+	 * collection.
 	 * 
 	 * @param index position of element to be removed
 	 * @throws IndexOutOfBoundsException If {@code index} is invalid
 	 */
 	public void remove(int index) {
 		ListNode element = this.getNode(Objects.checkIndex(index, this.size));
-		// TODO Napraviti kada nema elemenata
-		element.previous.next = element.next;
-		element.next.previous = element.previous;
+
+		if (element.previous == null) {
+			this.first = element.next;
+		} else {
+			element.previous.next = element.next;
+		}
+
+		if (element.next == null) {
+			this.last = element.previous;
+		} else {
+			element.next.previous = element.previous;
+		}
+
 		this.size--;
 
 	}

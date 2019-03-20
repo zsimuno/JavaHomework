@@ -4,13 +4,14 @@
 package hr.fer.zemris.java.custom.collections;
 
 /**
+ * Class that represents a stack of objects. Usual stack methods are provided.
+ * 
  * @author Zvonimir Šimunović
  *
  */
 public class ObjectStack {
-
 	/**
-	 * TODO fill and is this kind if initialization ok?
+	 * {@link ArrayIndexedCollection} object that we use to represent the stack.
 	 */
 	private ArrayIndexedCollection stack = new ArrayIndexedCollection();
 

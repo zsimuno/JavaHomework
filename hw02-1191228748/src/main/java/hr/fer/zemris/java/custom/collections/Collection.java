@@ -4,13 +4,15 @@
 package hr.fer.zemris.java.custom.collections;
 
 /**
+ * Class that represents a collection
+ * 
  * @author Zvonimir Šimunović
  *
  */
 public class Collection {
 	
 	/**
-	 * 
+	 * Default constructor that is empty
 	 */
 	protected Collection() {
 		
@@ -99,15 +101,19 @@ public class Collection {
 	 * @param other other collection which we add elements from
 	 */
 	public void addAll(Collection other) {
-		// TODO fill javadoc and see if the method shuld be maybe private or public
+		// TODO fill javadoc and see if the method should be maybe private or public
 		/**
+		 * Class that 
+		 * 
 		 * @author Zvonimir Šimunović
 		 *
 		 */
 		class LocalProcessor extends Processor {
 
 			/**
-			 * @param value
+			 * Adds the value into the current collection.
+			 * 
+			 * @param value value to be added to the current collection
 			 */
 			public void process(Object value) {
 				add(value);

@@ -26,8 +26,12 @@ public class ArrayIndexedCollection extends Collection {
 	private static final int defaultArrayCapacity = 16;
 
 	/**
-	 * @param initialCapacity
-	 * @param size
+	 * Create an empty {@link ArrayIndexedCollection} object with the capacity
+	 * equals to {@code initialCapacity} or {@code size} depending on which one
+	 * is larger.
+	 * 
+	 * @param initialCapacity capacity that is set
+	 * @param size            size of the new collection
 	 */
 	private ArrayIndexedCollection(int initialCapacity, int size) {
 		if (initialCapacity < 1) {
@@ -38,25 +42,38 @@ public class ArrayIndexedCollection extends Collection {
 	}
 
 	/**
-	 * @param initialCapacity
+	 * Create an empty {@link ArrayIndexedCollection} object with the capacity
+	 * equals to {@code initialCapacity}
+	 * 
+	 * @param initialCapacity capacity that is set
 	 */
 	public ArrayIndexedCollection(int initialCapacity) {
 		this(initialCapacity, 0);
 	}
 
 	/**
-	 * 
+	 * Create an empty {@link ArrayIndexedCollection} object with the capacity
+	 * equals to {@value #defaultArrayCapacity}
 	 */
 	public ArrayIndexedCollection() {
 		this(defaultArrayCapacity);
 	}
 
 	/**
-	 * @param collection
-	 * @param initialCapacity
+	 * Create an {@link ArrayIndexedCollection} object which elements are copied
+	 * from the other {@link Collection} object. New {@link ArrayIndexedCollection}
+	 * will have the capacity equals to {@code initialCapacity} or the size of the
+	 * {@code collection} if it's bigger than {@code initialCapacity}.
+	 * 
+	 * @param collection      {@link Collection} which elements are copied into this
+	 *                        newly constructed collection
+	 * @param initialCapacity capacity that is set
+	 * @throws NullPointerException If the given collection is null
 	 */
 	public ArrayIndexedCollection(Collection collection, int initialCapacity) {
 		this(initialCapacity, Objects.requireNonNull(collection).size());
+		
+		this.addAll(collection);
 
 		// TODO
 //		Other two constructors are variation of the previous two, but they accept additional parameter (as first
@@ -67,7 +84,14 @@ public class ArrayIndexedCollection extends Collection {
 	}
 
 	/**
-	 * @param collection
+	 * Create an {@link ArrayIndexedCollection} object which elements are copied
+	 * from the other {@link Collection} object. New {@link ArrayIndexedCollection}
+	 * will have the capacity equals to {@value #defaultArrayCapacity} or the size
+	 * of the {@code collection} if it's bigger than {@value #defaultArrayCapacity}.
+	 * 
+	 * @param collection {@link Collection} which elements are copied into this
+	 *                   newly constructed collection
+	 * @throws NullPointerException If the given collection is null
 	 */
 	public ArrayIndexedCollection(Collection collection) {
 		this(collection, defaultArrayCapacity);
@@ -91,11 +115,11 @@ public class ArrayIndexedCollection extends Collection {
 	@Override
 	public boolean remove(Object value) {
 		int indexOf = this.indexOf(value);
-		
+
 		if (indexOf == -1) {
 			return false;
 		}
-		
+
 		this.remove(indexOf);
 		return true;
 	}
@@ -110,12 +134,6 @@ public class ArrayIndexedCollection extends Collection {
 		for (Object object : elements) {
 			processor.process(object);
 		}
-	}
-
-	@Override
-	public void addAll(Collection other) {
-		// TODO Auto-generated method stub
-		super.addAll(other);
 	}
 
 	@Override
@@ -143,10 +161,9 @@ public class ArrayIndexedCollection extends Collection {
 		return this.elements[Objects.checkIndex(index, this.size)];
 	}
 
-	// TODO Check if docs should write legal positions (The legal positions are 0 to
-	// size (both are included))
+	// TODO see if this method needs to write "throws exception"
 	/**
-	 * Inserts (does not overwrite) the given {@code value} at the given
+	 * Inserts (does not overwrite) the given {@code value} at the given. (0 to {@code size})
 	 * {@code position} in array.
 	 * 
 	 * @param value    value to be inserted
@@ -157,7 +174,7 @@ public class ArrayIndexedCollection extends Collection {
 		Objects.checkIndex(position, this.size + 1); // size+1 because size is inclusive
 
 		if (this.size == elements.length) {
-			this.elements = Arrays.copyOf(this.elements, elements.length*2);
+			this.elements = Arrays.copyOf(this.elements, elements.length * 2);
 			// TODO See if the implementation is valid ("do not allocate new array" ?)
 		}
 
@@ -190,9 +207,10 @@ public class ArrayIndexedCollection extends Collection {
 		return -1;
 	}
 
+	// TODO see if this method needs to write "throws exception"
 	/**
 	 * 
-	 * Removes element at specified {@code index} from collection.
+	 * Removes element at specified {@code index} (0 to {@code size - 1}) from collection. 
 	 * 
 	 * @param index position of element to be removed
 	 * @throws IndexOutOfBoundsException If {@code index} is out of bounds
