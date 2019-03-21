@@ -5,6 +5,7 @@ package hr.fer.zemris.java.custom.collections;
 
 import java.util.Objects;
 
+
 /**
  * Implementation of linked list-backed collection of objects.
  * 
@@ -68,6 +69,7 @@ public class LinkedListIndexedCollection extends Collection {
 	 */
 	public LinkedListIndexedCollection() {
 		this.first = this.last = null;
+		this.size = 0;
 	}
 
 	/**
@@ -133,6 +135,11 @@ public class LinkedListIndexedCollection extends Collection {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @throws NullPointerException if {@code value} is null
+	 */
 	@Override
 	public void add(Object value) {
 		this.insert(value, this.size);
@@ -140,8 +147,17 @@ public class LinkedListIndexedCollection extends Collection {
 
 	@Override
 	public void clear() {
-		// TODO Provjeriti treba li osoboditi sve reference
+		// Removing all links
+		for (ListNode el = this.first; el != null; ) {
+            ListNode next = el.next;
+            el.value = null;
+            el.next = null;
+            el.previous = null;
+            el = next;
+        }
+		
 		this.first = this.last = null;
+		this.size = 0;
 	}
 
 	/**
@@ -174,6 +190,7 @@ public class LinkedListIndexedCollection extends Collection {
 
 	/**
 	 * Returns the object that is stored in linked list at position {@code index}.
+	 * Complexity always less than <i>size/2+1</i>.
 	 * 
 	 * @param index index of element to be returned (0 to size-1)
 	 * @return object that is stored at position {@code index}
@@ -186,6 +203,7 @@ public class LinkedListIndexedCollection extends Collection {
 	/**
 	 * Inserts (does not overwrite) the given {@code value} at the given
 	 * {@code position} in array. (0 to {@code size - 1})
+	 * Complexity O(1).
 	 * 
 	 * @param value    value to be inserted
 	 * @param position position to insert the element to
@@ -193,9 +211,12 @@ public class LinkedListIndexedCollection extends Collection {
 	 * @throws NullPointerException      if {@code value} is null
 	 */
 	public void insert(Object value, int position) {
+		if (value == null) {
+			throw new NullPointerException();
+		}
 		if (Objects.checkIndex(position, this.size + 1) == this.size) { // size+1 because size is inclusive
 			// Add to the end
-			this.last = new ListNode(this.last, null, Objects.requireNonNull(value));
+			this.last = new ListNode(this.last, null, value);
 
 			if (this.isEmpty()) { // this.size is not yet changed so this checks if it was empty before inserting
 				this.first = this.last;
@@ -204,7 +225,13 @@ public class LinkedListIndexedCollection extends Collection {
 			}
 		} else {
 			ListNode element = this.getNode(position);
-			element.previous = new ListNode(element.previous, element, value);
+			if (element.previous == null) {
+				element.previous = new ListNode(element.previous, element, value);
+				this.first = element.previous;
+			} else {
+				element.previous.next = element.previous = new ListNode(element.previous, element, value);
+			}
+
 		}
 		this.size++;
 
@@ -214,6 +241,7 @@ public class LinkedListIndexedCollection extends Collection {
 	 * 
 	 * Searches the collection and returns the index of the first occurrence of the
 	 * given {@code value} or -1 if the {@code value} is not found.
+	 * Complexity O(size).
 	 * 
 	 * @param value element to search for
 	 * @return index of the first occurrence of the given {@code value} or -1 if the

@@ -39,7 +39,7 @@ public class ArrayIndexedCollection extends Collection {
 			throw new IllegalArgumentException();
 		}
 		this.elements = new Object[(initialCapacity < size) ? size : initialCapacity];
-		this.size = size;
+		this.size = 0;
 	}
 
 	/**
@@ -64,9 +64,13 @@ public class ArrayIndexedCollection extends Collection {
 
 	/**
 	 * Create an {@link ArrayIndexedCollection} object which elements are copied
-	 * from the other {@link Collection} object. New {@link ArrayIndexedCollection}
-	 * will have the capacity equals to {@code initialCapacity} or the size of the
-	 * {@code collection} if it's bigger than {@code initialCapacity}.
+	 * from the other {@link Collection} object.
+	 * 
+	 * <p>
+	 * New {@link ArrayIndexedCollection} will have the capacity equals to
+	 * {@code initialCapacity} or the size of the {@code collection} if it's bigger
+	 * than {@code initialCapacity}.
+	 * </p>
 	 * 
 	 * @param collection      {@link Collection} which elements are copied into this
 	 *                        newly constructed collection
@@ -82,9 +86,12 @@ public class ArrayIndexedCollection extends Collection {
 
 	/**
 	 * Create an {@link ArrayIndexedCollection} object which elements are copied
-	 * from the other {@link Collection} object. New {@link ArrayIndexedCollection}
+	 * from the other {@link Collection} object. 
+	 * <p>
+	 * New {@link ArrayIndexedCollection}
 	 * will have the capacity equals to {@value #defaultArrayCapacity} or the size
 	 * of the {@code collection} if it's bigger than {@value #defaultArrayCapacity}.
+	 * </p>
 	 * 
 	 * @param collection {@link Collection} which elements are copied into this
 	 *                   newly constructed collection
@@ -141,6 +148,11 @@ public class ArrayIndexedCollection extends Collection {
 		this.size = 0;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @throws NullPointerException if {@code value} is null
+	 */
 	@Override
 	public void add(Object value) {
 		this.insert(value, this.size);
@@ -148,6 +160,7 @@ public class ArrayIndexedCollection extends Collection {
 
 	/**
 	 * Returns the object that is stored in backing array at position {@code index}.
+	 * Complexity is O(1).
 	 * 
 	 * @param index index of element to be returned (0 to size-1)
 	 * @return object that is stored at position {@code index}
@@ -158,19 +171,24 @@ public class ArrayIndexedCollection extends Collection {
 	}
 
 	/**
-	 * Inserts (does not overwrite) the given {@code value} at the given. (0 to
-	 * {@code size}) {@code position} in array.
+	 * Inserts (does not overwrite) the given {@code value} at the given {@code position} in array.
+	 * Complexity is O(size)
 	 * 
 	 * @param value    value to be inserted
-	 * @param position position to insert the element to
+	 * @param position position to insert the element to (0 to {@code size})
 	 * @throws IndexOutOfBoundsException If {@code position} is invalid
+	 * @throws NullPointerException      if {@code value} is null
 	 */
 	public void insert(Object value, int position) {
-		Objects.checkIndex(position, this.size + 1); // size+1 because size is inclusive
+		if (value == null) {
+			throw new NullPointerException();
+		}
+		if (position < 0 || position > this.size) {
+			throw new IndexOutOfBoundsException();
+		}
 
 		if (this.size == elements.length) {
 			this.elements = Arrays.copyOf(this.elements, elements.length * 2);
-			// TODO See if the implementation is valid ("do not allocate new array" ?)
 		}
 
 		for (int i = this.size; i > position; i--) {
@@ -185,6 +203,7 @@ public class ArrayIndexedCollection extends Collection {
 	 * 
 	 * Searches the collection and returns the index of the first occurrence of the
 	 * given {@code value} or -1 if the {@code value} is not found.
+	 * Complexity O(size).
 	 * 
 	 * @param value element to search for
 	 * @return index of the first occurrence of the given {@code value} or -1 if the
@@ -211,9 +230,10 @@ public class ArrayIndexedCollection extends Collection {
 	 * @throws IndexOutOfBoundsException If {@code index} is out of bounds
 	 */
 	public void remove(int index) {
-		for (int i = Objects.checkIndex(index, this.size); i < this.size; i++) {
+		for (int i = Objects.checkIndex(index, this.size); i < this.size - 1; i++) {
 			this.elements[i] = this.elements[i + 1];
 		}
+		this.elements[this.size - 1] = null;
 		this.size--;
 	}
 

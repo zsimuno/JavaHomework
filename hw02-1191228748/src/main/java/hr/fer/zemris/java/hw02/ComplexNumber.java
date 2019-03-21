@@ -19,6 +19,11 @@ public class ComplexNumber {
 	 * Imaginary part of a complex number
 	 */
 	private final double imaginary;
+	
+	/**
+	 * Precision of the equals method
+	 */
+	private static final double precision = 10e-8;
 
 	/**
 	 * Constructs a new {@code ComplexNumber} from the given {@code real} and
@@ -64,7 +69,6 @@ public class ComplexNumber {
 		return new ComplexNumber(magnitude * Math.cos(angle), magnitude * Math.sin(angle));
 	}
 
-	// (accepts strings such as: "3.51", "-3.17", "-2.71i", "i", "1","-2.71-3.15i"),
 	/**
 	 * Method that parses a string representation of a complex number to a
 	 * {@link ComplexNumber} object. Accepts strings such as "3.51", "-3.17",
@@ -72,6 +76,7 @@ public class ComplexNumber {
 	 * 
 	 * @param s string representation of a complex number
 	 * @return {@link ComplexNumber} object parsed from the input string {@code s}
+	 * @throws IllegalArgumentException if {@code s} is not a valid complex number
 	 */
 	public static ComplexNumber parse(String s) {
 		if (s == "i") {
@@ -121,7 +126,6 @@ public class ComplexNumber {
 					continue;
 				} else {
 					throw new IllegalArgumentException(s + " is not a complex number!");
-					// TODO sto napraviti za netocan upis?
 				}
 			}
 
@@ -149,7 +153,6 @@ public class ComplexNumber {
 			return Double.parseDouble(number);
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException(number + " is not a valid character of a complex number!");
-			// TODO sto napraviti za netocan upis?
 		}
 	}
 
@@ -177,16 +180,16 @@ public class ComplexNumber {
 	 * @return magnitude of the complex number
 	 */
 	public double getMagnitude() {
-		return Math.sqrt(Math.pow(real, 2) + Math.pow(imaginary, 2)); // TODO mozda hypot koristit
+		return Math.sqrt(Math.pow(real, 2) + Math.pow(imaginary, 2));
 	}
 
 	/**
-	 * Returns the angle in radians (from 0 to 2 Pi)
+	 * Returns the angle in radians
 	 * 
-	 * @return angle in radians, from 0 to 2 Pi
+	 * @return angle in radians
 	 */
 	public double getAngle() {
-		return Math.atan2(real, imaginary) + Math.PI; // TODO Provjerit jel pravilna konverzija
+		return Math.atan2(imaginary, real);
 	}
 
 	/**
@@ -234,26 +237,25 @@ public class ComplexNumber {
 				(this.imaginary * c.real - this.real * c.imaginary) / denominator);
 	}
 
-	// n>=0,
 	/**
 	 * Creates a new {@link ComplexNumber} that is {@code this} to the power
 	 * {@code n}.
 	 * 
-	 * @param n the exponent
+	 * @param n the exponent (n>=0)
 	 * @return new {@link ComplexNumber} that is {@code this} to the power {@code n}
+	 * @throws IllegalArgumentException if {@code n} is not a valid input
 	 */
 	public ComplexNumber power(int n) {
 		if (n < 0) {
 			throw new IllegalArgumentException();
-			// TODO Provjerit valja li
 		}
 
 		if (n == 0) {
-			return new ComplexNumber(1, 0); // TODO ima li ovo smisla?
+			return new ComplexNumber(1, 0);
 		}
 
 		if (n == 1) {
-			return new ComplexNumber(this.real, this.imaginary); // TODO Provjerit jel ovo ili this
+			return new ComplexNumber(this.real, this.imaginary);
 		}
 		double rToN = Math.pow(getMagnitude(), n);
 		double angle = this.getAngle();
@@ -261,26 +263,24 @@ public class ComplexNumber {
 
 	}
 
-//n > 0,
 	/**
 	 * Returns the nth root of the complex number {@code this}.
 	 * 
-	 * @param n the root number
+	 * @param n the root number (n > 0)
 	 * @return the nth root of the complex number {@code this}
+	 * @throws IllegalArgumentException if {@code n} is not a valid input
 	 */
 	public ComplexNumber[] root(int n) {
 		if (n <= 0) {
 			throw new IllegalArgumentException();
-			// TODO Provjerit valja li
 		}
-		// TODO What if n is 1?
 
 		double angle = this.getAngle();
-		double nRootR = Math.pow(this.getMagnitude(), 1 / n);
+		double nRootR = Math.pow(this.getMagnitude(), 1.0 / n);
 		ComplexNumber[] result = new ComplexNumber[n];
 		for (int i = 0; i < result.length; i++) {
 			result[i] = new ComplexNumber(nRootR * Math.cos((angle + 2 * i * Math.PI) / n),
-					nRootR * Math.sin((angle + 2 * i * Math.PI) / n));
+										  nRootR * Math.sin((angle + 2 * i * Math.PI) / n));
 		}
 		return result;
 	}
@@ -322,7 +322,6 @@ public class ComplexNumber {
 		return result;
 	}
 
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -335,15 +334,13 @@ public class ComplexNumber {
 			return false;
 		}
 		ComplexNumber other = (ComplexNumber) obj;
-		if (Double.doubleToLongBits(imaginary) != Double.doubleToLongBits(other.imaginary)) {
+		if (imaginary - other.imaginary > precision) {
 			return false;
 		}
-		if (Double.doubleToLongBits(real) != Double.doubleToLongBits(other.real)) {
+		if (real - other.real > precision) {
 			return false;
 		}
 		return true;
 	}
-	
-	
 
 }
