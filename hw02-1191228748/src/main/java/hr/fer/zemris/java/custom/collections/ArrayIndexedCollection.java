@@ -131,8 +131,8 @@ public class ArrayIndexedCollection extends Collection {
 
 	@Override
 	public void forEach(Processor processor) {
-		for (Object object : elements) {
-			processor.process(object);
+		for (int i = 0; i < this.size; i++) {
+			processor.process(elements[i]);
 		}
 	}
 

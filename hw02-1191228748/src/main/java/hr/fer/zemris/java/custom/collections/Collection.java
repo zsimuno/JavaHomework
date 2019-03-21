@@ -10,12 +10,12 @@ package hr.fer.zemris.java.custom.collections;
  *
  */
 public class Collection {
-	
+
 	/**
 	 * Default constructor that is empty
 	 */
 	protected Collection() {
-		
+
 	}
 
 	/**
@@ -33,6 +33,7 @@ public class Collection {
 	 * Returns the number of currently stored objects in this collections.
 	 * 
 	 * @return number of currently stored objects in this collections
+	 * 
 	 */
 	public int size() {
 		return 0;
@@ -88,7 +89,8 @@ public class Collection {
 	 * collection. The order in which elements will be sent is undefined in this
 	 * class.
 	 * 
-	 * @param processor
+	 * @param processor processor which method process will be called for each
+	 *                  element of this collection
 	 */
 	public void forEach(Processor processor) {
 
@@ -101,9 +103,9 @@ public class Collection {
 	 * @param other other collection which we add elements from
 	 */
 	public void addAll(Collection other) {
-		// TODO fill javadoc and see if the method should be maybe private or public
 		/**
-		 * Class that 
+		 * Class that is used in addAll method of {@code Collection} class to add all
+		 * elements of some other collection to this current collection
 		 * 
 		 * @author Zvonimir Šimunović
 		 *

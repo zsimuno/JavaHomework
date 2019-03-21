@@ -27,16 +27,12 @@ public class StackDemo {
 	 *             be an expression in postfix representation.
 	 */
 	public static void main(String[] args) {
+		
 		if (args.length != 1) {
-			// Maybe print something for user?
-			// TODO Just syso and terminate or?
 			System.out.println("Wrong number of command line arguments!");
 			return;
 		}
 
-		// TODO Validate the expression (eg. when there's an operation but only one
-		// number on the stack)
-		// TODO Is using a scanner a good method for this?
 		Scanner sc = new Scanner(args[0]);
 
 		ObjectStack stack = new ObjectStack();
@@ -51,8 +47,7 @@ public class StackDemo {
 				}
 
 				if (stack.size() < 2) {
-					// TODO Just syso and terminate or?
-					System.out.println("ERROR! Expression is not written correctly");
+					System.out.println("Expression is not written correctly!");
 					sc.close();
 					return;
 				}
@@ -70,10 +65,9 @@ public class StackDemo {
 					break;
 				case "/":
 					if (first == 0) {
-						System.out.println("ERROR! Division by zero is forbidden!");
+						System.out.println("Division by zero is forbidden!");
 						sc.close();
 						return;
-						// TODO Just syso and terminate or?
 					}
 					stack.push(second / first);
 					break;
@@ -91,10 +85,9 @@ public class StackDemo {
 		sc.close();
 
 		if (stack.size() != 1) {
-			// TODO Maybe exception?
-			System.out.println("ERROR!");
+			System.out.println("Expression is not written correctly!");
 		} else {
-			System.out.println("Result is: " + stack.pop()); // Print result
+			System.out.println("Expression evaluates to " + stack.pop()); // Print result
 		}
 
 	}

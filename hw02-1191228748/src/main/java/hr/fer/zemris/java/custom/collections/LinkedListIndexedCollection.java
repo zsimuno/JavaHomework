@@ -149,10 +149,11 @@ public class LinkedListIndexedCollection extends Collection {
 	 * 
 	 * @param index index of the element to be returned
 	 * @return ListNode object that is stored at position {@code index}
+	 * @throws IndexOutOfBoundsException if the index is out of bounds
 	 */
 	private ListNode getNode(int index) {
 		// We check in which half is the index
-		if (index < this.size / 2) { // Start from beginning
+		if (Objects.checkIndex(index, this.size) < this.size / 2) { // Start from beginning
 			ListNode current = this.first;
 
 			for (int i = 0; i < index; i++) {
