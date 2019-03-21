@@ -27,11 +27,12 @@ public class ArrayIndexedCollection extends Collection {
 
 	/**
 	 * Create an empty {@link ArrayIndexedCollection} object with the capacity
-	 * equals to {@code initialCapacity} or {@code size} depending on which one
-	 * is larger.
+	 * equals to {@code initialCapacity} or {@code size} depending on which one is
+	 * larger.
 	 * 
 	 * @param initialCapacity capacity that is set
 	 * @param size            size of the new collection
+	 * @throws IllegalArgumentException if initialCapacity is below 1
 	 */
 	private ArrayIndexedCollection(int initialCapacity, int size) {
 		if (initialCapacity < 1) {
@@ -46,6 +47,8 @@ public class ArrayIndexedCollection extends Collection {
 	 * equals to {@code initialCapacity}
 	 * 
 	 * @param initialCapacity capacity that is set
+	 * @throws IllegalArgumentException if initialCapacity is below 1
+	 * 
 	 */
 	public ArrayIndexedCollection(int initialCapacity) {
 		this(initialCapacity, 0);
@@ -68,19 +71,13 @@ public class ArrayIndexedCollection extends Collection {
 	 * @param collection      {@link Collection} which elements are copied into this
 	 *                        newly constructed collection
 	 * @param initialCapacity capacity that is set
-	 * @throws NullPointerException If the given collection is null
+	 * @throws NullPointerException     If the given collection is null
+	 * @throws IllegalArgumentException if initialCapacity is below 1
 	 */
 	public ArrayIndexedCollection(Collection collection, int initialCapacity) {
 		this(initialCapacity, Objects.requireNonNull(collection).size());
-		
-		this.addAll(collection);
 
-		// TODO
-//		Other two constructors are variation of the previous two, but they accept additional parameter (as first
-//		argument): a non-null reference to some other Collection which elements are copied into this newly
-//		constructed collection; if the initialCapacity is smaller than the size of the given collection, the size of
-//		the given collection should be used for elements array preallocation. If the given collection is null , a
-//		NullPointerException should be thrown.
+		this.addAll(collection);
 	}
 
 	/**
@@ -149,7 +146,6 @@ public class ArrayIndexedCollection extends Collection {
 		this.insert(value, this.size);
 	}
 
-	// TODO see if this method needs to write "throws exception"
 	/**
 	 * Returns the object that is stored in backing array at position {@code index}.
 	 * 
@@ -161,10 +157,9 @@ public class ArrayIndexedCollection extends Collection {
 		return this.elements[Objects.checkIndex(index, this.size)];
 	}
 
-	// TODO see if this method needs to write "throws exception"
 	/**
-	 * Inserts (does not overwrite) the given {@code value} at the given. (0 to {@code size})
-	 * {@code position} in array.
+	 * Inserts (does not overwrite) the given {@code value} at the given. (0 to
+	 * {@code size}) {@code position} in array.
 	 * 
 	 * @param value    value to be inserted
 	 * @param position position to insert the element to
@@ -207,10 +202,10 @@ public class ArrayIndexedCollection extends Collection {
 		return -1;
 	}
 
-	// TODO see if this method needs to write "throws exception"
 	/**
 	 * 
-	 * Removes element at specified {@code index} (0 to {@code size - 1}) from collection. 
+	 * Removes element at specified {@code index} (0 to {@code size - 1}) from
+	 * collection.
 	 * 
 	 * @param index position of element to be removed
 	 * @throws IndexOutOfBoundsException If {@code index} is out of bounds

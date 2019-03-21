@@ -3,6 +3,8 @@
  */
 package hr.fer.zemris.java.custom.collections;
 
+import java.util.Objects;
+
 /**
  * Class that represents a stack of objects. Usual stack methods are provided.
  * 
@@ -34,13 +36,13 @@ public class ObjectStack {
 	}
 
 	/**
-	 * Pushes given value on the stack.
+	 * Pushes given {@code value} on the stack.
 	 * 
 	 * @param value value to be pushed on the stack
+	 * @throws NullPointerException if {@code value} is null
 	 */
 	public void push(Object value) {
-		// TODO null value must not be allowed to be placed on stack.
-		stack.add(value);
+		stack.add(Objects.requireNonNull(value));
 	}
 
 	/**
@@ -49,12 +51,9 @@ public class ObjectStack {
 	 * @return object that was popped
 	 */
 	public Object pop() {
-		// TODO If the stack is
-//		 * empty when method pop is called, the method should throw EmptyStackException
-//		 * . This exception is not part of JRE libraries; you should provide an
-//		 * implementation of EmptyStackException class (put the class in the same
-//		 * package as all of collections you implemented and let it inherit from
-//		 * RuntimeException ).
+		if(stack.isEmpty()) {
+			throw new EmptyStackException();
+		}
 		Object top = stack.get(stack.size() - 1);
 		stack.remove(stack.size() - 1);
 		return top;
@@ -67,7 +66,9 @@ public class ObjectStack {
 	 * @return last element placed on stack
 	 */
 	public Object peek() {
-		// TODO Handle an empty stack as described in pop method.
+		if(stack.isEmpty()) {
+			throw new EmptyStackException();
+		}
 		return stack.get(stack.size() - 1);
 	}
 

@@ -78,6 +78,7 @@ public class LinkedListIndexedCollection extends Collection {
 	 *                   this newly constructed collection
 	 */
 	public LinkedListIndexedCollection(Collection collection) {
+		this();
 		this.addAll(collection);
 	}
 
@@ -115,7 +116,6 @@ public class LinkedListIndexedCollection extends Collection {
 
 	@Override
 	public Object[] toArray() {
-		// TODO Stavit kopiju reference ili vrijednosti?
 		Object[] array = new Object[this.size];
 		ListNode element = this.first;
 
@@ -172,19 +172,17 @@ public class LinkedListIndexedCollection extends Collection {
 		}
 	}
 
-	// TODO see if this method needs to write "throws exception"
 	/**
 	 * Returns the object that is stored in linked list at position {@code index}.
 	 * 
 	 * @param index index of element to be returned (0 to size-1)
 	 * @return object that is stored at position {@code index}
-	 * @throws IndexOutOfBoundsException if index is not valid
+	 * @throws IndexOutOfBoundsException if {@code index} is not valid
 	 */
 	public Object get(int index) {
-		return this.getNode(Objects.checkIndex(index, this.size)).value;
+		return this.getNode(index).value; // getNode checks the validity of the index
 	}
 
-	// TODO see if this method needs to write "throws exception"
 	/**
 	 * Inserts (does not overwrite) the given {@code value} at the given
 	 * {@code position} in array. (0 to {@code size - 1})
@@ -192,6 +190,7 @@ public class LinkedListIndexedCollection extends Collection {
 	 * @param value    value to be inserted
 	 * @param position position to insert the element to
 	 * @throws IndexOutOfBoundsException If {@code position} is invalid
+	 * @throws NullPointerException      if {@code value} is null
 	 */
 	public void insert(Object value, int position) {
 		if (Objects.checkIndex(position, this.size + 1) == this.size) { // size+1 because size is inclusive
@@ -228,7 +227,7 @@ public class LinkedListIndexedCollection extends Collection {
 		ListNode current = this.first;
 
 		for (int i = 0; i < this.size; i++, current = current.next) {
-			if (current.value == value) {
+			if (current.value.equals(value)) {
 				return i;
 			}
 		}
@@ -236,7 +235,6 @@ public class LinkedListIndexedCollection extends Collection {
 		return -1;
 	}
 
-	// TODO see if this method needs to write "throws exception"
 	/**
 	 * 
 	 * Removes element at specified {@code index} (0 to {@code size - 1}) from
@@ -246,7 +244,7 @@ public class LinkedListIndexedCollection extends Collection {
 	 * @throws IndexOutOfBoundsException If {@code index} is invalid
 	 */
 	public void remove(int index) {
-		ListNode element = this.getNode(Objects.checkIndex(index, this.size));
+		ListNode element = this.getNode(index); // getNode checks the validity of the index
 
 		if (element.previous == null) {
 			this.first = element.next;
