@@ -78,10 +78,11 @@ public class LinkedListIndexedCollection extends Collection {
 	 * 
 	 * @param collection other {@code Collection} whose elements are copied into
 	 *                   this newly constructed collection
+	 * @throws NullPointerException if {@code collection} is null
 	 */
 	public LinkedListIndexedCollection(Collection collection) {
 		this();
-		this.addAll(collection);
+		this.addAll(Objects.requireNonNull(collection));
 	}
 
 	@Override
@@ -96,12 +97,7 @@ public class LinkedListIndexedCollection extends Collection {
 
 	@Override
 	public boolean contains(Object value) {
-		for (ListNode el = this.first; el != null; el = el.next) {
-			if (el.value.equals(value)) {
-				return true;
-			}
-		}
-		return false;
+		return (this.indexOf(value) > -1);
 	}
 
 	@Override

@@ -23,7 +23,7 @@ public class ComplexNumber {
 	/**
 	 * Precision of the equals method
 	 */
-	private static final double precision = 10e-8;
+	private static final double precision = 1e-6;
 
 	/**
 	 * Constructs a new {@code ComplexNumber} from the given {@code real} and
@@ -189,7 +189,12 @@ public class ComplexNumber {
 	 * @return angle in radians
 	 */
 	public double getAngle() {
-		return Math.atan2(imaginary, real);
+		double angle = Math.atan2(imaginary, real);
+		if(angle < 0) {
+			return angle + 2 * Math.PI;
+		}
+		
+		return angle;
 	}
 
 	/**
@@ -333,11 +338,12 @@ public class ComplexNumber {
 		if (!(obj instanceof ComplexNumber)) {
 			return false;
 		}
+		
 		ComplexNumber other = (ComplexNumber) obj;
-		if (imaginary - other.imaginary > precision) {
+		if (Math.abs(imaginary - other.imaginary) > precision) {
 			return false;
 		}
-		if (real - other.real > precision) {
+		if (Math.abs(real - other.real) > precision) {
 			return false;
 		}
 		return true;

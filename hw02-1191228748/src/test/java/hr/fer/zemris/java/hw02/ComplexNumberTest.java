@@ -108,6 +108,12 @@ class ComplexNumberTest {
 		ComplexNumber z = ComplexNumber.fromMagnitudeAndAngle(2, Math.PI);
 		assertEquals(Math.PI, z.getAngle());
 	}
+	
+	@Test
+	void testGetAngle2() {
+		ComplexNumber z = ComplexNumber.fromMagnitudeAndAngle(2, 3 * Math.PI/2);
+		assertEquals(3 * Math.PI/2, z.getAngle());
+	}
 
 	@Test
 	void testAdd() {
@@ -171,5 +177,13 @@ class ComplexNumberTest {
 
 		assertTrue(z1.equals(z2));
 
+	}
+	
+	@Test
+	void testEquals2() {
+		ComplexNumber z1 = new ComplexNumber(2.0, 3.0);
+		ComplexNumber z3 = new ComplexNumber(4.001, 4.0001);
+
+		assertFalse(z1.equals(z3));
 	}
 }
