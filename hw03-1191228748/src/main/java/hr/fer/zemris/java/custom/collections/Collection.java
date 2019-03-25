@@ -75,7 +75,12 @@ public interface Collection {
 	 * @param processor processor which method process will be called for each
 	 *                  element of this collection
 	 */
-	void forEach(Processor processor);
+	default void forEach(Processor processor) {
+		ElementsGetter getter = this.createElementsGetter();
+		while(getter.hasNextElement()) {
+			processor.process(getter.getNextElement());
+		}
+	}
 
 	/**
 	 * Method adds into the current collection all elements from the given
@@ -93,11 +98,27 @@ public interface Collection {
 	 * Removes all elements from this collection
 	 */
 	void clear();
-	
+
 	/**
-	 * Creates and returns an {@link ElementsGetter} object that iterates through this collection.
+	 * Creates and returns an {@link ElementsGetter} object that iterates through
+	 * this collection.
+	 * 
 	 * @return {@link ElementsGetter} object that iterates through this collection
 	 */
 	ElementsGetter createElementsGetter();
+
+	/**
+	 * @param col
+	 * @param tester
+	 */
+	default void addAllSatisfying(Collection col, Tester tester) {
+		ElementsGetter getter = col.createElementsGetter();
+		while (getter.hasNextElement()) {
+			Object nextElement = getter.getNextElement();
+			if (tester.test(nextElement)) {
+				this.add(nextElement);
+			}
+		}
+	}
 
 }

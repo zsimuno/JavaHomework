@@ -3,6 +3,8 @@
  */
 package hr.fer.zemris.java.custom.collections;
 
+import java.util.ConcurrentModificationException;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /**
@@ -11,7 +13,7 @@ import java.util.Objects;
  * @author Zvonimir Šimunović
  *
  */
-public class LinkedListIndexedCollection implements Collection {
+public class LinkedListIndexedCollection implements List {
 
 	/**
 	 * 
@@ -61,6 +63,10 @@ public class LinkedListIndexedCollection implements Collection {
 	 * Reference to the last node of the linked list.
 	 */
 	private ListNode last;
+	/**
+	 * Counts each modification in the collection
+	 */
+	private long modificationCount = 0;
 
 	/**
 	 * Default constructor that constructs an empty
@@ -96,9 +102,9 @@ public class LinkedListIndexedCollection implements Collection {
 
 	@Override
 	public boolean remove(Object value) {
-		
+
 		for (ListNode el = this.first; el != null; el = el.next) {
-			if(el.value.equals(value)) {
+			if (el.value.equals(value)) {
 				removeNode(el);
 				return true;
 			}
@@ -116,13 +122,6 @@ public class LinkedListIndexedCollection implements Collection {
 		}
 
 		return array;
-	}
-
-	@Override
-	public void forEach(Processor processor) {
-		for (ListNode el = this.first; el != null; el = el.next) {
-			processor.process(el.value);
-		}
 	}
 
 	/**
@@ -147,6 +146,7 @@ public class LinkedListIndexedCollection implements Collection {
 		}
 
 		this.first = this.last = null;
+		modificationCount++;
 		this.size = 0;
 	}
 
@@ -178,27 +178,14 @@ public class LinkedListIndexedCollection implements Collection {
 		}
 	}
 
-	/**
-	 * Returns the object that is stored in linked list at position {@code index}.
-	 * Complexity always less than <i>size/2+1</i>.
-	 * 
-	 * @param index index of element to be returned (0 to size-1)
-	 * @return object that is stored at position {@code index}
-	 * @throws IndexOutOfBoundsException if {@code index} is not valid
-	 */
+
+	@Override
 	public Object get(int index) {
 		return this.getNode(index).value; // getNode checks the validity of the index
 	}
 
-	/**
-	 * Inserts (does not overwrite) the given {@code value} at the given
-	 * {@code position} in array. (0 to {@code size - 1}) Complexity O(1).
-	 * 
-	 * @param value    value to be inserted
-	 * @param position position to insert the element to
-	 * @throws IndexOutOfBoundsException If {@code position} is invalid
-	 * @throws NullPointerException      if {@code value} is null
-	 */
+
+	@Override
 	public void insert(Object value, int position) {
 		if (value == null) {
 			throw new NullPointerException();
@@ -222,20 +209,12 @@ public class LinkedListIndexedCollection implements Collection {
 			}
 
 		}
+		modificationCount++;
 		this.size++;
 
 	}
 
-	/**
-	 * 
-	 * Searches the collection and returns the index of the first occurrence of the
-	 * given {@code value} or -1 if the {@code value} is not found. Complexity
-	 * O(size).
-	 * 
-	 * @param value element to search for
-	 * @return index of the first occurrence of the given {@code value} or -1 if the
-	 *         {@code value} is not found.
-	 */
+	@Override
 	public int indexOf(Object value) {
 		if (value == null) {
 			return -1;
@@ -254,6 +233,7 @@ public class LinkedListIndexedCollection implements Collection {
 
 	/**
 	 * Removes one ListNode element from the collection.
+	 * 
 	 * @param element element that needs to be removed
 	 */
 	public void removeNode(ListNode element) {
@@ -270,58 +250,73 @@ public class LinkedListIndexedCollection implements Collection {
 		}
 
 		this.size--;
+		modificationCount++;
 	}
+
 	
-	/**
-	 * 
-	 * Removes element at specified {@code index} (0 to {@code size - 1}) from
-	 * collection.
-	 * 
-	 * @param index position of element to be removed
-	 * @throws IndexOutOfBoundsException If {@code index} is invalid
-	 */
+	@Override
 	public void remove(int index) {
 		ListNode element = this.getNode(index); // getNode checks the validity of the index
 
 		removeNode(element);
 
 	}
-	
+
 	/**
-	 * @author Zvonimir Šimunović
-	 *TODO
+	 * @author Zvonimir Šimunović TODO
 	 */
 	private static class LocalElementGetter implements ElementsGetter {
 		/**
 		 * Represents current node of the collection
 		 */
 		private ListNode currentNode;
-		
 		/**
-		 * Constructs new {@link LocalElementGetter} that points to the first element of the given {@link LinkedListIndexedCollection}
-		 * 
-		 * @param first reference to the first element of the {@link LinkedListIndexedCollection}
+		 * TODO
 		 */
-		public LocalElementGetter(ListNode first) {
-			currentNode = first;
+		private long savedModificationCount;
+
+		private LinkedListIndexedCollection linkedList;
+
+		/**
+		 * Constructs new {@link LocalElementGetter} that points to the first element of
+		 * the given {@link LinkedListIndexedCollection}
+		 * 
+		 * @param first reference to the first element of the
+		 *              {@link LinkedListIndexedCollection}
+		 */
+		public LocalElementGetter(LinkedListIndexedCollection list) {
+			linkedList = list;
+			savedModificationCount = list.modificationCount;
+			currentNode = list.first;
 		}
 
 		@Override
 		public boolean hasNextElement() {
-			return currentNode.next != null;
+			checkModificationCount();
+			return currentNode != null;
 		}
 
 		@Override
 		public Object getNextElement() {
+			checkModificationCount();
+			if (!hasNextElement())
+				throw new NoSuchElementException();
+
+			Object returnValue = currentNode.value;
 			currentNode = currentNode.next;
-			return currentNode.value;
+			return returnValue;
 		}
-		
+
+		private void checkModificationCount() {
+			if (savedModificationCount != linkedList.modificationCount)
+				throw new ConcurrentModificationException();
+		}
+
 	}
 
 	@Override
 	public ElementsGetter createElementsGetter() {
-		return new LocalElementGetter(this.first);
+		return new LocalElementGetter(this);
 	}
 
 }

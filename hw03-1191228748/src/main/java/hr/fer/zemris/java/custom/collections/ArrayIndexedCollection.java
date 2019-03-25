@@ -1,9 +1,9 @@
 package hr.fer.zemris.java.custom.collections;
 
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
+import java.util.NoSuchElementException;
 import java.util.Objects;
-
-import com.sun.org.apache.bcel.internal.classfile.ArrayElementValue;
 
 /**
  * Resizable array-backed collection of objects.
@@ -11,7 +11,7 @@ import com.sun.org.apache.bcel.internal.classfile.ArrayElementValue;
  * @author Zvonimir Šimunović
  *
  */
-public class ArrayIndexedCollection implements Collection {
+public class ArrayIndexedCollection implements List {
 	/**
 	 * Current size of collection (number of elements actually stored in elements
 	 * array).
@@ -26,6 +26,10 @@ public class ArrayIndexedCollection implements Collection {
 	 * Capacity that will be used if the one isn't given in the constructor.
 	 */
 	private static final int defaultArrayCapacity = 16;
+	/**
+	 * Counts each modification in the collection
+	 */
+	private long modificationCount = 0;
 
 	/**
 	 * Create an empty {@link ArrayIndexedCollection} object with the capacity
@@ -131,17 +135,11 @@ public class ArrayIndexedCollection implements Collection {
 	}
 
 	@Override
-	public void forEach(Processor processor) {
-		for (int i = 0; i < this.size; i++) {
-			processor.process(elements[i]);
-		}
-	}
-
-	@Override
 	public void clear() {
 		for (int i = 0; i < this.size; i++) {
 			this.elements[i] = null;
 		}
+		modificationCount++;
 		this.size = 0;
 	}
 
@@ -155,27 +153,14 @@ public class ArrayIndexedCollection implements Collection {
 		this.insert(value, this.size);
 	}
 
-	/**
-	 * Returns the object that is stored in backing array at position {@code index}.
-	 * Complexity is O(1).
-	 * 
-	 * @param index index of element to be returned (0 to size-1)
-	 * @return object that is stored at position {@code index}
-	 * @throws IndexOutOfBoundsException if the {@code index} is out of bounds
-	 */
+
+	@Override
 	public Object get(int index) {
 		return this.elements[Objects.checkIndex(index, this.size)];
 	}
 
-	/**
-	 * Inserts (does not overwrite) the given {@code value} at the given
-	 * {@code position} in array. Complexity is O(size)
-	 * 
-	 * @param value    value to be inserted
-	 * @param position position to insert the element to (0 to {@code size})
-	 * @throws IndexOutOfBoundsException If {@code position} is invalid
-	 * @throws NullPointerException      if {@code value} is null
-	 */
+
+	@Override
 	public void insert(Object value, int position) {
 		if (value == null) {
 			throw new NullPointerException();
@@ -193,19 +178,12 @@ public class ArrayIndexedCollection implements Collection {
 		}
 
 		this.elements[position] = value;
+		modificationCount++;
 		this.size++;
 	}
 
-	/**
-	 * 
-	 * Searches the collection and returns the index of the first occurrence of the
-	 * given {@code value} or -1 if the {@code value} is not found. Complexity
-	 * O(size).
-	 * 
-	 * @param value element to search for
-	 * @return index of the first occurrence of the given {@code value} or -1 if the
-	 *         {@code value} is not found.
-	 */
+
+	@Override
 	public int indexOf(Object value) {
 		if (value == null) {
 			return -1;
@@ -218,64 +196,74 @@ public class ArrayIndexedCollection implements Collection {
 		return -1;
 	}
 
-	/**
-	 * 
-	 * Removes element at specified {@code index} (0 to {@code size - 1}) from
-	 * collection.
-	 * 
-	 * @param index position of element to be removed
-	 * @throws IndexOutOfBoundsException If {@code index} is out of bounds
-	 */
+	@Override
 	public void remove(int index) {
 		for (int i = Objects.checkIndex(index, this.size); i < this.size - 1; i++) {
 			this.elements[i] = this.elements[i + 1];
 		}
 		this.elements[this.size - 1] = null;
+		modificationCount++;
 		this.size--;
 	}
-	
+
 	/**
-	 * @author Zvonimir Šimunović
-	 *TODO
+	 * @author Zvonimir Šimunović TODO
 	 */
 	private static class LocalElementGetter implements ElementsGetter {
-		
+
 		/**
 		 * Object array that stores the elements of {@link ArrayIndexedCollection}.
 		 */
-		private Object[] arrayElements;
-		
+		private ArrayIndexedCollection arrayList;
+
 		/**
 		 * Index of the current element in the Object array.
 		 */
 		private int currentElementIndex;
+		/**
+		 * TODO
+		 */
+		private long savedModificationCount;
 
 		/**
-		 * Constructs a new {@link LocalElementGetter} that stores elements of the {@link ArrayIndexedCollection}.
+		 * Constructs a new {@link LocalElementGetter} that stores elements of the
+		 * {@link ArrayIndexedCollection}.
+		 * 
 		 * @param elements elements of the {@link ArrayIndexedCollection}
 		 */
-		public LocalElementGetter(Object[] elements) {
-			arrayElements = elements;
+		public LocalElementGetter(ArrayIndexedCollection array) {
+			arrayList = array;
+			savedModificationCount = array.modificationCount;
 			currentElementIndex = 0;
 		}
 
 		@Override
 		public boolean hasNextElement() {
-			// TODO Auto-generated method stub
-			return (currentElementIndex < arrayElements.length - 1 && arrayElements[currentElementIndex + 1] != null);
+			checkModificationCount();
+			return (currentElementIndex < arrayList.elements.length && arrayList.elements[currentElementIndex] != null);
 		}
 
 		@Override
 		public Object getNextElement() {
+			checkModificationCount();
+			if (!hasNextElement())
+				throw new NoSuchElementException();
+
+			Object returnValue = arrayList.elements[currentElementIndex];
 			currentElementIndex++;
-			return arrayElements[currentElementIndex];
+			return returnValue;
 		}
-		
+
+		private void checkModificationCount() {
+			if (savedModificationCount != arrayList.modificationCount)
+				throw new ConcurrentModificationException();
+		}
+
 	}
 
 	@Override
 	public ElementsGetter createElementsGetter() {
-		return new LocalElementGetter(elements);
+		return new LocalElementGetter(this);
 	}
 
 }
