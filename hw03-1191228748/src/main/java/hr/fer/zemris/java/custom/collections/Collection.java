@@ -9,14 +9,7 @@ package hr.fer.zemris.java.custom.collections;
  * @author Zvonimir Šimunović
  *
  */
-public class Collection {
-
-	/**
-	 * Default constructor that is empty
-	 */
-	protected Collection() {
-
-	}
+public interface Collection {
 
 	/**
 	 * returns {@code true} if collection contains no objects and {@code false}
@@ -25,7 +18,7 @@ public class Collection {
 	 * @return {@code true} if collection contains no objects and {@code false}
 	 *         otherwise
 	 */
-	public boolean isEmpty() {
+	default boolean isEmpty() {
 		return (this.size() == 0);
 	}
 
@@ -35,18 +28,14 @@ public class Collection {
 	 * @return number of currently stored objects in this collections
 	 * 
 	 */
-	public int size() {
-		return 0;
-	}
+	int size();
 
 	/**
 	 * Adds the given object into this collection. Adds the object to the end.
 	 * 
 	 * @param value value to be added to the collection
 	 */
-	public void add(Object value) {
-
-	}
+	void add(Object value);
 
 	/**
 	 * Returns {@code true} only if the collection contains given {@code value} , as
@@ -56,9 +45,7 @@ public class Collection {
 	 * @return {@code true} only if the collection contains given {@code value},
 	 *         {@code false} if it doesn't
 	 */
-	public boolean contains(Object value) {
-		return false;
-	}
+	boolean contains(Object value);
 
 	/**
 	 * Returns {@code true} only if the collection contains given {@code value} , as
@@ -69,9 +56,7 @@ public class Collection {
 	 * @return {@code true} only if the collection contains given {@code value},
 	 *         {@code false} if it doesn't
 	 */
-	public boolean remove(Object value) {
-		return false;
-	}
+	boolean remove(Object value);
 
 	/**
 	 * Allocates new array with size equals to the size of this collections, fills
@@ -80,9 +65,7 @@ public class Collection {
 	 * 
 	 * @return Object array made from collection content
 	 */
-	public Object[] toArray() {
-		throw new UnsupportedOperationException();
-	}
+	Object[] toArray();
 
 	/**
 	 * Method calls {@code processor.process(.)} for each element of this
@@ -92,9 +75,7 @@ public class Collection {
 	 * @param processor processor which method process will be called for each
 	 *                  element of this collection
 	 */
-	public void forEach(Processor processor) {
-
-	}
+	void forEach(Processor processor);
 
 	/**
 	 * Method adds into the current collection all elements from the given
@@ -102,28 +83,8 @@ public class Collection {
 	 * 
 	 * @param other other collection which we add elements from
 	 */
-	public void addAll(Collection other) {
-		/**
-		 * Class that is used in addAll method of {@code Collection} class to add all
-		 * elements of some other collection to this current collection
-		 * 
-		 * @author Zvonimir Šimunović
-		 *
-		 */
-		class LocalProcessor extends Processor {
-
-			/**
-			 * Adds the value into the current collection.
-			 * 
-			 * @param value value to be added to the current collection
-			 */
-			public void process(Object value) {
-				add(value);
-			}
-
-		}
-
-		LocalProcessor processor = new LocalProcessor();
+	default void addAll(Collection other) {
+		Processor processor = this::add;
 
 		other.forEach(processor);
 	}
@@ -131,8 +92,12 @@ public class Collection {
 	/**
 	 * Removes all elements from this collection
 	 */
-	public void clear() {
-
-	}
+	void clear();
+	
+	/**
+	 * Creates and returns an {@link ElementsGetter} object that iterates through this collection.
+	 * @return {@link ElementsGetter} object that iterates through this collection
+	 */
+	ElementsGetter createElementsGetter();
 
 }
