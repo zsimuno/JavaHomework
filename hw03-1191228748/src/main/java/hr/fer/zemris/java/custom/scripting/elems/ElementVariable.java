@@ -4,22 +4,21 @@
 package hr.fer.zemris.java.custom.scripting.elems;
 
 /**
- * TODO
+ * Represents a varible
+ * 
  * @author Zvonimir Šimunović
  *
  */
 public class ElementVariable extends Element {
-	
-	/**
-	 * 
-	 * name of the element
-	 */
-	private String name;
-	
-	
 
 	/**
-	 * @param name
+	 * name of the variable
+	 */
+	private String name;
+
+	/**
+	 * Constructs {@link ElementVariable} from it's name
+	 * @param name name of the variable
 	 */
 	public ElementVariable(String name) {
 		this.name = name;
@@ -31,13 +30,12 @@ public class ElementVariable extends Element {
 	}
 
 	/**
-	 * Returns the name of the element
+	 * Returns the name of the variable
 	 * 
-	 * @return the name
+	 * @return the name of the variable
 	 */
 	public String getName() {
 		return name;
 	}
-	
-	
+
 }

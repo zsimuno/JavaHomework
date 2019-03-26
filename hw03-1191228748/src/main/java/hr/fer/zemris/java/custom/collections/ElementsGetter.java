@@ -6,7 +6,7 @@ package hr.fer.zemris.java.custom.collections;
 import java.util.ConcurrentModificationException;
 
 /**
- * TODO ima li ovo smisla? Class that is used to iterate through a collection or
+ * Class that is used to iterate through a collection or
  * process the elements.
  * 
  * @author Zvonimir Šimunović

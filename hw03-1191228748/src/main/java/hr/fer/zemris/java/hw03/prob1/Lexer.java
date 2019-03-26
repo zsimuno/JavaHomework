@@ -36,6 +36,7 @@ public class Lexer {
 	 * Constructor that accepts the input string that will be tokenized
 	 * 
 	 * @param text input string that will be tokenized
+	 * @throws NullPointerException if the {@code text} is {@code null} 
 	 */
 	public Lexer(String text) {
 		data = Objects.requireNonNull(text).toCharArray();
@@ -59,12 +60,12 @@ public class Lexer {
 				token = new Token(TokenType.EOF, null);
 				return token;
 			}
-			
+
 			if (Character.isWhitespace(data[currentIndex])) {
 				currentIndex++;
 				continue;
 			}
-			
+
 			break;
 		}
 
@@ -77,7 +78,9 @@ public class Lexer {
 	}
 
 	/**
-	 * @return
+	 * Calculates the token in the {@code BASIC} lexer state and returns it.
+	 * 
+	 * @return next token in data
 	 */
 	private Token basicState() {
 		char currentChar = data[currentIndex];
@@ -105,7 +108,9 @@ public class Lexer {
 	}
 
 	/**
-	 * @return
+	 * Calculates the token in the {@code EXTENDED} lexer state and returns it.
+	 * 
+	 * @return next token in data
 	 */
 	private Token extendedState() {
 
@@ -123,12 +128,12 @@ public class Lexer {
 	}
 
 
-
-	// TODO Javadoc
-
 	/**
-	 * @param t
-	 * @return
+	 * Gets a string to make the token of. Tests every character with the
+	 * {@code Tester} t
+	 * 
+	 * @param t Tester which we test the characters
+	 * @return String that will be turned into a token.
 	 */
 	private String getTokenString(Tester t) {
 		String tokenValue = "";
@@ -146,52 +151,68 @@ public class Lexer {
 	}
 
 	/**
-	 * @param obj
-	 * @return
+	 * Checks if the character is a letter.
+	 * 
+	 * @param obj object that is casted to {@link Character} and checked if it's a
+	 *            letter
+	 * @return {@code true} if the {@code obj} is a {@code Character} and a letter,
+	 *         {@code false} if it's not both of those
 	 */
 	private boolean isLetter(Object obj) {
-		if(!(obj instanceof Character)) {
+		if (!(obj instanceof Character)) {
 			return false;
 		}
 		char c = (Character) obj;
-		
-		
+
 		if (Character.isLetter(c))
 			return true;
 
 		// Checks if it's an escaped characters (valid ones are numbers and a backslash)
 		return (isEscapeChar(c) && (Character.isDigit(data[currentIndex + 1]) || data[currentIndex + 1] == '\\'));
 	}
-	
+
 	/**
-	 * @param obj
-	 * @return
+	 * Checks if the character is a digit.
+	 * 
+	 * @param obj object that is casted to {@link Character} and checked if it's a
+	 *            digit
+	 * @return {@code true} if the {@code obj} is a {@code Character} and a digit,
+	 *         {@code false} if it's not both of those
 	 */
 	private boolean isDigit(Object obj) {
-		if(!(obj instanceof Character)) {
+		if (!(obj instanceof Character)) {
 			return false;
 		}
 		char c = (Character) obj;
-		
+
 		return Character.isDigit(c);
 	}
-	
+
 	/**
-	 * @param obj
-	 * @return
+	 * Checks if character is not a hash ('#') or a whitespace character.
+	 * 
+	 * @param obj object that is casted to {@link Character} and checked if it's not
+	 *            a hash ('#') or a whitespace character
+	 * @return {@code true} if the {@code obj} is a {@code Character} and a hash
+	 *         ('#') or a whitespace character, {@code false} if it's not both of
+	 *         those
 	 */
 	private boolean notHashOrWhitespace(Object obj) {
-		if(!(obj instanceof Character)) {
+		if (!(obj instanceof Character)) {
 			return false;
 		}
 		char c = (Character) obj;
-		
+
 		return c != '#' && !Character.isWhitespace(c);
 	}
 
 	/**
-	 * @param c
-	 * @return
+	 * Checks if a character is an escape character. That means if it's a backslash
+	 * and there's more characters after it.
+	 * 
+	 * @param c character that is checked if it's a escape character
+	 * @return {@code true} if character is an escape character, {@code false} if
+	 *         it's not.
 	 */
 	private boolean isEscapeChar(char c) {
 		// Checks currentIndex because backslash can be at the end of the input

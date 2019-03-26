@@ -14,26 +14,28 @@ import hr.fer.zemris.java.custom.scripting.elems.ElementVariable;
  */
 public class ForLoopNode extends Node {
 	/**
-	 * TODO
+	 * Represents a variable that will change in the loop
 	 */
 	private ElementVariable variable;
 	/**
-	 * 
+	 * Starting value of the {@code variable} in the loop
 	 */
 	private Element startExpression;
 	/**
-	 * 
+	 * Loop will stop when {@code variable} reaches this value
 	 */
 	private Element endExpression;
 	/**
-	 * 
+	 * Value of {@code variable} will change by this value
 	 */
 	private Element stepExpression; // can be null 
 	/**
-	 * @param variable
-	 * @param startExpression
-	 * @param endExpression
-	 * @param stepExpression
+	 * Constructs a {@link ForLoopNode} from given values
+	 * 
+	 * @param variable variable that will change in the loop
+	 * @param startExpression Starting value of the {@code variable} in the loop
+	 * @param endExpression Loop will stop when {@code variable} reaches this value
+	 * @param stepExpression Value of {@code variable} will change by this value
 	 */
 	public ForLoopNode(ElementVariable variable, Element startExpression, Element endExpression,
 			Element stepExpression) {

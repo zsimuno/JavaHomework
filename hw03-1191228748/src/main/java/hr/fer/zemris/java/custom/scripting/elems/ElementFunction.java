@@ -4,22 +4,21 @@
 package hr.fer.zemris.java.custom.scripting.elems;
 
 /**
- * TODO
+ * Represents a function element
+ * 
  * @author Zvonimir Šimunović
  *
  */
 public class ElementFunction extends Element {
 
 	/**
-	 * 
-	 * name of the element
+	 * Name of the function
 	 */
 	private String name;
-	
-	
 
 	/**
-	 * @param name
+	 * Constructs {@link ElementFunction} from it's name
+	 * @param name name of the function
 	 */
 	public ElementFunction(String name) {
 		this.name = name;
@@ -31,9 +30,9 @@ public class ElementFunction extends Element {
 	}
 
 	/**
-	 * Returns the name of the element
+	 * Returns the name of the function
 	 * 
-	 * @return the name
+	 * @return the name of the function
 	 */
 	public String getName() {
 		return name;

@@ -14,28 +14,25 @@ import hr.fer.zemris.java.custom.scripting.elems.Element;
  */
 public class EchoNode extends Node {
 	/**
-	 * TODO
+	 * Elements of the node
 	 */
 	private Element[] elements;
 
-	
-	
 	/**
-	 * @param elements
+	 * Constructs {@link EchoNode} from given elements
+	 * 
+	 * @param elements elements of the node
 	 */
 	public EchoNode(Element[] elements) {
 		this.elements = elements;
 	}
 
-
-
 	/**
+	 * 
 	 * @return the elements
 	 */
 	public Element[] getElements() {
 		return elements;
 	}
-	
-	
 
 }

@@ -4,22 +4,22 @@
 package hr.fer.zemris.java.custom.scripting.elems;
 
 /**
- * TODO
+ * Represents a operator element
+ * 
  * @author Zvonimir Šimunović
  *
  */
 public class ElementOperator extends Element {
 
 	/**
-	 * 
-	 * name of the element
+	 * Symbol of the operator
 	 */
 	private String symbol;
-	
-	
 
 	/**
-	 * @param name
+	 * Constructs {@link ElementOperator} from the given {@code symbol}
+	 * 
+	 * @param symbol symbol of the operator
 	 */
 	public ElementOperator(String symbol) {
 		this.symbol = symbol;
@@ -31,9 +31,9 @@ public class ElementOperator extends Element {
 	}
 
 	/**
-	 * Returns the name of the element
+	 * Returns the symbol of the operator
 	 * 
-	 * @return the name
+	 * @return the symbol of the operator
 	 */
 	public String getSymbol() {
 		return symbol;

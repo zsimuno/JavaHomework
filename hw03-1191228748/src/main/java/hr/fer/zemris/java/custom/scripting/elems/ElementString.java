@@ -4,22 +4,21 @@
 package hr.fer.zemris.java.custom.scripting.elems;
 
 /**
- * TODO
+ * Represents a string element
+ * 
  * @author Zvonimir Šimunović
  *
  */
 public class ElementString extends Element {
 
 	/**
-	 * 
-	 * Value of the element
+	 * Value of the string
 	 */
 	private String value;
-	
-	
 
 	/**
-	 * @param value
+	 * Constructs {@link ElementString} from the given {@code value}
+	 * @param value value of the string
 	 */
 	public ElementString(String value) {
 		this.value = value;
@@ -31,9 +30,9 @@ public class ElementString extends Element {
 	}
 
 	/**
-	 * Returns the value of the element
+	 * Returns the value of the string element
 	 * 
-	 * @return the value
+	 * @return the value of the string element
 	 */
 	public String getValue() {
 		return value;

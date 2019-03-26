@@ -4,19 +4,22 @@
 package hr.fer.zemris.java.custom.scripting.elems;
 
 /**
- * TODO
+ * Represents a constant double element.
+ * 
  * @author Zvonimir Šimunović
  *
  */
 public class ElementConstantDouble extends Element {
 
 	/**
-	 * Value of the element
+	 * Value of the double
 	 */
 	private double value;
 
 	/**
-	 * @param value
+	 * Constructs {@link ElementConstantDouble} from the given {@code value}
+	 * 
+	 * @param value value of the double
 	 */
 	public ElementConstantDouble(int value) {
 		this.value = value;
@@ -28,7 +31,9 @@ public class ElementConstantDouble extends Element {
 	}
 
 	/**
-	 * @return the value
+	 * Returns the value of the double
+	 * 
+	 * @return the value of the double
 	 */
 	public double getValue() {
 		return value;

@@ -13,9 +13,9 @@ public enum SmartScriptLexerState {
 	/**
 	 * Basic lexer state
 	 */
-	BASIC,
+	TEXT,
 	/**
 	 * Extended lexer state
 	 */
-	EXTENDED;
+	TAG;
 }

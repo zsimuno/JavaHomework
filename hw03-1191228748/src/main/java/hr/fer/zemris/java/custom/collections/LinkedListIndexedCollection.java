@@ -263,7 +263,9 @@ public class LinkedListIndexedCollection implements List {
 	}
 
 	/**
-	 * @author Zvonimir Šimunović TODO
+	 * Class that we use to retrieve elements from the collection
+	 * 
+	 * @author Zvonimir Šimunović 
 	 */
 	private static class LocalElementGetter implements ElementsGetter {
 		/**
@@ -271,10 +273,13 @@ public class LinkedListIndexedCollection implements List {
 		 */
 		private ListNode currentNode;
 		/**
-		 * TODO
+		 * Modification count that was saved during the construction
 		 */
 		private long savedModificationCount;
 
+		/**
+		 * Variable that we store the list in. This list is the one we are getting elements from.
+		 */
 		private LinkedListIndexedCollection linkedList;
 
 		/**

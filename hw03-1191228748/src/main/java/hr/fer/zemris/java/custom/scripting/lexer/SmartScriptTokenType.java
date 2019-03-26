@@ -15,15 +15,63 @@ public enum SmartScriptTokenType {
 	 */
 	EOF, 
 	/**
-	 * Word token type
+	 * Text token type
 	 */
-	WORD, 
+	TEXT,
 	/**
-	 * Number token type
+	 * String token type
 	 */
-	NUMBER, 
+	STRING,
 	/**
-	 * Symbol token type
+	 * Variable token type
 	 */
-	SYMBOL;
+	VARIABLE, 
+	/**
+	 * Function token type
+	 */
+	FUNCTION, 
+	/**
+	 * Number (type Long) token type
+	 */
+	LONGNUMBER, 
+	/**
+	 * Number (type Integer) token type
+	 */
+	INTNUMBER,
+	/** 
+	 * Open braces '{' token type
+	 */
+	OPENBRACES,
+	/**
+	 * Closed braces '}' token type
+	 */
+	CLOSEDBRACES,
+	/** 
+	 * Open parenthesis '(' token type
+	 */
+	OPENPARENTHESIS,
+	/**
+	 * Closed parenthesis ')' token type
+	 */
+	CLOSEDPARENTHESIS,
+	/**
+	 * Dollar sign '$' token type
+	 */
+	DOLLARSIGN,
+	/**
+	 * Equals sign '=' token type
+	 */
+	EQUALSSIGN,
+	/**
+	 * Tag "for"
+	 */
+	FOR,
+	/**
+	 * Tag "end"
+	 */
+	END,
+	/**
+	 * Operator token type
+	 */
+	OPERATOR;
 }

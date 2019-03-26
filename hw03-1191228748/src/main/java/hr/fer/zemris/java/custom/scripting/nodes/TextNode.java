@@ -11,19 +11,21 @@ package hr.fer.zemris.java.custom.scripting.nodes;
  */
 public class TextNode extends Node {
 	/**
-	 * TODO docs
+	 * text stored in the node
 	 */
 	private String text;
 
 	/**
-	 * @param text
+	 * Constructs a TextNode from given text
+	 * 
+	 * @param text text that will be stored in TextNode
 	 */
 	public TextNode(String text) {
 		this.text = text;
 	}
 
 	/**
-	 * @return the text
+	 * @return the text that is stored in the node
 	 */
 	public String getText() {
 		return text;

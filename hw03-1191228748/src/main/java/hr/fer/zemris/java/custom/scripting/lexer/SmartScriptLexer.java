@@ -7,6 +7,7 @@ import java.util.Objects;
 
 import hr.fer.zemris.java.custom.collections.Tester;
 import hr.fer.zemris.java.hw03.prob1.LexerException;
+import hr.fer.zemris.java.hw03.prob1.LexerState;
 
 /**
  * @author Zvonimir Šimunović
@@ -21,16 +22,21 @@ public class SmartScriptLexer {
 	/**
 	 * Current SmartScriptToken
 	 */
-	private SmartScriptToken SmartScriptToken;
+	private SmartScriptToken currentToken;
 	/**
 	 * Index of the first char that is not processed
 	 */
 	private int currentIndex;
+	/**
+	 * Current state of the lexer
+	 */
+	private SmartScriptLexerState currentState = SmartScriptLexerState.TEXT;
 
 	/**
 	 * Constructor that accepts the input string that will be SmartScriptTokenized
 	 * 
 	 * @param text input string that will be SmartScriptTokenized
+	 * @throws NullPointerException if the {@code text} is {@code null}
 	 */
 	public SmartScriptLexer(String text) {
 		data = Objects.requireNonNull(text).toCharArray();
@@ -44,15 +50,15 @@ public class SmartScriptLexer {
 	 * @throws LexerException if there is an error
 	 */
 	public SmartScriptToken nextSmartScriptToken() {
-		if (SmartScriptToken != null && SmartScriptToken.getType() == SmartScriptTokenType.EOF) {
-			throw new LexerException("You can't read next SmartScriptToken after the end of file (EOF)!");
+		if (currentToken != null && currentToken.getType() == SmartScriptTokenType.EOF) {
+			throw new LexerException("No more tokens!");
 		}
 
 		// Ignore all whitespace
 		while (true) {
 			if (currentIndex == data.length) {
-				SmartScriptToken = new SmartScriptToken(SmartScriptTokenType.EOF, null);
-				return SmartScriptToken;
+				currentToken = new SmartScriptToken(SmartScriptTokenType.EOF, null);
+				return currentToken;
 			}
 
 			if (Character.isWhitespace(data[currentIndex])) {
@@ -63,58 +69,171 @@ public class SmartScriptLexer {
 			break;
 		}
 
+		if (currentState == SmartScriptLexerState.TAG) {
+			return tagStateToken();
+		}
+
+		return textStateToken();
+
+	}
+
+	/**
+	 * Calculates the token in the {@code TAG} lexer state and returns it.
+	 * 
+	 * @return next token in data
+	 */
+	private SmartScriptToken tagStateToken() {
 		char currentChar = data[currentIndex];
 
-		if (isLetter(currentChar)) {
-			SmartScriptToken = new SmartScriptToken(SmartScriptTokenType.WORD,
-					getSmartScriptTokenString(this::isLetter));
+		if (Character.isLetter(currentChar)) { // Variable name
+			currentToken = new SmartScriptToken(SmartScriptTokenType.TEXT, getTokenString(this::isLetter));
 
-		} else if (Character.isDigit(currentChar)) {
+		} else if (isNumber(currentChar)) {
 			try {
-				SmartScriptToken = new SmartScriptToken(SmartScriptTokenType.NUMBER,
-						Long.valueOf(getSmartScriptTokenString(this::isDigit)));
+				String tokenString = "";
+				// TODO if it's not digit-dot-digit value then return needed token
+
+				// Negative number
+				if (currentChar == '-') {
+					currentIndex++;
+					tokenString = "-";
+				}
+				tokenString += getTokenString(this::isDigit);
+
+				// Decimal point
+				if (data[currentIndex] == '.') {
+					tokenString += '.';
+					tokenString += getTokenString(this::isDigit);
+				}
+
+				currentToken = new SmartScriptToken(SmartScriptTokenType.NUMBER, Long.valueOf(tokenString));
+
 			} catch (NumberFormatException e) {
 				throw new LexerException("Invalid input!");
 			}
+		} else if (currentChar == '@') { // Function
 
-		} else if (currentChar != '\\') {
-			// Symbol, meaning that it is not a whitespace, number, letter or escape
-			// character
-			SmartScriptToken = new SmartScriptToken(SmartScriptTokenType.SYMBOL, Character.valueOf(currentChar));
-			currentIndex++;
+		} else if (currentChar == '\"') { // String
+			while (currentIndex < data.length && data[currentIndex] != '\"') {
+
+			}
 		} else {
-			throw new LexerException("Invalid input!");
-		}
-
-		return SmartScriptToken;
-
-	}
-
-	// TODO Javadoc
-
-	/**
-	 * @param t
-	 * @return
-	 */
-	private String getSmartScriptTokenString(Tester t) {
-		String SmartScriptTokenValue = "";
-		while (currentIndex < data.length && t.test(data[currentIndex])) {
-			// If it's an escape character then the next char is the part of the
-			// SmartScriptToken
-			// Check will only pass in words
-			if (isEscapeChar(data[currentIndex])) {
-				currentIndex++;
+			SmartScriptTokenType type;
+			switch (currentChar) {
+			case '{':
+				type = SmartScriptTokenType.OPENBRACES;
+				break;
+			case '}':
+				type = SmartScriptTokenType.CLOSEDBRACES;
+				break;
+			case '$':
+				type = SmartScriptTokenType.DOLLARSIGN;
+				break;
+			case '=':
+				type = SmartScriptTokenType.EQUALSSIGN;
+				break;
+			case '+':
+			case '-':
+			case '*':
+			case '/':
+			case '^':
+				type = SmartScriptTokenType.OPERATOR;
+				break;
+			default:
+				throw new LexerException("Invalid input!");
 			}
 
-			SmartScriptTokenValue += data[currentIndex];
+			currentToken = new SmartScriptToken(type, Character.valueOf(currentChar));
 			currentIndex++;
+
 		}
-		return SmartScriptTokenValue;
+
+		return currentToken;
+
 	}
 
 	/**
-	 * @param obj
-	 * @return
+	 * Calculates the token in the {@code TEXT} lexer state and returns it.
+	 * 
+	 * @return next token in data
+	 */
+	private SmartScriptToken textStateToken() {
+		// TODO check for open braces? 
+		currentToken = new SmartScriptToken(SmartScriptTokenType.TEXT, getTokenString(this::isValidText));
+		return currentToken;
+
+	}
+
+	/**
+	 * Checks if a character is a valid text character. That means if it's any
+	 * symbol other than whitespace or a backslash and there's either '\' or '{'
+	 * after it.
+	 * 
+	 * @param c character that is checked if it's a valid text character
+	 * @return {@code true} if character is a valid text character, {@code false} if
+	 *         it's not.
+	 */
+	private boolean isValidText(Object obj) {
+		if (!(obj instanceof Character)) {
+			return false;
+		}
+		char c = (Character) obj;
+
+		if (c == '\\') {
+			if (currentIndex < data.length - 1 && (c == '\\' || c == '{')) {
+				currentIndex++;
+				return true;
+			} else {
+				throw new SmartScriptLexerException("Not a valid escape character!");
+			}
+		}
+
+		return !Character.isWhitespace(c);
+
+	}
+
+	/**
+	 * Gets a string to make the token of. Tests every character with the
+	 * {@code Tester} t
+	 * 
+	 * @param t Tester which we test the characters
+	 * @return String that will be turned into a token.
+	 */
+	private String getTokenString(Tester t) {
+		int startingIndex = currentIndex;
+
+		while (currentIndex < data.length && t.test(data[currentIndex])) {
+			currentIndex++;
+		}
+
+		return new String(data, startingIndex, currentIndex - startingIndex);
+	}
+
+	/**
+	 * Checks if the current characters is a number or a start of a negative number
+	 * 
+	 * @param currentChar char to be checked
+	 * @return {@code true} if the current characters is a number or a start of a
+	 *         negative number, {@code false} if it's neither of those
+	 */
+	private boolean isNumber(char currentChar) {
+		if (Character.isDigit(currentChar))
+			return true;
+
+		// If this char is minus sign and next one is a digit
+		if (currentChar == '-' && (currentIndex < data.length && Character.isDigit(data[currentIndex + 1])))
+			return true;
+
+		return false;
+	}
+
+	/**
+	 * Checks if the character is a letter.
+	 * 
+	 * @param obj object that is casted to {@link Character} and checked if it's a
+	 *            letter
+	 * @return {@code true} if the {@code obj} is a {@code Character} and a letter,
+	 *         {@code false} if it's not both of those
 	 */
 	private boolean isLetter(Object obj) {
 		if (!(obj instanceof Character)) {
@@ -122,16 +241,17 @@ public class SmartScriptLexer {
 		}
 		char c = (Character) obj;
 
-		if (Character.isLetter(c))
-			return true;
+		return Character.isLetter(c) || Character.isDigit(c) || c == '_';
 
-		// Checks if it's an escaped characters (valid ones are numbers and a backslash)
-		return (isEscapeChar(c) && (Character.isDigit(data[currentIndex + 1]) || data[currentIndex + 1] == '\\'));
 	}
 
 	/**
-	 * @param obj
-	 * @return
+	 * Checks if the character is a digit.
+	 * 
+	 * @param obj object that is casted to {@link Character} and checked if it's a
+	 *            digit
+	 * @return {@code true} if the {@code obj} is a {@code Character} and a digit,
+	 *         {@code false} if it's not both of those
 	 */
 	private boolean isDigit(Object obj) {
 		if (!(obj instanceof Character)) {
@@ -143,12 +263,25 @@ public class SmartScriptLexer {
 	}
 
 	/**
-	 * @param c
-	 * @return
+	 * Checks if a character is a valid escape character. That means if it's a
+	 * backslash and there's either '\', '"', 'n', 'r' or 't' after it.
+	 * 
+	 * @param c character that is checked if it's a valid escape character
+	 * @return {@code true} if character is a valid escape character, {@code false}
+	 *         if it's not.
 	 */
-	private boolean isEscapeChar(char c) {
-		// Checks currentIndex because backslash can be at the end of the input
-		return c == '\\' && currentIndex < data.length - 1;
+	private boolean isValidEscapeChar(char c) {
+		if (c == '\\') {
+			// Checks currentIndex because backslash can be at the end of the input
+			if (currentIndex < data.length - 1 && (c == '\\' || c == '\"' || c == 'n' || c == 'r' || c == 'y')) {
+				currentIndex++;
+				return true;
+			} else {
+				throw new SmartScriptLexerException("Not a valid escape character!");
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -157,8 +290,8 @@ public class SmartScriptLexer {
 	 * 
 	 * @return last generated SmartScriptToken
 	 */
-	public SmartScriptToken getSmartScriptToken() {
-		return SmartScriptToken;
+	public SmartScriptToken getToken() {
+		return currentToken;
 	}
 
 }

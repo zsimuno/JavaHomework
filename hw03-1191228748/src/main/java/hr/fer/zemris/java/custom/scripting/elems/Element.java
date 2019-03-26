@@ -4,7 +4,7 @@
 package hr.fer.zemris.java.custom.scripting.elems;
 
 /**
- * TODO
+ * Represents an element in a node used by the parser to build a document model.
  * @author Zvonimir Šimunović
  *
  */

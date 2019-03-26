@@ -207,7 +207,9 @@ public class ArrayIndexedCollection implements List {
 	}
 
 	/**
-	 * @author Zvonimir Šimunović TODO
+	 * Class that we use to retrieve elements from the collection
+	 * 
+	 * @author Zvonimir Šimunović 
 	 */
 	private static class LocalElementGetter implements ElementsGetter {
 
@@ -221,7 +223,7 @@ public class ArrayIndexedCollection implements List {
 		 */
 		private int currentElementIndex;
 		/**
-		 * TODO
+		 * Modification count that was saved during the construction
 		 */
 		private long savedModificationCount;
 
