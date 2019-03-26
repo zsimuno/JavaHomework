@@ -26,14 +26,12 @@ public class StackDemo {
 	 * @param args command line arguments. In this case it must be one and it must
 	 *             be an expression in postfix representation.
 	 * 
-	 * @throws IllegalArgumentException if there is wrong number of command line
-	 *                                  arguments or if the one argument is not
-	 *                                  a valid postfix expression
 	 */
 	public static void main(String[] args) {
 
 		if (args.length != 1) {
-			throw new IllegalArgumentException("Wrong number of command line arguments!");
+			System.out.println("Wrong number of command line arguments!");
+			return;
 		}
 
 		Scanner sc = new Scanner(args[0]);
@@ -51,7 +49,8 @@ public class StackDemo {
 
 				if (stack.size() < 2) {
 					sc.close();
-					throw new IllegalArgumentException("Expression is not written correctly!");
+					System.out.println("Expression is not written correctly!");
+					return;
 				}
 
 				int first = (int) stack.pop();
@@ -68,7 +67,8 @@ public class StackDemo {
 				case "/":
 					if (first == 0) {
 						sc.close();
-						throw new IllegalArgumentException("Division by zero is forbidden!");
+						System.out.println("Division by zero is forbidden!");
+						return;
 					}
 					stack.push(second / first);
 					break;
@@ -78,6 +78,10 @@ public class StackDemo {
 				case "%":
 					stack.push(second % first);
 					break;
+				default: // Not any of the legal characters
+					sc.close();
+					System.out.println("Expression is not written correctly!");
+					return;
 				}
 
 			}
@@ -86,7 +90,8 @@ public class StackDemo {
 		sc.close();
 
 		if (stack.size() != 1) {
-			throw new IllegalArgumentException("Expression is not written correctly!");
+			System.out.println("Expression is not written correctly!");
+			return;
 		} else {
 			System.out.println("Expression evaluates to " + stack.pop()); // Print result
 		}

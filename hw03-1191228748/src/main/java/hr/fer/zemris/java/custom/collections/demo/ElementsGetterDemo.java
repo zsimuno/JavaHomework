@@ -14,11 +14,15 @@ import hr.fer.zemris.java.custom.collections.List;
 import hr.fer.zemris.java.custom.collections.Tester;
 
 /**
+ * Class that demos classes from collections package
+ * 
  * @author Zvonimir Šimunović
  *
  */
 public class ElementsGetterDemo {
 	/**
+	 * Main method that starts all the demos
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
@@ -57,12 +61,18 @@ public class ElementsGetterDemo {
 		clear(col1, col2);
 
 		DemoTester();
-		
+
 		DemoAddAllSatisying();
-		
+
 		DemoListInterface();
 	}
 
+	/**
+	 * Method that clears two given collection
+	 * 
+	 * @param col1 first collection that is cleared
+	 * @param col2 second collection that is cleared
+	 */
 	private static void clear(Collection col1, Collection col2) {
 		col1.clear();
 		col2.clear();
@@ -219,7 +229,22 @@ public class ElementsGetterDemo {
 		getter.processRemaining(System.out::println);
 	}
 
+	/**
+	 * Class that is used to test an {@link Integer} object if it stores an even
+	 * number or not.
+	 * 
+	 * @author Zvonimir Šimunović
+	 *
+	 */
 	static class EvenIntegerTester implements Tester {
+		/**
+		 * Tests if the given object is an {@link Integer} that stores an even number.
+		 * 
+		 * @param obj object that is checked if it's an Integer that stores an even
+		 *            number
+		 * @return {@code true} if its an even integer, {@code false} if it's not or if
+		 *         the Object is not an {@code Integer}
+		 */
 		public boolean test(Object obj) {
 			if (!(obj instanceof Integer))
 				return false;
@@ -229,7 +254,7 @@ public class ElementsGetterDemo {
 	}
 
 	/**
-	 * Demost {@link Tester} class from page 6
+	 * Demos {@link Tester} class from page 6
 	 */
 	public static void DemoTester() {
 		// false true false
@@ -257,8 +282,7 @@ public class ElementsGetterDemo {
 		col2.addAllSatisfying(col1, new EvenIntegerTester());
 		col2.forEach(System.out::println);
 	}
-	
-	
+
 	/**
 	 * Demos {@link List} interface
 	 */
@@ -279,19 +303,5 @@ public class ElementsGetterDemo {
 		col3.forEach(System.out::println); // Ivana
 		col4.forEach(System.out::println); // Jasna
 	}
-	/**
-	 * 
-	 */
-	public static void Demo() {
-		//
-		System.out.println("\nDemo");
-	}
-//	
-//	/**
-//	 * 
-//	 */
-//	public static void Demo() {
-//		//
-//		System.out.println("\nDemo");
-//	}
+
 }

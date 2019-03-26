@@ -49,6 +49,7 @@ public class ObjectStack {
 	 * removes last value pushed on stack from stack and returns it.
 	 * 
 	 * @return object that was popped
+	 * @throws EmptyStackException if the stack is empty
 	 */
 	public Object pop() {
 		if(stack.isEmpty()) {
@@ -64,6 +65,7 @@ public class ObjectStack {
 	 * Returns last element placed on stack but does not delete it from stack.
 	 * 
 	 * @return last element placed on stack
+	 * @throws EmptyStackException if the stack is empty
 	 */
 	public Object peek() {
 		if(stack.isEmpty()) {
