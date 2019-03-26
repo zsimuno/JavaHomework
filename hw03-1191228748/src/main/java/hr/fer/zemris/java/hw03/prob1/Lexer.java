@@ -53,15 +53,18 @@ public class Lexer {
 			throw new LexerException("You can't read next token after the end of file (EOF)!");
 		}
 
+		// Removes all whitespace
 		while (true) {
 			if (currentIndex == data.length) {
 				token = new Token(TokenType.EOF, null);
 				return token;
 			}
+			
 			if (Character.isWhitespace(data[currentIndex])) {
 				currentIndex++;
 				continue;
 			}
+			
 			break;
 		}
 
@@ -80,11 +83,11 @@ public class Lexer {
 		char currentChar = data[currentIndex];
 
 		if (isLetter(currentChar)) {
-			token = new Token(TokenType.WORD, getToken(this::isLetter));
+			token = new Token(TokenType.WORD, getTokenString(this::isLetter));
 
 		} else if (Character.isDigit(currentChar)) {
 			try {
-				token = new Token(TokenType.NUMBER, Long.valueOf(getToken(Character::isDigit)));
+				token = new Token(TokenType.NUMBER, Long.valueOf(getTokenString(this::isDigit)));
 			} catch (NumberFormatException e) {
 				throw new LexerException("Invalid input!");
 			}
@@ -92,9 +95,6 @@ public class Lexer {
 		} else if (currentChar != '\\') {
 			// Symbol, meaning that it is not a whitespace, number, letter or escape
 			// character
-			if (currentChar == '#') {
-				setState(LexerState.EXTENDED);
-			}
 			token = new Token(TokenType.SYMBOL, Character.valueOf(currentChar));
 			currentIndex++;
 		} else {
@@ -112,42 +112,27 @@ public class Lexer {
 		char currentChar = data[currentIndex];
 
 		if (notHashOrWhitespace(currentChar)) {
-			token = new Token(TokenType.WORD, getToken(this::notHashOrWhitespace));
+			token = new Token(TokenType.WORD, getTokenString(this::notHashOrWhitespace));
 
 		} else { // currentChar is #
 			token = new Token(TokenType.SYMBOL, Character.valueOf(currentChar));
 			currentIndex++;
-			setState(LexerState.BASIC);
 		}
 
 		return token;
 	}
 
-	public boolean notHashOrWhitespace(char c) {
-		return c != '#' && !Character.isWhitespace(c);
-	}
+
 
 	// TODO Javadoc
-	/**
-	 * @author Zvonimir Šimunović
-	 *
-	 */
-	private static interface CharTester {
-
-		/**
-		 * @param c
-		 * @return
-		 */
-		public boolean testChar(char c);
-	}
 
 	/**
 	 * @param t
 	 * @return
 	 */
-	private String getToken(CharTester t) {
+	private String getTokenString(Tester t) {
 		String tokenValue = "";
-		while (t.testChar(data[currentIndex])) {
+		while (currentIndex < data.length && t.test(data[currentIndex])) {
 			// If it's an escape character then the next char is the part of the token
 			// Check will only pass in words
 			if (isEscapeChar(data[currentIndex]) && currentState == LexerState.BASIC) {
@@ -156,23 +141,52 @@ public class Lexer {
 
 			tokenValue += data[currentIndex];
 			currentIndex++;
-			if (currentIndex == data.length) {
-				break;
-			}
 		}
 		return tokenValue;
 	}
 
 	/**
-	 * @param c
+	 * @param obj
 	 * @return
 	 */
-	private boolean isLetter(char c) {
+	private boolean isLetter(Object obj) {
+		if(!(obj instanceof Character)) {
+			return false;
+		}
+		char c = (Character) obj;
+		
+		
 		if (Character.isLetter(c))
 			return true;
 
 		// Checks if it's an escaped characters (valid ones are numbers and a backslash)
 		return (isEscapeChar(c) && (Character.isDigit(data[currentIndex + 1]) || data[currentIndex + 1] == '\\'));
+	}
+	
+	/**
+	 * @param obj
+	 * @return
+	 */
+	private boolean isDigit(Object obj) {
+		if(!(obj instanceof Character)) {
+			return false;
+		}
+		char c = (Character) obj;
+		
+		return Character.isDigit(c);
+	}
+	
+	/**
+	 * @param obj
+	 * @return
+	 */
+	private boolean notHashOrWhitespace(Object obj) {
+		if(!(obj instanceof Character)) {
+			return false;
+		}
+		char c = (Character) obj;
+		
+		return c != '#' && !Character.isWhitespace(c);
 	}
 
 	/**
