@@ -14,20 +14,20 @@ public class ElementOperator extends Element {
 	/**
 	 * Symbol of the operator
 	 */
-	private String symbol;
+	private Character symbol;
 
 	/**
 	 * Constructs {@link ElementOperator} from the given {@code symbol}
 	 * 
 	 * @param symbol symbol of the operator
 	 */
-	public ElementOperator(String symbol) {
+	public ElementOperator(Character symbol) {
 		this.symbol = symbol;
 	}
 
 	@Override
 	String asText() {
-		return symbol;
+		return symbol.toString();
 	}
 
 	/**
@@ -35,7 +35,7 @@ public class ElementOperator extends Element {
 	 * 
 	 * @return the symbol of the operator
 	 */
-	public String getSymbol() {
+	public Character getSymbol() {
 		return symbol;
 	}
 

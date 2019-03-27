@@ -23,7 +23,7 @@ public class Node {
 	 * 
 	 * @param child Node that will be added to the children
 	 */
-	void addChildNode(Node child) {
+	public void addChildNode(Node child) {
 		
 		if(children == null) {
 			children = new ArrayIndexedCollection();
@@ -37,7 +37,7 @@ public class Node {
 	 * 
 	 * @return number of (direct) children
 	 */
-	int numberOfChildren() {
+	public int numberOfChildren() {
 		if(children == null) {
 			return 0;
 		}
@@ -52,7 +52,7 @@ public class Node {
 	 * @return selected child at position {@code index}
 	 * @throws IndexOutOfBoundsException if the index is invalid
 	 */
-	Node getChild(int index) {
+	public Node getChild(int index) {
 		if(children == null) {
 			throw new IndexOutOfBoundsException();
 		}

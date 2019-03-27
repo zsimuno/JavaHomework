@@ -21,7 +21,7 @@ public class ElementConstantDouble extends Element {
 	 * 
 	 * @param value value of the double
 	 */
-	public ElementConstantDouble(int value) {
+	public ElementConstantDouble(double value) {
 		this.value = value;
 	}
 	

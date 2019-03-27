@@ -31,13 +31,13 @@ public enum SmartScriptTokenType {
 	 */
 	FUNCTION, 
 	/**
-	 * Number (type Long) token type
+	 * Number (type Double) token type
 	 */
-	LONGNUMBER, 
+	DOUBLE, 
 	/**
 	 * Number (type Integer) token type
 	 */
-	INTNUMBER,
+	INTEGER,
 	/** 
 	 * Open braces '{' token type
 	 */
@@ -46,14 +46,6 @@ public enum SmartScriptTokenType {
 	 * Closed braces '}' token type
 	 */
 	CLOSEDBRACES,
-	/** 
-	 * Open parenthesis '(' token type
-	 */
-	OPENPARENTHESIS,
-	/**
-	 * Closed parenthesis ')' token type
-	 */
-	CLOSEDPARENTHESIS,
 	/**
 	 * Dollar sign '$' token type
 	 */
