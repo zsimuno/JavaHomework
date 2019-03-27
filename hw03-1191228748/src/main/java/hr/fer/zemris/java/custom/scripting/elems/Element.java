@@ -15,7 +15,7 @@ public class Element {
 	 * 
 	 * @return element as text
 	 */
-	String asText() {
+	public String asText() {
 		return "";
 	}
 

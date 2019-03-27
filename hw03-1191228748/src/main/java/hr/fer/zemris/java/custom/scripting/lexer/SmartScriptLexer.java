@@ -43,7 +43,6 @@ public class SmartScriptLexer {
 		}
 		data = text.toCharArray();
 		currentIndex = 0;
-		nextSmartScriptToken();
 	}
 
 	/**
@@ -57,23 +56,27 @@ public class SmartScriptLexer {
 			throw new SmartScriptLexerException("No more tokens!");
 		}
 
-		// Ignore all spaces TODO check if all or only spaces
-		while (true) {
-			if (currentIndex == data.length) {
-				currentToken = new SmartScriptToken(SmartScriptTokenType.EOF, null);
-				return currentToken;
-			}
+		if (currentState == SmartScriptLexerState.TAG) {
+			// Ignore all whitespace
+			while (true) {
+				if (currentIndex == data.length) {
+					currentToken = new SmartScriptToken(SmartScriptTokenType.EOF, null);
+					return currentToken;
+				}
 
-			if (data[currentIndex] == ' ') {
-				currentIndex++;
-				continue;
-			}
+				if (Character.isWhitespace(data[currentIndex])) {
+					currentIndex++;
+					continue;
+				}
 
-			break;
+				break;
+			}
+			return tagStateToken();
 		}
 
-		if (currentState == SmartScriptLexerState.TAG) {
-			return tagStateToken();
+		if (currentIndex == data.length) {
+			currentToken = new SmartScriptToken(SmartScriptTokenType.EOF, null);
+			return currentToken;
 		}
 
 		return textStateToken();
@@ -91,17 +94,7 @@ public class SmartScriptLexer {
 		if (Character.isLetter(currentChar)) { // Variable name or keyword
 			String tokenString = getTokenString(this::isValidVariableName);
 
-			switch (tokenString.toUpperCase()) {
-			case "FOR":
-				currentToken = new SmartScriptToken(SmartScriptTokenType.FOR, tokenString);
-				break;
-			case "END":
-				currentToken = new SmartScriptToken(SmartScriptTokenType.END, tokenString);
-				break;
-			default:
-				currentToken = new SmartScriptToken(SmartScriptTokenType.VARIABLE, tokenString);
-				break;
-			}
+			currentToken = new SmartScriptToken(SmartScriptTokenType.VARIABLE, tokenString);
 
 		} else if (isNumber(currentChar)) { // Number
 			String tokenString = "";
@@ -138,10 +131,10 @@ public class SmartScriptLexer {
 			currentIndex++;
 			// Variable and function names can contain same characters
 			currentToken = new SmartScriptToken(SmartScriptTokenType.FUNCTION,
-					"@" + getTokenString(this::isValidVariableName));
+					getTokenString(this::isValidVariableName));
 
 		} else if (currentChar == '\"') { // String
-			int startingIndex = currentIndex;
+			int startingIndex = currentIndex + 1; // Exclude the quotations
 			currentIndex++;
 			while (currentIndex < data.length && data[currentIndex] != '\"') {
 				if (isValidEscapeChar(data[currentIndex])) {
@@ -154,7 +147,7 @@ public class SmartScriptLexer {
 				}
 
 			}
-			String tokenString = new String(data, startingIndex, currentIndex + 1 - startingIndex);
+			String tokenString = new String(data, startingIndex, currentIndex - startingIndex);
 			// If the loop ended but current character is not the quotation mark then string
 			// is not valid
 			if (data[currentIndex] != '\"') {
@@ -188,7 +181,7 @@ public class SmartScriptLexer {
 				type = SmartScriptTokenType.OPERATOR;
 				break;
 			default:
-				throw new SmartScriptLexerException("Invalid input!");
+				throw new SmartScriptLexerException("Invalid input " + currentChar + " !");
 			}
 
 			currentToken = new SmartScriptToken(type, Character.valueOf(currentChar));
@@ -234,7 +227,7 @@ public class SmartScriptLexer {
 		char c = (Character) obj;
 
 		if (c == '\\') {
-			if (currentIndex < data.length - 1 && (c == '\\' || c == '{')) {
+			if (currentIndex < data.length - 1 && (data[currentIndex + 1] == '\\' || data[currentIndex + 1] == '{')) {
 				currentIndex++;
 				return true;
 			} else {

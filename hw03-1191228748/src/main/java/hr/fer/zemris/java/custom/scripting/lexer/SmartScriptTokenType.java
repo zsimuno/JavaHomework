@@ -55,14 +55,6 @@ public enum SmartScriptTokenType {
 	 */
 	EQUALSSIGN,
 	/**
-	 * Tag "for"
-	 */
-	FOR,
-	/**
-	 * Tag "end"
-	 */
-	END,
-	/**
 	 * Operator token type
 	 */
 	OPERATOR;

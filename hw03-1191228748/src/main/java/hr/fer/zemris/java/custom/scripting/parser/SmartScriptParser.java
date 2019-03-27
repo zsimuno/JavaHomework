@@ -38,14 +38,12 @@ public class SmartScriptParser {
 	/**
 	 * Stack that we use to make the document tree
 	 */
-	private ObjectStack stack;
-	
+	private ObjectStack stack = new ObjectStack();
+
 	/**
 	 * Document node that is parsed
 	 */
 	private DocumentNode documentNode;
-
-
 
 	/**
 	 * Constructs a parser and parses given text
@@ -53,22 +51,23 @@ public class SmartScriptParser {
 	 * @param text
 	 */
 	public SmartScriptParser(String text) {
-		// TODO In this constructor, parser should create an instance of lexer and
-		// initialize
-		// it with obtained text.
-		ObjectStack stack = new ObjectStack();
+
 		stack.push(new DocumentNode());
+		
 		try {
 			lexer = new SmartScriptLexer(text);
 		} catch (SmartScriptLexerException e) {
 			throw new SmartScriptParserException(e.getMessage());
 		}
+		
+		// Get the first token
+		nextToken();
 
 		parse();
-		
+
 		documentNode = (DocumentNode) stack.pop();
 	}
-	
+
 	/**
 	 * Returns the document node
 	 * 
@@ -87,6 +86,9 @@ public class SmartScriptParser {
 		((Node) stack.peek()).addChildNode(node);
 	}
 
+	/**
+	 * Moves lexer to the next token
+	 */
 	private void nextToken() {
 		try {
 			lexer.nextSmartScriptToken();
@@ -99,7 +101,7 @@ public class SmartScriptParser {
 	 * 
 	 */
 	private void parse() {
-		while (isTokenType(SmartScriptTokenType.EOF)) {
+		while (!isTokenType(SmartScriptTokenType.EOF)) {
 
 			switch (currentTokenType()) {
 			case OPENBRACES:
@@ -108,6 +110,7 @@ public class SmartScriptParser {
 				break;
 			case TEXT:
 				addToTopStackElement(new TextNode((String) lexer.getToken().getValue()));
+				nextToken();
 				break;
 			default:
 				parserException();
@@ -126,19 +129,26 @@ public class SmartScriptParser {
 			parserException();
 		}
 		nextToken();
-		switch (currentTokenType()) {
-		case FOR:
-			parseFor();
-			break;
-		case EQUALSSIGN:
+		if(isTokenType(SmartScriptTokenType.VARIABLE)) {
+			switch (currentTokenValue().toString().toUpperCase()) {
+			case "FOR":
+				parseFor();
+				break;
+			case "END":
+				parseEndTag();
+				break;
+			default:
+				parserException();
+				break;
+			}
+			
+		} else if(isTokenType(SmartScriptTokenType.EQUALSSIGN)) {
 			parseEquals();
-			break;
-		case END:
-			parseEndTag();
-			break;
-		default:
+			
+		} else {
 			parserException();
 		}
+		
 	}
 
 	/**
@@ -154,17 +164,17 @@ public class SmartScriptParser {
 		ElementVariable variable = new ElementVariable((String) currentTokenValue());
 		nextToken();
 
-		Element startExpression = getForLoopElement();
+		Element startExpression = getCurrentTagElement();
 		nextToken();
 
-		Element endExpression = getForLoopElement();
+		Element endExpression = getCurrentTagElement();
 		nextToken();
 
 		Element stepExpression;
 		if (isTokenType(SmartScriptTokenType.DOLLARSIGN)) {
 			stepExpression = null;
 		} else {
-			stepExpression = getForLoopElement();
+			stepExpression = getCurrentTagElement();
 			nextToken();
 		}
 
@@ -180,19 +190,29 @@ public class SmartScriptParser {
 	}
 
 	/**
-	 * Returns the element of a for loop
+	 * Returns the {@link Element} 
 	 * 
 	 * @return
-	 * @throws SmartScriptParserException if there is an error in parsing
 	 */
-	private Element getForLoopElement() {
-		if (isTokenType(SmartScriptTokenType.DOUBLE)) {
+	private Element getCurrentTagElement() {
+		switch (currentTokenType()) {
+		case VARIABLE:
+			return new ElementVariable((String) currentTokenValue());
+		case OPERATOR:
+			return new ElementOperator((Character) currentTokenValue());
+		case FUNCTION:
+			return new ElementFunction((String) currentTokenValue());
+		case STRING:
+			return new ElementString((String) currentTokenValue());
+		case INTEGER:
 			return new ElementConstantInteger((Integer) currentTokenValue());
-		} else if (isTokenType(SmartScriptTokenType.INTEGER)) {
+		case DOUBLE:
 			return new ElementConstantDouble((Double) currentTokenValue());
-		} else {
+		default:
 			parserException();
+			break;
 		}
+		
 		return null;
 	}
 
@@ -205,27 +225,18 @@ public class SmartScriptParser {
 
 		ArrayIndexedCollection elements = new ArrayIndexedCollection();
 		while (!isTokenType(SmartScriptTokenType.DOLLARSIGN)) {
-			switch (currentTokenType()) {
-			case VARIABLE:
-				elements.add(new ElementVariable((String) currentTokenValue()));
-				break;
-			case OPERATOR:
-				elements.add(new ElementOperator((Character) currentTokenValue()));
-				break;
-			case FUNCTION:
-				elements.add(new ElementFunction((String) currentTokenValue()));
-				break;
-			case STRING:
-				elements.add(new ElementString((String) currentTokenValue()));
-				break;
-			default:
-				parserException();
-				break;
-			}
+
+			elements.add(getCurrentTagElement());
+
 			nextToken();
 		}
 
-		addToTopStackElement(new EchoNode((Element[]) elements.toArray()));
+		Element[] elementsArray = new Element[elements.size()];
+		for (int i = 0; i < elementsArray.length; i++) {
+			elementsArray[i] = (Element) elements.get(i);
+		}
+
+		addToTopStackElement(new EchoNode(elementsArray));
 
 		parseEndOfTag();
 	}
@@ -257,9 +268,9 @@ public class SmartScriptParser {
 		if (!isTokenType(SmartScriptTokenType.CLOSEDBRACES)) {
 			parserException();
 		}
-		nextToken();
-		
 		lexer.setState(SmartScriptLexerState.TEXT);
+		nextToken();
+
 	}
 
 	/**

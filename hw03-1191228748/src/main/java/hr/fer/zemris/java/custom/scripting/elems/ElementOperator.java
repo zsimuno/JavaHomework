@@ -26,7 +26,7 @@ public class ElementOperator extends Element {
 	}
 
 	@Override
-	String asText() {
+	public String asText() {
 		return symbol.toString();
 	}
 

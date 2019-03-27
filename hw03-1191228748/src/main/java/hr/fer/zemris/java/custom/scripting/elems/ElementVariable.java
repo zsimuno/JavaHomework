@@ -25,7 +25,7 @@ public class ElementVariable extends Element {
 	}
 
 	@Override
-	String asText() {
+	public String asText() {
 		return name;
 	}
 

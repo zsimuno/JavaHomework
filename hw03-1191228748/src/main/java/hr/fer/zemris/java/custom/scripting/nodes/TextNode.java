@@ -31,5 +31,23 @@ public class TextNode extends Node {
 		return text;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return text;
+	}
+	
+	
+	/**
+	 * Returns string representation but without escaping characters
+	 * @return string representation but without escaping characters
+	 */
+	public String toStringWithoutEscaping() {
+		return  text.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
+	}
+	
+
 	
 }

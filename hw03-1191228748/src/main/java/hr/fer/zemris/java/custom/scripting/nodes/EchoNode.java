@@ -35,4 +35,18 @@ public class EchoNode extends Node {
 		return elements;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		String output = "{$= ";
+		for (Element element : elements) {
+			output += element.asText() + " ";
+		}
+		return output + "$}";
+	}
+	
+	
+
 }

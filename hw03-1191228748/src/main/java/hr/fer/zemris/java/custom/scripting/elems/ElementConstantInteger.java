@@ -26,7 +26,7 @@ public class ElementConstantInteger extends Element {
 	}
 
 	@Override
-	String asText() {
+	public String asText() {
 		return Integer.toString(value);
 	}
 

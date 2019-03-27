@@ -25,8 +25,8 @@ public class ElementString extends Element {
 	}
 
 	@Override
-	String asText() {
-		return value;
+	public String asText() {
+		return "\"" + value + "\"";
 	}
 
 	/**

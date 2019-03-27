@@ -25,8 +25,8 @@ public class ElementFunction extends Element {
 	}
 
 	@Override
-	String asText() {
-		return name;
+	public String asText() {
+		return "@" + name;
 	}
 
 	/**

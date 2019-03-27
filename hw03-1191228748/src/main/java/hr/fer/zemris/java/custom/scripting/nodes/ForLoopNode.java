@@ -28,14 +28,16 @@ public class ForLoopNode extends Node {
 	/**
 	 * Value of {@code variable} will change by this value
 	 */
-	private Element stepExpression; // can be null 
+	private Element stepExpression; // can be null
+
 	/**
 	 * Constructs a {@link ForLoopNode} from given values
 	 * 
-	 * @param variable variable that will change in the loop
+	 * @param variable        variable that will change in the loop
 	 * @param startExpression Starting value of the {@code variable} in the loop
-	 * @param endExpression Loop will stop when {@code variable} reaches this value
-	 * @param stepExpression Value of {@code variable} will change by this value
+	 * @param endExpression   Loop will stop when {@code variable} reaches this
+	 *                        value
+	 * @param stepExpression  Value of {@code variable} will change by this value
 	 */
 	public ForLoopNode(ElementVariable variable, Element startExpression, Element endExpression,
 			Element stepExpression) {
@@ -44,30 +46,44 @@ public class ForLoopNode extends Node {
 		this.endExpression = endExpression;
 		this.stepExpression = stepExpression;
 	}
+
 	/**
 	 * @return the variable
 	 */
 	public ElementVariable getVariable() {
 		return variable;
 	}
+
 	/**
 	 * @return the startExpression
 	 */
 	public Element getStartExpression() {
 		return startExpression;
 	}
+
 	/**
 	 * @return the endExpression
 	 */
 	public Element getEndExpression() {
 		return endExpression;
 	}
+
 	/**
 	 * @return the stepExpression
 	 */
 	public Element getStepExpression() {
 		return stepExpression;
 	}
-	
-	
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "{$ FOR " + variable.asText() + " " + startExpression.asText() + " " + endExpression.asText() + " "
+				+ stepExpression.asText() + " $}";
+	}
+
 }
