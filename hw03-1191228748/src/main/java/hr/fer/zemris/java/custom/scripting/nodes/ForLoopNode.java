@@ -3,6 +3,8 @@
  */
 package hr.fer.zemris.java.custom.scripting.nodes;
 
+import java.util.Objects;
+
 import hr.fer.zemris.java.custom.scripting.elems.Element;
 import hr.fer.zemris.java.custom.scripting.elems.ElementVariable;
 
@@ -61,6 +63,8 @@ public class ForLoopNode extends Node {
 		return startExpression;
 	}
 
+
+
 	/**
 	 * @return the endExpression
 	 */
@@ -75,15 +79,34 @@ public class ForLoopNode extends Node {
 		return stepExpression;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
-		return "{$ FOR " + variable.asText() + " " + startExpression.asText() + " " + endExpression.asText() + " "
-				+ stepExpression.asText() + " $}";
+		return "{$ FOR " + variable.toString() + " " + startExpression.toString() + " " + endExpression.toString() + " "
+				+ stepExpression.toString() + " $}";
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(endExpression, startExpression, stepExpression, variable);
+		return result;
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (!(obj instanceof ForLoopNode))
+			return false;
+		ForLoopNode other = (ForLoopNode) obj;
+		return Objects.equals(endExpression, other.endExpression)
+				&& Objects.equals(startExpression, other.startExpression)
+				&& Objects.equals(stepExpression, other.stepExpression) && Objects.equals(variable, other.variable);
+	}
+
 
 }

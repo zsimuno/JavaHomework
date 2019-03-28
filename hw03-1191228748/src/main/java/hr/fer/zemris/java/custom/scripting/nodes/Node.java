@@ -3,6 +3,8 @@
  */
 package hr.fer.zemris.java.custom.scripting.nodes;
 
+import java.util.Objects;
+
 import hr.fer.zemris.java.custom.collections.ArrayIndexedCollection;
 
 /**
@@ -59,6 +61,32 @@ public class Node {
 		
 		return (Node)children.get(index);
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(children);
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof Node))
+			return false;
+		Node other = (Node) obj;
+		if(this.numberOfChildren() != other.numberOfChildren())
+			return false;
+		for (int i = 0; i < this.numberOfChildren(); i++) {
+			if(!this.getChild(i).equals(other.getChild(i))) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	
 
 }

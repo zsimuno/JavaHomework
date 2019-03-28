@@ -3,8 +3,6 @@
  */
 package hr.fer.zemris.java.custom.scripting.lexer;
 
-import java.util.Objects;
-
 import hr.fer.zemris.java.custom.collections.Tester;
 
 /**
@@ -49,7 +47,7 @@ public class SmartScriptLexer {
 	 * Generates and returns the next SmartScriptToken
 	 * 
 	 * @return the next SmartScriptToken
-	 * @throws LexerException if there is an error
+	 * @throws SmartScriptLexerException if there is an error while tokenizing
 	 */
 	public SmartScriptToken nextSmartScriptToken() {
 		if (currentToken != null && currentToken.getType() == SmartScriptTokenType.EOF) {
@@ -87,6 +85,7 @@ public class SmartScriptLexer {
 	 * Calculates the token in the {@code TAG} lexer state and returns it.
 	 * 
 	 * @return next token in data
+	 * @throws SmartScriptLexerException if there is an error while tokenizing
 	 */
 	private SmartScriptToken tagStateToken() {
 		char currentChar = data[currentIndex];
@@ -97,33 +96,35 @@ public class SmartScriptLexer {
 			currentToken = new SmartScriptToken(SmartScriptTokenType.VARIABLE, tokenString);
 
 		} else if (isNumber(currentChar)) { // Number
-			String tokenString = "";
-			// TODO if it's not digit-dot-digit value then return needed token
+			StringBuilder tokenString = new StringBuilder();
 
 			// Negative number
 			if (currentChar == '-') {
 				currentIndex++;
-				tokenString = "-";
+				tokenString.append("-");
 			}
-			tokenString += getTokenString(this::isDigit);
+			tokenString.append(getTokenString(this::isDigit));
 
 			try {
 				// Is it a decimal point and a digit-dot-digit notation (i.e. is next char
 				// digit)
-				if (data[currentIndex] == '.' && currentIndex < data.length - 1
+				if (currentIndex < data.length && data[currentIndex] == '.' && currentIndex < data.length - 1
 						&& Character.isDigit(data[currentIndex + 1])) {
 
-					tokenString += '.';
+					tokenString.append('.');
 					currentIndex++;
-					tokenString += getTokenString(this::isDigit);
-					currentToken = new SmartScriptToken(SmartScriptTokenType.DOUBLE, Double.valueOf(tokenString));
+					tokenString.append(getTokenString(this::isDigit));
+					currentToken = new SmartScriptToken(SmartScriptTokenType.DOUBLE,
+							Double.valueOf(tokenString.toString()));
 
 				} else { // Integer
-					currentToken = new SmartScriptToken(SmartScriptTokenType.INTEGER, Integer.valueOf(tokenString));
+					currentToken = new SmartScriptToken(SmartScriptTokenType.INTEGER,
+							Integer.valueOf(tokenString.toString()));
 				}
+				
 
 			} catch (NumberFormatException e) {
-				throw new SmartScriptLexerException("Invalid input " + tokenString + "!");
+				throw new SmartScriptLexerException("Invalid input " + tokenString.toString() + "!");
 			}
 
 		} else if (isFunctionName(currentChar)) { // Function
@@ -134,20 +135,37 @@ public class SmartScriptLexer {
 					getTokenString(this::isValidVariableName));
 
 		} else if (currentChar == '\"') { // String
-			int startingIndex = currentIndex + 1; // Exclude the quotations
+			StringBuilder tokenString = new StringBuilder();
 			currentIndex++;
 			while (currentIndex < data.length && data[currentIndex] != '\"') {
 				if (isValidEscapeChar(data[currentIndex])) {
+					char next = data[currentIndex + 1];
+					switch (next) {
+					case 'r':
+						tokenString.append("\r");
+						break;
+					case 'n':
+						tokenString.append("\n");
+						break;
+					case 't':
+						tokenString.append("\t");
+						break;
+
+					default:
+						tokenString.append(next);
+						break;
+					}
+
 					currentIndex += 2;
 
 				} else if (data[currentIndex] == '$') {
 					break;
 				} else {
+					tokenString.append(data[currentIndex]);
 					currentIndex++;
 				}
 
 			}
-			String tokenString = new String(data, startingIndex, currentIndex - startingIndex);
 			// If the loop ended but current character is not the quotation mark then string
 			// is not valid
 			if (data[currentIndex] != '\"') {
@@ -156,20 +174,28 @@ public class SmartScriptLexer {
 			// Move from quotation marks
 			currentIndex++;
 
-			currentToken = new SmartScriptToken(SmartScriptTokenType.STRING, tokenString);
+			currentToken = new SmartScriptToken(SmartScriptTokenType.STRING, tokenString.toString());
+
+		} else if (currentChar == '{') { // Opening tag
+			if (currentIndex < data.length - 1 && data[currentIndex + 1] == '$') {
+				currentToken = new SmartScriptToken(SmartScriptTokenType.OPENTAG, "{$");
+
+			} else {
+				throw new SmartScriptLexerException("Invalid input " + currentChar + " !");
+			}
+			currentIndex += 2;
+
+		} else if (currentChar == '$') { // Closing tag
+			if (currentIndex < data.length - 1 && data[currentIndex + 1] == '}') {
+				currentToken = new SmartScriptToken(SmartScriptTokenType.CLOSETAG, "$}");
+			} else {
+				throw new SmartScriptLexerException("Invalid input " + currentChar + " !");
+			}
+			currentIndex += 2;
 
 		} else {
 			SmartScriptTokenType type;
 			switch (currentChar) {
-			case '{':
-				type = SmartScriptTokenType.OPENBRACES;
-				break;
-			case '}':
-				type = SmartScriptTokenType.CLOSEDBRACES;
-				break;
-			case '$':
-				type = SmartScriptTokenType.DOLLARSIGN;
-				break;
 			case '=':
 				type = SmartScriptTokenType.EQUALSSIGN;
 				break;
@@ -197,14 +223,27 @@ public class SmartScriptLexer {
 	 * Calculates the token in the {@code TEXT} lexer state and returns it.
 	 * 
 	 * @return next token in data
+	 * @throws SmartScriptLexerException if there is an error while tokenizing
 	 */
 	private SmartScriptToken textStateToken() {
-		// TODO check for open braces?
-		if (data[currentIndex] == '{') {
-			currentToken = new SmartScriptToken(SmartScriptTokenType.OPENBRACES, Character.valueOf('{'));
-			currentIndex++;
+		// Checks if it's opening tag (that is "{$")
+		if (data[currentIndex] == '{' && currentIndex < data.length - 1 && data[currentIndex + 1] == '$') {
+			currentToken = new SmartScriptToken(SmartScriptTokenType.OPENTAG, "{$");
+			currentIndex += 2;
 		} else {
-			currentToken = new SmartScriptToken(SmartScriptTokenType.TEXT, getTokenString(this::isValidText));
+			StringBuilder tokenString = new StringBuilder();
+			while (currentIndex < data.length && !isOpenTag()) {
+				if (isValidTextEscapeChar(data[currentIndex])) {
+					tokenString.append(data[currentIndex + 1]);
+					currentIndex += 2;
+				} else {
+					tokenString.append(data[currentIndex]);
+					currentIndex++;
+				}
+
+			}
+
+			currentToken = new SmartScriptToken(SmartScriptTokenType.TEXT, tokenString.toString());
 		}
 
 		return currentToken;
@@ -212,30 +251,40 @@ public class SmartScriptLexer {
 	}
 
 	/**
-	 * Checks if a character is a valid text character. That means if it's any
-	 * symbol other than whitespace or a backslash and there's either '\' or '{'
-	 * after it.
+	 * Checks if next token will be an open tag
 	 * 
-	 * @param c character that is checked if it's a valid text character
-	 * @return {@code true} if character is a valid text character, {@code false} if
-	 *         it's not.
+	 * @return {@code true} if next token will be an open tag , {@code false}
+	 *         otherwise
 	 */
-	private boolean isValidText(Object obj) {
-		if (!(obj instanceof Character)) {
-			return false;
-		}
-		char c = (Character) obj;
+	private boolean isOpenTag() {
+		return data[currentIndex] == '{' && currentIndex < data.length - 1 && data[currentIndex + 1] == '$';
+	}
 
+	/**
+	 * Checks if a character is a valid text escape character. That means if it's a
+	 * backslash and there's either '\' or '{' after it.
+	 * 
+	 * @param c character that is checked if it's a valid text escape character
+	 * @return {@code true} if character is a valid text escape character,
+	 *         {@code false} if it's not.
+	 * @throws SmartScriptLexerException if there is an error while tokenizing
+	 */
+	private boolean isValidTextEscapeChar(char c) {
 		if (c == '\\') {
-			if (currentIndex < data.length - 1 && (data[currentIndex + 1] == '\\' || data[currentIndex + 1] == '{')) {
-				currentIndex++;
-				return true;
+			// Checks currentIndex because backslash can be at the end of the input
+			if (currentIndex < data.length - 1) {
+				char next = data[currentIndex + 1];
+				if (next == '\\' || next == '{') {
+					return true;
+				} else {
+					throw new SmartScriptLexerException("Not a valid escape character!");
+				}
+
 			} else {
 				throw new SmartScriptLexerException("Not a valid escape character!");
 			}
 		}
-
-		return c != '{';
+		return false;
 
 	}
 
@@ -321,19 +370,26 @@ public class SmartScriptLexer {
 	}
 
 	/**
-	 * Checks if a character is a valid escape character. That means if it's a
-	 * backslash and there's either '\', '"', 'n', 'r' or 't' after it.
+	 * Checks if a character is a valid escape character in STRING token type. That
+	 * means if it's a backslash and there's either '\', '"', 'n', 'r' or 't' after
+	 * it.
 	 * 
 	 * @param c character that is checked if it's a valid escape character
 	 * @return {@code true} if character is a valid escape character, {@code false}
 	 *         if it's not.
+	 * @throws SmartScriptLexerException if there is an error while tokenizing
 	 */
 	private boolean isValidEscapeChar(char c) {
 		if (c == '\\') {
 			// Checks currentIndex because backslash can be at the end of the input
-			if (currentIndex < data.length - 1 && (c == '\\' || c == '\"' || c == 'n' || c == 'r' || c == 't')) {
-				currentIndex++;
-				return true;
+			if (currentIndex < data.length - 1) {
+				char next = data[currentIndex + 1];
+				if (next == '\\' || next == '\"' || next == 'n' || next == 'r' || next == 't') {
+					return true;
+				} else {
+					throw new SmartScriptLexerException("Not a valid escape character!");
+				}
+
 			} else {
 				throw new SmartScriptLexerException("Not a valid escape character!");
 			}
@@ -356,9 +412,13 @@ public class SmartScriptLexer {
 	 * Sets the state of the lexer
 	 * 
 	 * @param state state that the lexers state will be put in
+	 * @throws SmartScriptLexerException if state is null
 	 */
 	public void setState(SmartScriptLexerState state) {
-		currentState = Objects.requireNonNull(state);
+		if (state == null) {
+			throw new SmartScriptLexerException("No such state as null state!");
+		}
+		currentState = state;
 	}
 
 }

@@ -39,17 +39,13 @@ public enum SmartScriptTokenType {
 	 */
 	INTEGER,
 	/** 
-	 * Open braces '{' token type
+	 * Opening tag "{$"
 	 */
-	OPENBRACES,
+	OPENTAG,
 	/**
-	 * Closed braces '}' token type
+	 * Closing tag "$}"
 	 */
-	CLOSEDBRACES,
-	/**
-	 * Dollar sign '$' token type
-	 */
-	DOLLARSIGN,
+	CLOSETAG,
 	/**
 	 * Equals sign '=' token type
 	 */

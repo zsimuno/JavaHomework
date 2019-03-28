@@ -23,7 +23,7 @@ import hr.fer.zemris.java.custom.scripting.nodes.Node;
 import hr.fer.zemris.java.custom.scripting.nodes.TextNode;
 
 /**
- * TODO javadoc
+ * Parser that we use to parse SmartScript code.
  * 
  * @author Zvonimir Šimunović
  *
@@ -48,22 +48,27 @@ public class SmartScriptParser {
 	/**
 	 * Constructs a parser and parses given text
 	 * 
-	 * @param text
+	 * @param text text that will be parsed
 	 */
 	public SmartScriptParser(String text) {
 
 		stack.push(new DocumentNode());
-		
+
+		// Construct the lexer
 		try {
 			lexer = new SmartScriptLexer(text);
 		} catch (SmartScriptLexerException e) {
 			throw new SmartScriptParserException(e.getMessage());
 		}
-		
+
 		// Get the first token
 		nextToken();
 
 		parse();
+		
+		if(stack.size() > 1) {
+			throw new SmartScriptParserException("Missing END tags!");
+		}
 
 		documentNode = (DocumentNode) stack.pop();
 	}
@@ -98,13 +103,13 @@ public class SmartScriptParser {
 	}
 
 	/**
-	 * 
+	 * Parses the code
 	 */
 	private void parse() {
 		while (!isTokenType(SmartScriptTokenType.EOF)) {
 
 			switch (currentTokenType()) {
-			case OPENBRACES:
+			case OPENTAG:
 				lexer.setState(SmartScriptLexerState.TAG);
 				tagParser();
 				break;
@@ -125,11 +130,7 @@ public class SmartScriptParser {
 	 */
 	private void tagParser() {
 		nextToken();
-		if (!isTokenType(SmartScriptTokenType.DOLLARSIGN)) {
-			parserException();
-		}
-		nextToken();
-		if(isTokenType(SmartScriptTokenType.VARIABLE)) {
+		if (isTokenType(SmartScriptTokenType.VARIABLE)) {
 			switch (currentTokenValue().toString().toUpperCase()) {
 			case "FOR":
 				parseFor();
@@ -141,14 +142,14 @@ public class SmartScriptParser {
 				parserException();
 				break;
 			}
-			
-		} else if(isTokenType(SmartScriptTokenType.EQUALSSIGN)) {
+
+		} else if (isTokenType(SmartScriptTokenType.EQUALSSIGN)) {
 			parseEquals();
-			
+
 		} else {
 			parserException();
 		}
-		
+
 	}
 
 	/**
@@ -164,17 +165,17 @@ public class SmartScriptParser {
 		ElementVariable variable = new ElementVariable((String) currentTokenValue());
 		nextToken();
 
-		Element startExpression = getCurrentTagElement();
+		Element startExpression = tagElementForLoop();
 		nextToken();
 
-		Element endExpression = getCurrentTagElement();
+		Element endExpression = tagElementForLoop();
 		nextToken();
 
 		Element stepExpression;
-		if (isTokenType(SmartScriptTokenType.DOLLARSIGN)) {
+		if (isTokenType(SmartScriptTokenType.CLOSETAG)) {
 			stepExpression = null;
 		} else {
-			stepExpression = getCurrentTagElement();
+			stepExpression = tagElementForLoop();
 			nextToken();
 		}
 
@@ -190,11 +191,59 @@ public class SmartScriptParser {
 	}
 
 	/**
-	 * Returns the {@link Element} 
+	 * Returns the {@link Element} that can be in a for loop
 	 * 
-	 * @return
+	 * @return the {@link Element} that can be in a for loop
 	 */
-	private Element getCurrentTagElement() {
+	private Element tagElementForLoop() {
+		switch (currentTokenType()) {
+		case VARIABLE:
+			return new ElementVariable((String) currentTokenValue());
+		case STRING:
+			return new ElementString((String) currentTokenValue());
+		case INTEGER:
+			return new ElementConstantInteger((Integer) currentTokenValue());
+		case DOUBLE:
+			return new ElementConstantDouble((Double) currentTokenValue());
+		default:
+			parserException();
+			break;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Parses equals tag
+	 * 
+	 */
+	private void parseEquals() {
+		nextToken(); // Skip =
+
+		ArrayIndexedCollection elements = new ArrayIndexedCollection();
+		while (!isTokenType(SmartScriptTokenType.CLOSETAG)) {
+
+			elements.add(tegElementEcho());
+
+			nextToken();
+		}
+
+		Element[] elementsArray = new Element[elements.size()];
+		for (int i = 0; i < elementsArray.length; i++) {
+			elementsArray[i] = (Element) elements.get(i);
+		}
+
+		addToTopStackElement(new EchoNode(elementsArray));
+
+		parseEndOfTag();
+	}
+
+	/**
+	 * Returns the {@link Element} that can be in echo tag
+	 * 
+	 * @return the {@link Element} that can be in echo tag
+	 */
+	private Element tegElementEcho() {
 		switch (currentTokenType()) {
 		case VARIABLE:
 			return new ElementVariable((String) currentTokenValue());
@@ -212,33 +261,8 @@ public class SmartScriptParser {
 			parserException();
 			break;
 		}
-		
+
 		return null;
-	}
-
-	/**
-	 * Parses equals tag
-	 * 
-	 */
-	private void parseEquals() {
-		nextToken(); // Skip =
-
-		ArrayIndexedCollection elements = new ArrayIndexedCollection();
-		while (!isTokenType(SmartScriptTokenType.DOLLARSIGN)) {
-
-			elements.add(getCurrentTagElement());
-
-			nextToken();
-		}
-
-		Element[] elementsArray = new Element[elements.size()];
-		for (int i = 0; i < elementsArray.length; i++) {
-			elementsArray[i] = (Element) elements.get(i);
-		}
-
-		addToTopStackElement(new EchoNode(elementsArray));
-
-		parseEndOfTag();
 	}
 
 	/**
@@ -260,14 +284,10 @@ public class SmartScriptParser {
 	 * Parses end of a tag (tha is "$}" )
 	 */
 	private void parseEndOfTag() {
-		if (!isTokenType(SmartScriptTokenType.DOLLARSIGN)) {
+		if (!isTokenType(SmartScriptTokenType.CLOSETAG)) {
 			parserException();
 		}
-		nextToken();
 
-		if (!isTokenType(SmartScriptTokenType.CLOSEDBRACES)) {
-			parserException();
-		}
 		lexer.setState(SmartScriptLexerState.TEXT);
 		nextToken();
 
