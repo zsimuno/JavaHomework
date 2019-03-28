@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-
 /**
  * Tests for {@link SmartScriptLexer}
  * 
@@ -15,8 +14,6 @@ import org.junit.jupiter.api.Test;
  *
  */
 class SmartScriptLexerTest {
-
-	
 
 	@Test
 	public void testNotNull() {
@@ -93,12 +90,13 @@ class SmartScriptLexerTest {
 		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.TEXT, "{ \\"));
 		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.EOF, null));
 	}
-	
+
 	@Test
 	public void testEscape2() {
 		SmartScriptLexer lexer = new SmartScriptLexer("Example { bla } blu \\{$=1$}. Nothing interesting {=here}");
 
-		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.TEXT, "Example { bla } blu {$=1$}. Nothing interesting {=here}"));
+		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.TEXT,
+				"Example { bla } blu {$=1$}. Nothing interesting {=here}"));
 		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.EOF, null));
 	}
 
@@ -114,56 +112,69 @@ class SmartScriptLexerTest {
 		SmartScriptLexer lexer = new SmartScriptLexer("   \\c    ");
 		assertThrows(SmartScriptLexerException.class, () -> lexer.nextSmartScriptToken());
 	}
-	
+
 	@Test
 	public void testValidVariableName1() {
 		SmartScriptLexer lexer = new SmartScriptLexer("A7_bb");
 		lexer.setState(SmartScriptLexerState.TAG);
-		
+
 		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.VARIABLE, "A7_bb"));
 		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.EOF, null));
 	}
-	
+
 	@Test
 	public void testValidVariableName2() {
 		SmartScriptLexer lexer = new SmartScriptLexer("counter");
 		lexer.setState(SmartScriptLexerState.TAG);
-		
+
 		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.VARIABLE, "counter"));
 		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.EOF, null));
 	}
-	
+
 	@Test
 	public void testValidVariableName3() {
 		SmartScriptLexer lexer = new SmartScriptLexer("tmp_34");
 		lexer.setState(SmartScriptLexerState.TAG);
-		
+
 		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.VARIABLE, "tmp_34"));
 		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.EOF, null));
 	}
-	
+
 	@Test
 	public void testInvalidVarName1() {
 		SmartScriptLexer lexer = new SmartScriptLexer("_a21");
 		lexer.setState(SmartScriptLexerState.TAG);
-		
+
 		assertThrows(SmartScriptLexerException.class, () -> lexer.nextSmartScriptToken());
 	}
-	
+
 	@Test
 	public void testInvalidVarName2() {
 		SmartScriptLexer lexer = new SmartScriptLexer("32");
 		lexer.setState(SmartScriptLexerState.TAG);
-		
-		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.INTEGER, Integer.valueOf(32)));
+
+		checkToken(lexer.nextSmartScriptToken(),
+				new SmartScriptToken(SmartScriptTokenType.INTEGER, Integer.valueOf(32)));
 	}
-	
+
 	@Test
 	public void testInvalidVarName3() {
 		SmartScriptLexer lexer = new SmartScriptLexer("3s_ee");
 		lexer.setState(SmartScriptLexerState.TAG);
-		
-		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.INTEGER, Integer.valueOf(3)));
+
+		checkToken(lexer.nextSmartScriptToken(),
+				new SmartScriptToken(SmartScriptTokenType.INTEGER, Integer.valueOf(3)));
+	}
+	
+	@Test
+	public void stringNotClosed() {
+		SmartScriptLexer lexer = new SmartScriptLexer("\"This string $ is closed\" \"This one is not");
+		lexer.setState(SmartScriptLexerState.TAG);
+
+		checkToken(lexer.nextSmartScriptToken(),
+				new SmartScriptToken(SmartScriptTokenType.STRING, "This string $ is closed"));
+				
+		assertThrows(SmartScriptLexerException.class, () -> lexer.nextSmartScriptToken());
 	}
 
 	@Test
@@ -174,10 +185,30 @@ class SmartScriptLexerTest {
 
 		assertThrows(SmartScriptLexerException.class, () -> lexer.nextSmartScriptToken());
 	}
+
+	@Test
+	public void invalidNumber() {
+		SmartScriptLexer lexer = new SmartScriptLexer("2.35.4");
+
+		lexer.setState(SmartScriptLexerState.TAG);
+		
+		lexer.nextSmartScriptToken(); // First get the double
+		assertThrows(SmartScriptLexerException.class, () -> lexer.nextSmartScriptToken());
+	}
 	
+	@Test
+	public void validNonexistentTag() {
+		SmartScriptLexer lexer = new SmartScriptLexer("{$IF$}");
 
+		lexer.setState(SmartScriptLexerState.TAG);
 
+		SmartScriptToken correctData[] = { new SmartScriptToken(SmartScriptTokenType.OPENTAG, "{$"),
+				new SmartScriptToken(SmartScriptTokenType.VARIABLE, "IF"),
+				new SmartScriptToken(SmartScriptTokenType.CLOSETAG, "$}"),
+				new SmartScriptToken(SmartScriptTokenType.EOF, null) };
 
+		checkTokenStream(lexer, correctData);
+	}
 
 	@Test
 	public void testForLoopTag() {
@@ -196,7 +227,7 @@ class SmartScriptLexerTest {
 
 		checkTokenStream(lexer, correctData);
 	}
-	
+
 	@Test
 	public void testForLoopDifferent() {
 		SmartScriptLexer lexer = new SmartScriptLexer("{$ FOR sco_re \"-1\" 10 \"1\" $}");
@@ -236,13 +267,17 @@ class SmartScriptLexerTest {
 		SmartScriptLexer lexer2 = new SmartScriptLexer("{$ FOR i -1.35 bbb \"1\" $}");
 		lexer1.setState(SmartScriptLexerState.TAG);
 		lexer2.setState(SmartScriptLexerState.TAG);
-		
+
 		checkTwoLexers(lexer1, lexer2);
 
 	}
 
-	// Helper method for checking if lexer generates the same stream of tokens
-	// as the given stream.
+	/**
+	 * Helper method for checking if lexer generates the same stream of tokens as the given stream.
+	 * 
+	 * @param lexer lexer to be checked
+	 * @param correctData data that is expected
+	 */
 	private void checkTokenStream(SmartScriptLexer lexer, SmartScriptToken[] correctData) {
 		int counter = 0;
 		for (SmartScriptToken expected : correctData) {
@@ -254,6 +289,12 @@ class SmartScriptLexerTest {
 		}
 	}
 
+	/**
+	 * Compares tokens in two lexers
+	 * 
+	 * @param lexer1
+	 * @param lexer2
+	 */
 	private void checkTwoLexers(SmartScriptLexer lexer1, SmartScriptLexer lexer2) {
 		int counter = 0;
 		while (true) {
@@ -263,12 +304,12 @@ class SmartScriptLexerTest {
 			assertEquals(first.getType(), second.getType(), msg);
 			assertEquals(first.getValue(), second.getValue(), msg);
 			counter++;
-			if(first.getType() == SmartScriptTokenType.EOF) {
+			if (first.getType() == SmartScriptTokenType.EOF) {
 				break;
 			}
 		}
 	}
-	
+
 	@Test
 	public void testNullState() {
 		assertThrows(SmartScriptLexerException.class, () -> new SmartScriptLexer("").setState(null));
@@ -287,8 +328,7 @@ class SmartScriptLexerTest {
 		SmartScriptLexer lexer = new SmartScriptLexer("");
 		lexer.setState(SmartScriptLexerState.TAG);
 
-		assertEquals(SmartScriptTokenType.EOF, lexer.nextSmartScriptToken().getType(),
-				"Must be only EOF.");
+		assertEquals(SmartScriptTokenType.EOF, lexer.nextSmartScriptToken().getType(), "Must be only EOF.");
 	}
 
 	@Test
@@ -331,11 +371,12 @@ class SmartScriptLexerTest {
 
 		lexer.setState(SmartScriptLexerState.TAG);
 
-		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.EQUALSSIGN, Character.valueOf('=')));
-		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.STRING, "Joe \"Long\" Smith"));
-		
 		checkToken(lexer.nextSmartScriptToken(),
-				new SmartScriptToken(SmartScriptTokenType.CLOSETAG, "$}"));
+				new SmartScriptToken(SmartScriptTokenType.EQUALSSIGN, Character.valueOf('=')));
+		checkToken(lexer.nextSmartScriptToken(),
+				new SmartScriptToken(SmartScriptTokenType.STRING, "Joe \"Long\" Smith"));
+
+		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.CLOSETAG, "$}"));
 
 		lexer.setState(SmartScriptLexerState.TEXT);
 
@@ -343,21 +384,23 @@ class SmartScriptLexerTest {
 		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.EOF, null));
 
 	}
-	
+
 	@Test
 	public void testMultipleStatesAgain() {
 		SmartScriptLexer lexer = new SmartScriptLexer("Example \\{$=1$}. Now actually write one {$=1$}");
 
-		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.TEXT, "Example {$=1$}. Now actually write one "));
+		checkToken(lexer.nextSmartScriptToken(),
+				new SmartScriptToken(SmartScriptTokenType.TEXT, "Example {$=1$}. Now actually write one "));
 		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.OPENTAG, "{$"));
 
 		lexer.setState(SmartScriptLexerState.TAG);
 
-		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.EQUALSSIGN, Character.valueOf('=')));
-		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.INTEGER, Integer.valueOf(1)));
-		
 		checkToken(lexer.nextSmartScriptToken(),
-				new SmartScriptToken(SmartScriptTokenType.CLOSETAG, "$}"));
+				new SmartScriptToken(SmartScriptTokenType.EQUALSSIGN, Character.valueOf('=')));
+		checkToken(lexer.nextSmartScriptToken(),
+				new SmartScriptToken(SmartScriptTokenType.INTEGER, Integer.valueOf(1)));
+
+		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.CLOSETAG, "$}"));
 
 		checkToken(lexer.nextSmartScriptToken(), new SmartScriptToken(SmartScriptTokenType.EOF, null));
 

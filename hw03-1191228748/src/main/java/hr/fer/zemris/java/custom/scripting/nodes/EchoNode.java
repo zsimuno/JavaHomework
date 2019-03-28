@@ -37,7 +37,6 @@ public class EchoNode extends Node {
 		return elements;
 	}
 
-
 	@Override
 	public String toString() {
 		String output = "{$= ";
@@ -66,9 +65,5 @@ public class EchoNode extends Node {
 		EchoNode other = (EchoNode) obj;
 		return Arrays.equals(elements, other.elements);
 	}
-	
-	
-	
-	
 
 }

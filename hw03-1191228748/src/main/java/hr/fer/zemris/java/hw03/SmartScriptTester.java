@@ -3,6 +3,11 @@
  */
 package hr.fer.zemris.java.hw03;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import hr.fer.zemris.java.custom.scripting.nodes.*;
 import hr.fer.zemris.java.custom.scripting.parser.*;
 
@@ -16,40 +21,35 @@ import hr.fer.zemris.java.custom.scripting.parser.*;
 public class SmartScriptTester {
 
 	/**
-	 * Main method that starts the program
+	 * Main method that starts the program. 
 	 * 
 	 * @param args command line arguments
 	 */
 	public static void main(String[] args) {
-//		if (args.length != 1) {
-//			System.out.println("Invalid number of command line arguments!");
-//			return;
-//		}
-//
-//		String docBody = "";
-//		try {
-//			docBody = new String(Files.readAllBytes(Paths.get(args[0])), StandardCharsets.UTF_8);
-//		} catch (IOException e1) {
-//			System.out.println("Invalid file name!");
-//			return;
-//		}
+		if (args.length != 1) {
+			System.out.println("Invalid number of command line arguments!");
+			return;
+		}
+
+		String docBody = "";
+		try {
+			docBody = new String(Files.readAllBytes(Paths.get(args[0])), StandardCharsets.UTF_8);
+		} catch (IOException e1) {
+			System.out.println("Invalid file name!");
+			return;
+		}
 		
-		String docBody = "    This is sample text.\r\n" + "{$    FOR i 1   10 1 $}\r\n"
-				+ "	This is {$= i $}-th time this message is generated.\r\n" + "{$END$}\r\n" + "{$FOR i 0 10 2 $}\r\n"
-				+ "	sin({$=i$}^2) = {$= i i * @sin \"0.000\" @decfmt $}\r\n" + "{$END$}";
 
 		SmartScriptParser parser = null;
-		parser = new SmartScriptParser(docBody);
-		// TODO Odkomentirat
-//		try {
-//			parser = new SmartScriptParser(docBody);
-//		} catch (SmartScriptParserException e) {
-//			System.out.println("Unable to parse document!");
-//			System.exit(-1);
-//		} catch (Exception e) {
-//			System.out.println("If this line ever executes, you have failed this class!");
-//			System.exit(-1);
-//		}
+		try {
+			parser = new SmartScriptParser(docBody);
+		} catch (SmartScriptParserException e) {
+			System.out.println("Unable to parse document!");
+			System.exit(-1);
+		} catch (Exception e) {
+			System.out.println("If this line ever executes, you have failed this class!");
+			System.exit(-1);
+		}
 		DocumentNode document = parser.getDocumentNode();
 		String originalDocumentBody = createOriginalDocumentBody(document);
 		System.out.println(originalDocumentBody + "\n"); // should write something like original
@@ -91,9 +91,7 @@ public class SmartScriptTester {
 		String originalDocumentBody = createOriginalDocumentBody(document);
 		SmartScriptParser parser2 = new SmartScriptParser(originalDocumentBody);
 		DocumentNode document2 = parser2.getDocumentNode();
-		String secondDocumentBody = createOriginalDocumentBody(document2);
-		System.out.println(document.equals(document2));
-		System.out.println(originalDocumentBody.equals(secondDocumentBody));
+		System.out.println("Equals = " + document.equals(document2));
 		// now document and document2 should be structurally identical trees
 	}
 

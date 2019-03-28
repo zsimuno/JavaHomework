@@ -6,6 +6,8 @@ package hr.fer.zemris.java.custom.scripting.lexer;
 import hr.fer.zemris.java.custom.collections.Tester;
 
 /**
+ * Lexer that tokenizes the given text written in SmartScript
+ * 
  * @author Zvonimir Šimunović
  *
  */
@@ -55,6 +57,7 @@ public class SmartScriptLexer {
 		}
 
 		if (currentState == SmartScriptLexerState.TAG) {
+			
 			// Ignore all whitespace
 			while (true) {
 				if (currentIndex == data.length) {
@@ -103,17 +106,21 @@ public class SmartScriptLexer {
 				currentIndex++;
 				tokenString.append("-");
 			}
+			
+			// Number digits
 			tokenString.append(getTokenString(this::isDigit));
 
 			try {
 				// Is it a decimal point and a digit-dot-digit notation (i.e. is next char
-				// digit)
+				// digit) or just an integer
 				if (currentIndex < data.length && data[currentIndex] == '.' && currentIndex < data.length - 1
 						&& Character.isDigit(data[currentIndex + 1])) {
 
 					tokenString.append('.');
 					currentIndex++;
-					tokenString.append(getTokenString(this::isDigit));
+					
+					tokenString.append(getTokenString(this::isDigit)); // After digit
+					
 					currentToken = new SmartScriptToken(SmartScriptTokenType.DOUBLE,
 							Double.valueOf(tokenString.toString()));
 
@@ -130,14 +137,16 @@ public class SmartScriptLexer {
 		} else if (isFunctionName(currentChar)) { // Function
 			// Move from @ character
 			currentIndex++;
-			// Variable and function names can contain same characters
+			// Variable and function names can contain the same characters
 			currentToken = new SmartScriptToken(SmartScriptTokenType.FUNCTION,
 					getTokenString(this::isValidVariableName));
 
 		} else if (currentChar == '\"') { // String
 			StringBuilder tokenString = new StringBuilder();
-			currentIndex++;
+			currentIndex++; // Move from quotation
+			
 			while (currentIndex < data.length && data[currentIndex] != '\"') {
+				
 				if (isValidEscapeChar(data[currentIndex])) {
 					char next = data[currentIndex + 1];
 					switch (next) {
@@ -152,14 +161,12 @@ public class SmartScriptLexer {
 						break;
 
 					default:
-						tokenString.append(next);
+						tokenString.append(next); // quotation or backslash
 						break;
 					}
 
 					currentIndex += 2;
 
-				} else if (data[currentIndex] == '$') {
-					break;
 				} else {
 					tokenString.append(data[currentIndex]);
 					currentIndex++;
@@ -168,8 +175,8 @@ public class SmartScriptLexer {
 			}
 			// If the loop ended but current character is not the quotation mark then string
 			// is not valid
-			if (data[currentIndex] != '\"') {
-				throw new SmartScriptLexerException("Invalid string input " + data[currentIndex] + "!");
+			if (currentIndex >= data.length || data[currentIndex] != '\"') {
+				throw new SmartScriptLexerException("Invalid string input!");
 			}
 			// Move from quotation marks
 			currentIndex++;
@@ -230,12 +237,14 @@ public class SmartScriptLexer {
 		if (data[currentIndex] == '{' && currentIndex < data.length - 1 && data[currentIndex + 1] == '$') {
 			currentToken = new SmartScriptToken(SmartScriptTokenType.OPENTAG, "{$");
 			currentIndex += 2;
-		} else {
+			
+		} else { // Regular text
 			StringBuilder tokenString = new StringBuilder();
 			while (currentIndex < data.length && !isOpenTag()) {
-				if (isValidTextEscapeChar(data[currentIndex])) {
+				if (isValidTextEscapeChar(data[currentIndex])) { // Meaning { or backslash
 					tokenString.append(data[currentIndex + 1]);
 					currentIndex += 2;
+					
 				} else {
 					tokenString.append(data[currentIndex]);
 					currentIndex++;

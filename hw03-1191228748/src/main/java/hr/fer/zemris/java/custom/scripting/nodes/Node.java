@@ -79,6 +79,7 @@ public class Node {
 		Node other = (Node) obj;
 		if(this.numberOfChildren() != other.numberOfChildren())
 			return false;
+		
 		for (int i = 0; i < this.numberOfChildren(); i++) {
 			if(!this.getChild(i).equals(other.getChild(i))) {
 				return false;

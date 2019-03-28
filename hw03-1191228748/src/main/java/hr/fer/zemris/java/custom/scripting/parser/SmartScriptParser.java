@@ -49,6 +49,7 @@ public class SmartScriptParser {
 	 * Constructs a parser and parses given text
 	 * 
 	 * @param text text that will be parsed
+	 * @throws SmartScriptParserException on parse error
 	 */
 	public SmartScriptParser(String text) {
 
@@ -65,8 +66,8 @@ public class SmartScriptParser {
 		nextToken();
 
 		parse();
-		
-		if(stack.size() > 1) {
+
+		if (stack.size() > 1) {
 			throw new SmartScriptParserException("Missing END tags!");
 		}
 
@@ -93,6 +94,8 @@ public class SmartScriptParser {
 
 	/**
 	 * Moves lexer to the next token
+	 * 
+	 * @throws SmartScriptParserException on parse error
 	 */
 	private void nextToken() {
 		try {
@@ -104,6 +107,8 @@ public class SmartScriptParser {
 
 	/**
 	 * Parses the code
+	 * 
+	 * @throws SmartScriptParserException on parse error
 	 */
 	private void parse() {
 		while (!isTokenType(SmartScriptTokenType.EOF)) {
@@ -127,10 +132,12 @@ public class SmartScriptParser {
 
 	/**
 	 * Parses a tag
+	 * 
+	 * @throws SmartScriptParserException on parse error
 	 */
 	private void tagParser() {
 		nextToken();
-		if (isTokenType(SmartScriptTokenType.VARIABLE)) {
+		if (isTokenType(SmartScriptTokenType.VARIABLE)) { // Variable tag name
 			switch (currentTokenValue().toString().toUpperCase()) {
 			case "FOR":
 				parseFor();
@@ -143,7 +150,7 @@ public class SmartScriptParser {
 				break;
 			}
 
-		} else if (isTokenType(SmartScriptTokenType.EQUALSSIGN)) {
+		} else if (isTokenType(SmartScriptTokenType.EQUALSSIGN)) { // Echo
 			parseEquals();
 
 		} else {
@@ -154,6 +161,8 @@ public class SmartScriptParser {
 
 	/**
 	 * Parses for loop
+	 * 
+	 * @throws SmartScriptParserException on parse error
 	 */
 	private void parseFor() {
 		nextToken(); // Skip FOR
@@ -186,14 +195,13 @@ public class SmartScriptParser {
 		addToTopStackElement(forLoop);
 
 		stack.push(forLoop);
-
-		parse();
 	}
 
 	/**
 	 * Returns the {@link Element} that can be in a for loop
 	 * 
 	 * @return the {@link Element} that can be in a for loop
+	 * @throws SmartScriptParserException on parse error
 	 */
 	private Element tagElementForLoop() {
 		switch (currentTokenType()) {
@@ -216,6 +224,7 @@ public class SmartScriptParser {
 	/**
 	 * Parses equals tag
 	 * 
+	 * @throws SmartScriptParserException on parse error
 	 */
 	private void parseEquals() {
 		nextToken(); // Skip =
@@ -242,6 +251,7 @@ public class SmartScriptParser {
 	 * Returns the {@link Element} that can be in echo tag
 	 * 
 	 * @return the {@link Element} that can be in echo tag
+	 * @throws SmartScriptParserException on parse error
 	 */
 	private Element tegElementEcho() {
 		switch (currentTokenType()) {
@@ -268,6 +278,7 @@ public class SmartScriptParser {
 	/**
 	 * Parses end tag
 	 * 
+	 * @throws SmartScriptParserException on parse error
 	 */
 	private void parseEndTag() {
 		nextToken(); // Skip END token
@@ -281,7 +292,9 @@ public class SmartScriptParser {
 	}
 
 	/**
-	 * Parses end of a tag (tha is "$}" )
+	 * Parses end of a tag (that is "$}" )
+	 * 
+	 * @throws SmartScriptParserException on parse error
 	 */
 	private void parseEndOfTag() {
 		if (!isTokenType(SmartScriptTokenType.CLOSETAG)) {
@@ -299,8 +312,12 @@ public class SmartScriptParser {
 	 * @param type type that is compared with current tokens type
 	 * @return {@code true} if current token is of the given {@code type},
 	 *         {@code false} if it's not
+	 * @throws SmartScriptParserException if can't parse because of lexer error
 	 */
 	private boolean isTokenType(SmartScriptTokenType type) {
+		if (lexer == null || lexer.getToken() == null) {
+			parserException("Problem with lexer");
+		}
 		return lexer.getToken().getType() == type;
 	}
 

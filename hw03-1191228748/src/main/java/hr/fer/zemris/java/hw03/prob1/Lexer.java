@@ -136,7 +136,7 @@ public class Lexer {
 	 * @return String that will be turned into a token.
 	 */
 	private String getTokenString(Tester t) {
-		String tokenValue = "";
+		StringBuilder tokenValue = new StringBuilder();
 		while (currentIndex < data.length && t.test(data[currentIndex])) {
 			// If it's an escape character then the next char is the part of the token
 			// Check will only pass in words
@@ -144,10 +144,10 @@ public class Lexer {
 				currentIndex++;
 			}
 
-			tokenValue += data[currentIndex];
+			tokenValue.append(data[currentIndex]);
 			currentIndex++;
 		}
-		return tokenValue;
+		return tokenValue.toString();
 	}
 
 	/**

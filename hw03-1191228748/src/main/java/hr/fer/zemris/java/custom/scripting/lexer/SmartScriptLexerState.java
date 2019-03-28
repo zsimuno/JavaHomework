@@ -11,11 +11,11 @@ package hr.fer.zemris.java.custom.scripting.lexer;
  */
 public enum SmartScriptLexerState {
 	/**
-	 * Basic lexer state
+	 * Text lexer state where we tokenize text
 	 */
 	TEXT,
 	/**
-	 * Extended lexer state
+	 * Tag lexer state where we tokenize tags
 	 */
 	TAG;
 }

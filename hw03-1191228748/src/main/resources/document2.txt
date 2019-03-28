@@ -1,0 +1,2 @@
+I'll write some { \\weird } stuff \{$=here$} but now is 
+{$= 5 $} times and {$= @sin 5*2.31 $}

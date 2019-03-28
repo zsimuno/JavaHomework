@@ -16,14 +16,18 @@ import hr.fer.zemris.java.custom.scripting.elems.*;
 import hr.fer.zemris.java.custom.scripting.nodes.*;
 
 /**
+ * Tests for {@link SmartScriptParser}
+ * 
  * @author Zvonimir Šimunović
  *
  */
 class SmartScriptParserTest {
 
 	/**
-	 * @param filename
-	 * @return
+	 * Loads a file
+	 * 
+	 * @param filename name of the file
+	 * @return text from file
 	 */
 	private String loader(String filename) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -116,32 +120,146 @@ class SmartScriptParserTest {
 
 		assertEquals(document2, document1);
 	}
-	
+
 	@Test
 	public void testParser() {
 		SmartScriptParser parser = new SmartScriptParser("Example \\{$=1$}. Now actually write one {$=1$}");
 		DocumentNode document1 = parser.getDocumentNode();
+
 		DocumentNode document2 = parser.getDocumentNode();
+
 		document2.addChildNode(new TextNode("Example {$=1$}. Now actually write one "));
-		Element[] elements = {(Element) new ElementVariable("i")};
+		Element[] elements = { (Element) new ElementVariable("i") };
 		document2.addChildNode(new EchoNode(elements));
 
 		assertEquals(document2, document1);
 	}
-	
+
 	@Test
 	public void testEchoNode() {
 		SmartScriptParser parser = new SmartScriptParser("{$= i i * @sin \"0.000\" @decfmt $}");
 		DocumentNode document1 = parser.getDocumentNode();
 		DocumentNode document2 = parser.getDocumentNode();
-		Element[] elements = {(Element) new ElementVariable("i"), (Element) new ElementVariable("i"), 
-				(Element) new ElementOperator('*'),
-				(Element) new ElementFunction("sin"),
-				(Element) new ElementString("0.000"),
-				(Element) new ElementFunction("decfmt")};
+		Element[] elements = { (Element) new ElementVariable("i"), (Element) new ElementVariable("i"),
+				(Element) new ElementOperator('*'), (Element) new ElementFunction("sin"),
+				(Element) new ElementString("0.000"), (Element) new ElementFunction("decfmt") };
 		document2.addChildNode(new EchoNode(elements));
 
 		assertEquals(document2, document1);
+	}
+
+	@Test
+	public void testDocument1() {
+		String document = loader("document1.txt");
+		SmartScriptParser parser = new SmartScriptParser(document);
+		DocumentNode document1 = parser.getDocumentNode();
+		DocumentNode document2 = new DocumentNode();
+
+		document2.addChildNode(new TextNode("This is sample text."));
+
+		ForLoopNode forLoop = new ForLoopNode(new ElementVariable("i"), (Element) new ElementConstantInteger(1),
+				(Element) new ElementConstantInteger(10), (Element) new ElementConstantInteger(1));
+
+		forLoop.addChildNode(new TextNode("This is "));
+
+		Element[] elements = { (Element) new ElementVariable("i") };
+		forLoop.addChildNode(new EchoNode(elements));
+
+		forLoop.addChildNode(new TextNode("-th time this message is generated."));
+
+		document2.addChildNode(forLoop);
+		
+		assertEquals(document2, document1);
+	}
+
+	@Test
+	public void testDocument2() {
+		String document = loader("document2.txt");
+		SmartScriptParser parser = new SmartScriptParser(document);
+		DocumentNode document1 = parser.getDocumentNode();
+		DocumentNode document2 = new DocumentNode();
+
+		document2.addChildNode(new TextNode("I'll write some { \\weird } stuff {$=here$} but now is \r\n"));
+
+		Element[] elements1 = { (Element) new ElementConstantInteger(5) };
+		document2.addChildNode(new EchoNode(elements1));
+
+		document2.addChildNode(new TextNode(" times and "));
+
+		Element[] elements2 = { (Element) new ElementFunction("sin"), (Element) new ElementConstantInteger(5),
+				(Element) new ElementOperator('*'), (Element) new ElementConstantDouble(2.31) };
+		document2.addChildNode(new EchoNode(elements2));
+
+		assertEquals(document2, document1);
+	}
+	
+	
+	@Test
+	public void testDocument3() {
+		String document = loader("document3.txt");
+		SmartScriptParser parser = new SmartScriptParser(document);
+		DocumentNode document1 = parser.getDocumentNode();
+		DocumentNode document2 = new DocumentNode();
+
+		document2.addChildNode(new TextNode("This is sample text.\r\n"));
+
+		ForLoopNode forLoop = new ForLoopNode(new ElementVariable("i"), (Element) new ElementConstantInteger(1),
+				(Element) new ElementConstantInteger(10), (Element) new ElementConstantInteger(1));
+
+		forLoop.addChildNode(new TextNode("\r\n"));
+
+		ForLoopNode innerForLoop = new ForLoopNode(new ElementVariable("j"), (Element) new ElementConstantInteger(0),
+				(Element) new ElementConstantInteger(10), (Element) new ElementConstantInteger(2));
+		
+
+		innerForLoop.addChildNode(new TextNode("\r\n"));
+		
+		Element[] elements = { (Element) new ElementVariable("i") };
+		innerForLoop.addChildNode(new EchoNode(elements));
+		
+		innerForLoop.addChildNode(new TextNode("\r\n"));
+		
+		forLoop.addChildNode(innerForLoop);
+		
+		
+		document2.addChildNode(forLoop);
+		document2.addChildNode(new TextNode("\r\nAnother sample text!"));
+
+		assertEquals(document2, document1);
+	}
+	
+	@Test
+	public void testDocument4() {
+		String document = loader("document4.txt");
+		assertThrows(SmartScriptParserException.class, () -> new SmartScriptParser(document));
+
+	}
+
+
+	
+	@Test
+	public void insuficientEndTag() {
+		assertThrows(SmartScriptParserException.class, () -> new SmartScriptParser("{$ FOR i -1 10 1 $}"));
+	}
+	
+	@Test
+	public void extraEndTags() {
+		assertThrows(SmartScriptParserException.class, () -> new SmartScriptParser("{$ FOR i -1 10 1 $}{$END$}{$END$}"));
+	}
+	
+	@Test
+	public void noClosingTag() {
+		assertThrows(SmartScriptParserException.class, () -> new SmartScriptParser("{$ FOR i -1 10 1 {$END$}"));
+	}
+	
+	@Test
+	public void noClosingTagInEnd() {
+		assertThrows(SmartScriptParserException.class, () -> new SmartScriptParser("{$ FOR i -1 10 1 $}{$END"));
+	}
+	
+	@Test
+	public void noClosingTagInEcho() {
+		assertThrows(SmartScriptParserException.class, () -> new SmartScriptParser("{$= i i * @sin \"0.000\" @decfmt 1"));
 	}
 
 }
