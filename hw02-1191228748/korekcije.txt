@@ -1,0 +1,96 @@
+Recenzije:
+
+1. Recenzent: Tišljar, Marija (0130309559)
+Ukupna ocjena: 1
+
+u 4. zadatku program se raspadne uz stack trace kod krivog unosa (min uvjet).
+Metoda getAngle ti ne radi dobro.
+
+Parser ne radi dobro za -i i dopusta dijeljenje s nulom
+Sve ostalo je lijepo napisano i iztestirano.
+
+---------------------------------------------------------------------------------------
+
+2. Recenzent: Tomašić, Tomislav (0036511115), vrsta: 1.
+Ukupna ocjena: 5
+
+Možda dodati u javadoc za ObjectStack pop i peek o bacanju EmptyStackException.
+
+Metoda getAngle klase ComplexNumber bi trebala vraćati kut u rasponu [0,2pi].
+
+---------------------------------------------------------------------------------------
+
+Recenzent: Tomičić, Ivan (0036506657)
+Ukupna ocjena: 1.
+
+Ocjena 1 zato što za 4. zadatak u uputi za recenziju piše:
+
+"4. zadatak: pokrenuti uz "8 2 / 5 1 - * 1 +" i rezultat mora biti 17; pokrenuti uz "8 2 / perica 3 - *" i program mora ispisati korisniku pogrešku (tipa: "izraz ne valja" ili nešto srodno) te prekinuti s radom. Program se ne smije raspasti uz ispisani stack-trace korisniku."
+
+Vama program baca iznimku, a ne bio smio. Pitao sam profesora za to, rekao je da je ocjena 1 ako baca iznimku, inače
+su prva 4 zadatka riješena odlično, za 5. U 5. zadatku postoje neke greške zbog kojih bi snizio ocjenu na 4.
+
+
+2. ZADATAK -------------------------------
+
+Trebalo je definirati člansku varijablu 
+
+private int capacity u kojoj bi se čuvao kapacitet polja Objecta,
+premda u zadaći piše da se na razini klase trebaju definirati dvije
+članske varijable (ali kako onda pratiti kapacitet polja Objecta ?), ali
+to ne uzimam kao grešku jer je i meni zbunjujuće bilo.
+
+Lijepo i elegantno riješeno, javadoc odličan, testovi komentirani da se može
+pratiti što je u kolekciji.
+
+3. i 4. ZADATAK -------------------------------
+
+Sve riješeno i testirano odlično i jasno, osim što StackDemo baca iznimku za krivi izraz.
+
+5. ZADATAK ----------------------------
+
+Ne valja metoda getAngle() koja treba vratiti kut u intervalu [0, 2*PI], a tebi vraća
+[-PI, PI]
+
+"getAngle(): double (angle is in radians, from 0 to 2 Pi)"
+
+Također parse metoda vam ne radi za 
+
+parse("-i");
+
+Što nisi testirao. Testovi za ComplexNumber ne pokrivaju sve slučajeve.
+ComplexNumber.parse("++2.71+3.15i"); ti također ne baca iznimku.
+
+Baca ti iznimku za ComplexNumber.parse("+2.71-+3.15i");
+ali ne baca za ComplexNumber.parse("+2.71+-3.15i");
+
+Također sam testirao metodu equals
+
+@Test
+void testEquals() {
+	ComplexNumber z1 = new ComplexNumber(2.0, 3.0);
+	ComplexNumber z3 = new ComplexNumber(4.001, 4.0001);
+
+	assertFalse(z1.equals(z3));
+}
+
+ovaj test zbog nekog razloga meni faila, stvarno ne znam zašto. Probaj i ti testirati
+sa točno ovim brojevima, nezz stvarno, možda je točno riješeno pa je do mojih postavki...
+
+---------------------------------------------------------------------------------------
+Korekcije:
+---------------------------------------------------------------------------------------
+
+Popravio sam problem sa izbacivanjem iznimke tako da sam stavio samo da ispisuje grešku na ekran i završi pokretanje programa (dakle, nema iznimke  i ispisa stack tracea)
+
+Nisam mjenjao ove greške vezano uz capacity i dijeljenje sa nulom zato što što sam vidio u pitanje i odgovori da treba biti kao i u mene.
+Link za djeljenje: https://ferko.fer.hr/ferko/QAAQuestion.action?courseInstanceID=2018L%2F38047&questionID=1227
+Link za capacity: https://ferko.fer.hr/ferko/QAAQuestion.action?courseInstanceID=2018L%2F38047&questionID=1188
+
+Popravio getAngle tako da za kuteve manje od 0 dodaje 2*PI
+
+Popravio sam parser tako da radi. Posljednji test u testovima ima baš primjere kolege Tomičića na kojima se vidi da je parser funkcionalan. 
+Što se tiče koleginog testa za equals, problem je bio što sam samo gledao razliku brojeva a ne apsolutnu vrijednost njihove razlike pa je rezultiralo tome da njegov test nije prošao.
+
+Dodatne sitnice koje sam sam otkrio pa popravio su to da nisam gledao u LinkedList jel kolekcija koju predajem null. Dodao sam još neke testove za kompleksne brojeve. Provjera za nulu kod modula u StackDemo. Contains u LinkedList sam promjenio da samo zove indexOf.
+

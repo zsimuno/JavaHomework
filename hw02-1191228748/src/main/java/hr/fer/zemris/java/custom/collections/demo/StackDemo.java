@@ -76,6 +76,11 @@ public class StackDemo {
 					stack.push(second * first);
 					break;
 				case "%":
+					if (first == 0) {
+						sc.close();
+						System.out.println("Division by zero is forbidden!");
+						return;
+					}
 					stack.push(second % first);
 					break;
 				default: // Not any of the legal characters

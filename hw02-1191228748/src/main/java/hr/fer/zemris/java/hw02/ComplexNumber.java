@@ -19,7 +19,7 @@ public class ComplexNumber {
 	 * Imaginary part of a complex number
 	 */
 	private final double imaginary;
-	
+
 	/**
 	 * Precision of the equals method
 	 */
@@ -84,34 +84,42 @@ public class ComplexNumber {
 		}
 		Double real = 0.0, imaginary = 0.0;
 		String number = "";
-
-		for (int i = 0; i < s.length(); i++) {
+		int stringLen = s.length();
+		for (int i = 0; i < stringLen; i++) {
 			char nextChar = s.charAt(i);
 
 			switch (nextChar) {
 
 			case '-':
-				if (number.isBlank()) { // If it's not blank then a number has been inputed
-					number += nextChar;
-				} else {
-					real = parseNumber(number);
+				if (i < stringLen - 1 && isDigitOrI(s.charAt(i + 1))) {
+					if (!number.isBlank()) { // If it's not blank then a number has been inputed
+						real = parseNumber(number);
+					}
 					number = "-";
+				} else {
+					throw new IllegalArgumentException(s + " is not a complex number!");
 				}
+
 				break;
 			case '+':
-				if (number.isBlank()) { // If it's not blank then a number has been inputed
-					continue;
-				} else {
-					real = parseNumber(number);
+
+				if (i < stringLen - 1 && isDigitOrI(s.charAt(i + 1))) {
+					if (!number.isBlank()) { // If it's not blank then a number has been inputed
+						real = parseNumber(number);
+					}
 					number = "";
+
+				} else {
+					throw new IllegalArgumentException(s + " is not a complex number!");
 				}
+
 				break;
 
 			case 'i':
-				if (number.isBlank() || number == "+") { // If it's not blank then a number has been inputed
+				if (number.isBlank()) { // If it's not blank then a number has been inputed
 					imaginary = 1.0;
 				} else {
-					imaginary = (number == "-") ? -1.0 : parseNumber(number);
+					imaginary = (number.equals("-")) ? -1.0 : parseNumber(number);
 					number = "";
 				}
 				// This should be the end of the number so we check that
@@ -138,6 +146,17 @@ public class ComplexNumber {
 
 		return new ComplexNumber(real, imaginary);
 
+	}
+
+	/**
+	 * Check is a character is a digit or 'i'
+	 *
+	 * @param c character that we check if it is a digit or 'i'
+	 * @return {@code true} if the character is a digit or 'i', {@code false}
+	 *         otherwise
+	 */
+	private static boolean isDigitOrI(char c) {
+		return Character.isDigit(c) || c == 'i';
 	}
 
 	/**
@@ -190,10 +209,10 @@ public class ComplexNumber {
 	 */
 	public double getAngle() {
 		double angle = Math.atan2(imaginary, real);
-		if(angle < 0) {
+		if (angle < 0) {
 			return angle + 2 * Math.PI;
 		}
-		
+
 		return angle;
 	}
 
@@ -285,7 +304,7 @@ public class ComplexNumber {
 		ComplexNumber[] result = new ComplexNumber[n];
 		for (int i = 0; i < result.length; i++) {
 			result[i] = new ComplexNumber(nRootR * Math.cos((angle + 2 * i * Math.PI) / n),
-										  nRootR * Math.sin((angle + 2 * i * Math.PI) / n));
+					nRootR * Math.sin((angle + 2 * i * Math.PI) / n));
 		}
 		return result;
 	}
@@ -338,7 +357,7 @@ public class ComplexNumber {
 		if (!(obj instanceof ComplexNumber)) {
 			return false;
 		}
-		
+
 		ComplexNumber other = (ComplexNumber) obj;
 		if (Math.abs(imaginary - other.imaginary) > precision) {
 			return false;

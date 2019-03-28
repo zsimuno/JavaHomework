@@ -108,11 +108,11 @@ class ComplexNumberTest {
 		ComplexNumber z = ComplexNumber.fromMagnitudeAndAngle(2, Math.PI);
 		assertEquals(Math.PI, z.getAngle());
 	}
-	
+
 	@Test
 	void testGetAngle2() {
-		ComplexNumber z = ComplexNumber.fromMagnitudeAndAngle(2, 3 * Math.PI/2);
-		assertEquals(3 * Math.PI/2, z.getAngle());
+		ComplexNumber z = ComplexNumber.fromMagnitudeAndAngle(2, 3 * Math.PI / 2);
+		assertEquals(3 * Math.PI / 2, z.getAngle());
 	}
 
 	@Test
@@ -178,7 +178,43 @@ class ComplexNumberTest {
 		assertTrue(z1.equals(z2));
 
 	}
-	
+
+	@Test
+	public void parserTest() {
+		String[] validInput = new String[] { "3.51", "-3.17", "-2.71i", "i", "1", "-2.71-3.15i", "351i", "-317i",
+				"3.51i", "-3.17i", "i", "-i", "+2.71", "+2.71+3.15i", "+i" };
+		String[] invalidInput = new String[] { "i351", "-i317", "i3.51", "-i3.17", "-+2.71", "--2.71", "-2.71+-3.15i",
+				"+2.71-+3.15i", "-+2.71", "3.15E-2" };
+		
+		ComplexNumber[] expected = new ComplexNumber[] {new ComplexNumber(3.51, 0),
+				new ComplexNumber(-3.17, 0),
+				new ComplexNumber(0, -2.71),
+				new ComplexNumber(0, 1),
+				new ComplexNumber(1, 0),
+				new ComplexNumber(-2.71, -3.15),
+				new ComplexNumber(0, 351),
+				new ComplexNumber(0, -317),
+				new ComplexNumber(0, 3.51),
+				new ComplexNumber(0, -3.17),
+				new ComplexNumber(0, 1),
+				new ComplexNumber(0, -1),
+				new ComplexNumber(2.71, 0),
+				new ComplexNumber(2.71, 3.15),
+				new ComplexNumber(0, 1)
+		};
+		
+		for (int i = 0; i < expected.length; i++) {
+			ComplexNumber actual = ComplexNumber.parse(validInput[i]);
+			assertEquals(expected[i], actual);
+		}
+
+		for (String string : invalidInput) {
+			assertThrows(IllegalArgumentException.class, () -> {
+				ComplexNumber.parse(string);
+			});
+		}
+	}
+
 	@Test
 	void testEquals2() {
 		ComplexNumber z1 = new ComplexNumber(2.0, 3.0);
@@ -186,4 +222,23 @@ class ComplexNumberTest {
 
 		assertFalse(z1.equals(z3));
 	}
+	
+	@Test
+	void testParseNotValid() {
+		assertThrows(IllegalArgumentException.class, () -> {
+			ComplexNumber.parse("+2.71+-3.15i");
+		});
+		
+		assertThrows(IllegalArgumentException.class, () -> {
+			ComplexNumber.parse("+2.71-+3.15i");
+		});
+		
+		assertThrows(IllegalArgumentException.class, () -> {
+			ComplexNumber.parse("++2.71+3.15i");
+		});
+		
+		ComplexNumber actual = ComplexNumber.parse("-i");
+		assertEquals(new ComplexNumber(0, -1), actual);
+	}
+	
 }
