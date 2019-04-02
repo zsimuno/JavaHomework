@@ -8,6 +8,8 @@ package hr.fer.zemris.java.custom.collections;
  * 
  * @author Zvonimir Šimunović
  * 
+ * @param <T> type of the elements that are stored in this collection
+ * 
  */
 public interface List<T> extends Collection<T> {
 	/**

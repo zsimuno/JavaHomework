@@ -5,11 +5,13 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+
 /**
  * Resizable array-backed collection of objects.
  * 
  * @author Zvonimir Šimunović
  *
+ * @param <T> type of the elements that are stored in this collection
  */
 public class ArrayIndexedCollection<T> implements List<T> {
 	/**

@@ -9,6 +9,8 @@ import java.util.Objects;
  * Class that represents a stack of objects. Usual stack methods are provided.
  * 
  * @author Zvonimir Šimunović
+ * 
+ * @param <T> type of the elements that are stored in this stack
  *
  */
 public class ObjectStack<T> {
@@ -52,7 +54,7 @@ public class ObjectStack<T> {
 	 * @throws EmptyStackException if the stack is empty
 	 */
 	public T pop() {
-		if(stack.isEmpty()) {
+		if (stack.isEmpty()) {
 			throw new EmptyStackException();
 		}
 		T top = stack.get(stack.size() - 1);
@@ -68,7 +70,7 @@ public class ObjectStack<T> {
 	 * @throws EmptyStackException if the stack is empty
 	 */
 	public T peek() {
-		if(stack.isEmpty()) {
+		if (stack.isEmpty()) {
 			throw new EmptyStackException();
 		}
 		return stack.get(stack.size() - 1);

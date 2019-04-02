@@ -10,6 +10,8 @@ import java.util.ConcurrentModificationException;
  * process the elements.
  * 
  * @author Zvonimir Šimunović
+ * 
+ * @param <T> type of the elements that this {@code ElementsGetter} iterates upon
  *
  */
 public interface ElementsGetter<T> {

@@ -6,31 +6,43 @@ package hr.fer.zemris.java.custom.collections;
 import java.util.Objects;
 
 /**
- * TODO Javadoc
+ * Class {@code Dictionary} maps keys to values. Every key and value are
+ * objects. Every entry is uniquely determined by the key value. Keys cannot be
+ * null while values can. From a given key a value associated with that key can
+ * be found.
  * 
  * @author Zvonimir Šimunović
+ * 
+ * @param <K> type of the keys stored in this dictionary
+ * @param <V> type of the values od elements
  *
  */
 public class Dictionary<K, V> {
 
 	/**
+	 * Class {@code Entry} represents one entry in the {@link Dictionary}.
+	 * Represents a pair of key and value where both are objects. Keys cannot be
+	 * null.
+	 * 
 	 * @author Zvonimir Šimunović
 	 *
 	 */
 	private static class Entry<K, V> {
 		/**
-		 * 
+		 * Key part of the {@code Entry}. Must be unique in one {@link Dictionary}
 		 */
 		private K key;
 
 		/**
-		 * 
+		 * Value part of the {@code Entry}. Can be null.
 		 */
 		private V value;
 
 		/**
-		 * @param key
-		 * @param value
+		 * Constructs an {@code Entry} object from given values.
+		 * 
+		 * @param key   key that will be stored in the entry
+		 * @param value value that will be stored in the entry
 		 * @throws NullPointerException if {@code key} is {@code null}
 		 */
 		public Entry(K key, V value) {
@@ -39,6 +51,8 @@ public class Dictionary<K, V> {
 		}
 
 		/**
+		 * Returns the key object
+		 * 
 		 * @return the key
 		 */
 		public K getKey() {
@@ -46,6 +60,8 @@ public class Dictionary<K, V> {
 		}
 
 		/**
+		 * Returns the value object
+		 * 
 		 * @return the value
 		 */
 		public V getValue() {
@@ -55,47 +71,48 @@ public class Dictionary<K, V> {
 	}
 
 	/**
-	 * 
+	 * List of {@link Entry} objects. Stores entries of the dictionary.
 	 */
 	private ArrayIndexedCollection<Entry<K, V>> entryList = new ArrayIndexedCollection<Entry<K, V>>();
 
 	/**
+	 * Determines whether the {@code Dictionary} is empty
 	 * 
-	 */
-	public Dictionary() {
-		// TODO Auto-generated constructor stub
-	}
-
-	/**
-	 * @return
+	 * @return {@code true} if the dictionary is empty, {@code false} if it's not
 	 */
 	boolean isEmpty() {
 		return entryList.isEmpty();
 	}
 
 	/**
-	 * @return
+	 * Returns the size of the {@code Dictionary}.
+	 * 
+	 * @return the size of the {@code Dictionary}
 	 */
 	int size() {
 		return entryList.size();
 	}
 
 	/**
-	 * 
+	 * Clears the dictionary.
 	 */
 	void clear() {
 		entryList.clear();
 	}
 
 	/**
-	 * @param key
-	 * @param value
+	 * Puts one key and value entry in the dictionary. If the key already exists
+	 * than overwrites the {@code value} part of the entry with the given one.
+	 * 
+	 * @param key   key to be put in the dictionary if it doesn't exists.
+	 * @param value value to be put in the dictionary
+	 * @throws NullPointerException if given {@code key} value is {@code null}
 	 */
 	void put(K key, V value) {
 
-		// TODO Ima li ovo smisla?
-		if (key == null)
-			return;
+		if (key == null) {
+			throw new NullPointerException("Key value cannot be null!");
+		}
 
 		// If a key already exists
 		ElementsGetter<Entry<K, V>> getter = entryList.createElementsGetter();
@@ -113,10 +130,18 @@ public class Dictionary<K, V> {
 	}
 
 	/**
-	 * @param key
-	 * @return
+	 * Returns the {@code value} object that is associated with the given key. If
+	 * the key doesn't exist {@code null} is returned. Note that the {@code value}
+	 * can also be {@code null}.
+	 * 
+	 * @param key key that is used to look up the value associated with it
+	 * @return the value that is associated with the given key or {@code null} if
+	 *         the key doesn't exist.
 	 */
 	V get(Object key) {
+		if (key == null)
+			return null;
+
 		ElementsGetter<Entry<K, V>> getter = entryList.createElementsGetter();
 
 		while (getter.hasNextElement()) {

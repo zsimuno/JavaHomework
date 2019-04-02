@@ -2,12 +2,13 @@
  * 
  */
 package hr.fer.zemris.java.custom.collections;
-
+// TODO Check generics
 /**
  * Class that represents a collection
  * 
  * @author Zvonimir Šimunović
  *
+ * @param <T> type of the elements that are stored in this collection
  */
 public interface Collection<T> {
 
@@ -111,7 +112,7 @@ public interface Collection<T> {
 	 * @param col
 	 * @param tester
 	 */
-	default void addAllSatisfying(Collection<T> col, Tester tester) {
+	default void addAllSatisfying(Collection<T> col, Tester<T> tester) {
 		ElementsGetter<T> getter = col.createElementsGetter();
 		while (getter.hasNextElement()) {
 			T nextElement = getter.getNextElement();

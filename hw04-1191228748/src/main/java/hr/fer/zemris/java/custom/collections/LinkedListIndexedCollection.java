@@ -11,6 +11,8 @@ import java.util.Objects;
  * Implementation of linked list-backed collection of objects.
  * 
  * @author Zvonimir Šimunović
+ * 
+ * @param <T> type of the elements that are stored in this collection
  *
  */
 public class LinkedListIndexedCollection<T> implements List<T> {

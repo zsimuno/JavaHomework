@@ -4,18 +4,28 @@
 package hr.fer.zemris.math;
 
 /**
- * TODO javadoc Vector2D
+ * Vector2D Class {@code Vector2D} represents a vector in a 2D plane.
  * 
  * @author Zvonimir Šimunović
  *
  */
 public class Vector2D {
 
-	private double x, y;
+	/**
+	 * x value
+	 */
+	private double x;
 
 	/**
-	 * @param x
-	 * @param y
+	 * y value
+	 */
+	private double y;
+
+	/**
+	 * Constructs a vector from given x and y values
+	 * 
+	 * @param x x value
+	 * @param y y value
 	 */
 	public Vector2D(double x, double y) {
 		this.x = x;
@@ -23,21 +33,27 @@ public class Vector2D {
 	}
 
 	/**
-	 * @return
+	 * Returns the value of x
+	 * 
+	 * @return the value of x
 	 */
 	public double getX() {
 		return x;
 	}
 
 	/**
-	 * @return
+	 * Returns the value of y
+	 * 
+	 * @return the value of y
 	 */
 	public double getY() {
 		return y;
 	}
 
 	/**
-	 * @param offset
+	 * Translates the vector by the given {@code offset}
+	 * 
+	 * @param offset offset by which the vector will be translated
 	 */
 	public void translate(Vector2D offset) {
 		x += offset.getX();
@@ -45,15 +61,21 @@ public class Vector2D {
 	}
 
 	/**
-	 * @param offset
-	 * @return
+	 * Constructs and returns a new {@code Vector2D} that we get from translating
+	 * this one by the given {@code offset}
+	 * 
+	 * @param offset offset by which the vector will be translated
+	 * @return a new {@code Vector2D} that we get from translating this one by the
+	 *         given {@code offset}
 	 */
 	public Vector2D translated(Vector2D offset) {
 		return new Vector2D(x + offset.x, y + offset.y);
 	}
 
 	/**
-	 * @param angle
+	 * Rotates the vector by the given {@code angle}
+	 * 
+	 * @param angle angle by which the vector will be rotated
 	 */
 	public void rotate(double angle) {
 		x = x * Math.cos(angle) - y * Math.sin(angle);
@@ -61,32 +83,43 @@ public class Vector2D {
 	}
 
 	/**
-	 * @param angle
-	 * @return
+	 * Constructs and returns a new {@code Vector2D} from rotating this vector by
+	 * the given {@code angle}.
+	 * 
+	 * @param angle angle by which the vector will be rotated
+	 * @return new {@code Vector2D} from rotating this vector by the given
+	 *         {@code angle}.
 	 */
 	public Vector2D rotated(double angle) {
 		return new Vector2D(x * Math.cos(angle) - y * Math.sin(angle), x * Math.sin(angle) + y * Math.cos(angle));
 	}
 
 	/**
-	 * TODO Ima li smisla?
-	 * @param scaler
+	 * Scales the vector by the given {@code scale}
+	 * 
+	 * @param scaler scale by which the vector will be scaled
 	 */
-	public void scale(double scaler) {
+	public void scale(double scaler) { // TODO ima li smisla?
 		x *= scaler;
 		y *= scaler;
 	}
 
 	/**
-	 * @param scaler
-	 * @return
+	 * Constructs and returns a new {@code Vector2D} from scaling this vector by the
+	 * given {@code scaler}.
+	 * 
+	 * @param scaler scale by which the vector will be scaled
+	 * @return new {@code Vector2D} from scaling this vector by the given
+	 *         {@code scaler}.
 	 */
 	public Vector2D scaled(double scaler) {
 		return new Vector2D(x * scaler, y * scaler);
 	}
 
 	/**
-	 * @return
+	 * Copies this vector in to a new {@code Vector2D}.
+	 * 
+	 * @return new {@code Vector2D} that is a copy of this one
 	 */
 	public Vector2D copy() {
 		return new Vector2D(x, y); // TODO dobro?
