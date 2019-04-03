@@ -162,8 +162,6 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 			throw new NullPointerException("Key value cannot be null!");
 		}
 
-		// Resize the array if necessary
-
 		int slot = getTableSlot(key);
 		TableEntry<K, V> last = null;
 
@@ -174,24 +172,23 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 				entry.setValue(value);
 				return;
 			}
-			
+
 			// Save the last if we need to add a new element
 			last = entry;
 
-
 		}
 
-		// If the slot is empty
+		// If the table slot is empty
 		if (table[slot] == null) {
 			table[slot] = new TableEntry<>(key, value, null);
-			
+
 		} else {// Slot is not empty so we put the new element to be the last in the list
 			last.next = new TableEntry<>(key, value, null);
 		}
-		
+
 		modificationCount++;
 		size++;
-		resizeIfNeeded();
+		resizeIfNeeded(); // Resize the array if necessary
 		return;
 
 	}
@@ -204,24 +201,20 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 	@SuppressWarnings("unchecked")
 	private void resizeIfNeeded() {
 
-		// Ckeck if we need to resize
+		// Check if we need to resize
 		if (size < table.length * resizePercentage) {
 			return;
 		}
-		// TODO Jel size provjeravamo ili broj popunjenih slotova u tablici? Kada
-		// provjeravamo?
 
 		TableEntry<K, V>[] oldTable = table;
 
 		this.table = (TableEntry<K, V>[]) new TableEntry[2 * oldTable.length];
 
-		// TODO kill all references to old table?
-
 		size = 0;
 
 		for (int i = 0; i < oldTable.length; i++) {
-
 			for (TableEntry<K, V> entry = oldTable[i]; entry != null; entry = entry.next) {
+
 				this.put(entry.getKey(), entry.getValue());
 			}
 		}
@@ -272,8 +265,6 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 	}
 
 	/**
-	 * TODO ova metoda i get imaju preslican kod. Mozda neki getEntry implementirat
-	 * tako da prima i tester.
 	 * 
 	 * Checks if object is a key in this hashtable.
 	 * 
@@ -298,7 +289,8 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 	}
 
 	/**
-	 * Checks if this {@code SimpleHashtable} contains the given {@code value}
+	 * Checks if this {@code SimpleHashtable} contains the given {@code value}.
+	 * Determined using {@code equals} method.
 	 * 
 	 * @param value value that we search for in the {@code SimpleHashtable}
 	 * @return {@code true} if the hashtable contains the {@code value},
@@ -306,16 +298,16 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 	 */
 	public boolean containsValue(Object value) {
 
-		for (int i = 0; i < table.length; i++) {
+		for (TableEntry<K, V> entry : this) {
 
-			for (TableEntry<K, V> entry = table[i]; entry != null; entry = entry.next) {
-				if (entry.getValue() == null) {
-					if (entry.getValue() == value) {
-						return true;
-					}
-				} else if (entry.getValue().equals(value)) {
+			// If entry null and value is null then returns true
+			if (entry.getValue() == null) {
+				if (entry.getValue() == value) {
 					return true;
+
 				}
+			} else if (entry.getValue().equals(value)) { // Entry is not null so equals can be used
+				return true;
 			}
 		}
 
@@ -332,8 +324,8 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 			return;
 
 		for (int i = 0; i < table.length; i++) {
-
 			for (TableEntry<K, V> entry = table[i], previous = null; entry != null; entry = entry.next) {
+
 				if (entry.getKey().equals(key)) {
 
 					if (previous == null) { // entry is the fist element in the slot
@@ -394,7 +386,6 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 	 */
 	public void clear() {
 		for (int i = 0; i < table.length; i++) {
-			// TODO treba li sve elemente postavljat na null?
 			table[i] = null;
 		}
 		modificationCount++;
@@ -418,7 +409,7 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 		/**
 		 * Index of the current table slot
 		 */
-		private int currentTableIndex;
+		private int currentTableIndex = -1;
 		/**
 		 * Current entry in the hashtable
 		 */
@@ -433,7 +424,7 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 		private long savedModificationCount;
 
 		/**
-		 * Conctruts an {@code IteratorImpl} object
+		 * Constructs an {@code IteratorImpl} object
 		 */
 		public IteratorImpl() {
 			super();

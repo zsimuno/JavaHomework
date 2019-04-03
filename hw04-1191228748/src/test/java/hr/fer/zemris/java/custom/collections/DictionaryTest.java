@@ -25,6 +25,13 @@ class DictionaryTest {
 		dict.put("Ivana", 5);
 		assertFalse(dict.isEmpty());
 	}
+	
+	@Test
+	void testIsEmptyFalse2() {
+		Dictionary<String, Integer> dict = new Dictionary<>();
+		dict.put("Ivana", 2);
+		assertFalse(dict.isEmpty());
+	}
 
 	@Test
 	void testIsEmptyOnEmpty() {
@@ -41,6 +48,14 @@ class DictionaryTest {
 		dict.put("Kristina", 5);
 		dict.put("Ivana", 5);
 		assertEquals(4, dict.size());
+	}
+	
+	@Test
+	void testSize2() {
+		Dictionary<String, Integer> dict = new Dictionary<>();
+		dict.put("Ivana", 2);
+		dict.put("Ante", 2);
+		assertEquals(2, dict.size());
 	}
 
 	@Test
@@ -64,6 +79,17 @@ class DictionaryTest {
 		assertEquals(2, dict.get(21));
 		assertEquals(4, dict.get(124));
 	}
+	
+	@Test
+	void testPut2() {
+		Dictionary<Integer, Integer> dict = new Dictionary<>();
+		dict.put(21, 2);
+		dict.put(124, 4);
+		dict.put(21, 12);
+		assertEquals(2, dict.size());
+		assertEquals(12, dict.get(21));
+		assertEquals(4, dict.get(124));
+	}
 
 	@Test
 	void testPutNullValue() {
@@ -85,6 +111,16 @@ class DictionaryTest {
 		assertEquals(2, dict.get("Jasna"));
 	}
 
+	@Test
+	void testGet2() {
+		Dictionary<String, Integer> dict = new Dictionary<>();
+		dict.put("Ivana", 2);
+		dict.put("Ante", 2);
+		dict.put("Jasna", 2);
+		assertEquals(2, dict.get("Ante"));
+		assertEquals(2, dict.get("Jasna"));
+	}
+	
 	@Test
 	void testGetNull() {
 		Dictionary<String, Integer> dict = new Dictionary<>();
@@ -116,6 +152,13 @@ class DictionaryTest {
 		dict.clear();
 		assertEquals(0, dict.size());
 		assertNull(dict.get("Ivana"));
+	}
+	
+	@Test
+	void testClearOnEmpty() {
+		Dictionary<String, Integer> dict = new Dictionary<>();
+		dict.clear();
+		assertEquals(0, dict.size());
 	}
 	
 	@Test

@@ -2,7 +2,6 @@
  * 
  */
 package hr.fer.zemris.java.custom.collections;
-// TODO Check generics
 /**
  * Class that represents a collection
  * 
@@ -76,7 +75,7 @@ public interface Collection<T> {
 	 * @param processor processor which method process will be called for each
 	 *                  element of this collection
 	 */
-	default void forEach(Processor<T> processor) {
+	default void forEach(Processor<? super T> processor) {
 		ElementsGetter<T> getter = this.createElementsGetter();
 		while (getter.hasNextElement()) {
 			processor.process(getter.getNextElement());

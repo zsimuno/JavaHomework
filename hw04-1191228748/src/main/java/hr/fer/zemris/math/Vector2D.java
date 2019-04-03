@@ -11,7 +11,7 @@ import java.util.Objects;
  * @author Zvonimir Šimunović
  *
  */
-public class Vector2D { 
+public class Vector2D {
 
 	/**
 	 * x value
@@ -64,10 +64,10 @@ public class Vector2D {
 	 * @throws NullPointerException if {@code offset} is {@code null}
 	 */
 	public void translate(Vector2D offset) {
-		if(offset == null) {
+		if (offset == null) {
 			throw new NullPointerException();
 		}
-		
+
 		x += offset.getX();
 		y += offset.getY();
 	}
@@ -82,7 +82,7 @@ public class Vector2D {
 	 * @throws NullPointerException if {@code offset} is {@code null}
 	 */
 	public Vector2D translated(Vector2D offset) {
-		if(offset == null) {
+		if (offset == null) {
 			throw new NullPointerException();
 		}
 		return new Vector2D(x + offset.x, y + offset.y);
@@ -94,8 +94,9 @@ public class Vector2D {
 	 * @param angle angle by which the vector will be rotated
 	 */
 	public void rotate(double angle) {
-		x = x * Math.cos(angle) - y * Math.sin(angle);
+		double newX = x * Math.cos(angle) - y * Math.sin(angle);
 		y = x * Math.sin(angle) + y * Math.cos(angle);
+		x = newX;
 	}
 
 	/**
@@ -115,7 +116,7 @@ public class Vector2D {
 	 * 
 	 * @param scaler scale by which the vector will be scaled
 	 */
-	public void scale(double scaler) { 
+	public void scale(double scaler) {
 		x *= scaler;
 		y *= scaler;
 	}
@@ -162,7 +163,5 @@ public class Vector2D {
 	public String toString() {
 		return "(" + x + ", " + y + ")";
 	}
-	
-	
 
 }

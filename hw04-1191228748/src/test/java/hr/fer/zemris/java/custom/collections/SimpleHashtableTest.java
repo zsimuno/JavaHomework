@@ -82,6 +82,18 @@ class SimpleHashtableTest {
 	}
 
 	@Test
+	void testChanging() {
+		SimpleHashtable<String, Integer> examMarks = new SimpleHashtable<>(2);
+		examMarks.put("Ivana", 2);
+		examMarks.put("Ante", 2);
+		examMarks.put("Jasna", 2);
+		examMarks.put("Kristina", 5);
+		examMarks.put("Kristina", 2);
+		assertEquals(2, examMarks.get("Kristina"));
+
+	}
+
+	@Test
 	void testGet() {
 		SimpleHashtable<String, Integer> hash = new SimpleHashtable<>();
 		hash.put("Ivana", 2);
@@ -204,6 +216,20 @@ class SimpleHashtableTest {
 		hash.put("32", 32);
 		hash.put("42", 21);
 		assertTrue(hash.containsValue(1));
+		assertTrue(hash.containsValue(2));
+		assertTrue(hash.containsValue(32));
+		assertTrue(hash.containsValue(21));
+	}
+
+	@Test
+	void testContainsValue2() {
+
+		SimpleHashtable<String, Integer> hash = new SimpleHashtable<>();
+		hash.put("First", 31);
+		hash.put("Second", 2);
+		hash.put("32", 32);
+		hash.put("42", 21);
+		assertTrue(hash.containsValue(31));
 		assertTrue(hash.containsValue(2));
 		assertTrue(hash.containsValue(32));
 		assertTrue(hash.containsValue(21));
@@ -335,23 +361,17 @@ class SimpleHashtableTest {
 	@Test
 	void testToString2() {
 		SimpleHashtable<String, String> hashTable = new SimpleHashtable<String, String>(1);
-		System.out.println(hashTable.toString());
+		assertEquals("[]", hashTable.toString());
 		hashTable.put("C1", "value2");
-		System.out.println(hashTable.toString());
+		assertEquals("[C1=value2]", hashTable.toString());
 		hashTable.put("C4", "value1");
-		System.out.println(hashTable.toString());
+		assertEquals("[C4=value1, C1=value2]", hashTable.toString());
 		hashTable.put("C2", "value4");
-		System.out.println(hashTable.toString());
+		assertEquals("[C4=value1, C1=value2, C2=value4]", hashTable.toString());
 		hashTable.put("C3", "value3");
-		System.out.println(hashTable.toString());
+		assertEquals("[C3=value3, C4=value1, C1=value2, C2=value4]", hashTable.toString());
 		hashTable.put("C0", "value3");
-		System.out.println(hashTable.toString());
-//		[] 
-//		[C1=value2] 
-//		[C4=value1, C1=value2] 
-//		[C4=value1, C1=value2, C2=value4]
-//		[C3=value3, C4=value1, C1=value2, C2=value4] 
-//		[C3=value3, C4=value1, C0=value3, C1=value2, C2=value4]
+		assertEquals("[C3=value3, C4=value1, C0=value3, C1=value2, C2=value4]", hashTable.toString());
 	}
 
 	@Test
@@ -359,10 +379,10 @@ class SimpleHashtableTest {
 		// create collection:
 		SimpleHashtable<String, Integer> examMarks = new SimpleHashtable<>(2);
 		// fill data:
-		examMarks.put("Ivana", 2);
+		examMarks.put("Ivana", 1);
 		examMarks.put("Ante", 2);
-		examMarks.put("Jasna", 2);
-		examMarks.put("Kristina", 5);
+		examMarks.put("Jasna", 3);
+		examMarks.put("Kristina", 4);
 		examMarks.put("Ivana", 5); // overwrites old grade for Ivana
 		int sum = 0;
 		for (SimpleHashtable.TableEntry<String, Integer> pair : examMarks) {
@@ -481,7 +501,5 @@ class SimpleHashtableTest {
 		});
 
 	}
-
-	// TODO Test changing of last element
 
 }

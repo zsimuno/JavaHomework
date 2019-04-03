@@ -30,11 +30,32 @@ class Vector2DTest {
 	}
 
 	@Test
+	void testConstructor3() {
+		Vector2D v = new Vector2D(0, 0);
+		assertEquals(0, v.getX());
+		assertEquals(0, v.getY());
+	}
+
+	@Test
+	void testConstructor4() {
+		Vector2D v = new Vector2D(-5, -10);
+		assertEquals(-5, v.getX());
+		assertEquals(-10, v.getY());
+	}
+
+	@Test
 	void testCopy() {
 		Vector2D v1 = new Vector2D(2, 5);
 		Vector2D v = v1.copy();
 		assertEquals(2, v.getX());
 		assertEquals(5, v.getY());
+	}
+
+	@Test
+	void testCopy2() {
+		Vector2D v1 = new Vector2D(124, 12);
+		Vector2D v = v1.copy();
+		assertEquals(v, v1);
 	}
 
 	@Test
@@ -45,12 +66,26 @@ class Vector2DTest {
 	}
 
 	@Test
+	void testTranslate2() {
+		Vector2D v = new Vector2D(-5, -6);
+		v.translate(new Vector2D(10, 12));
+		assertEquals(new Vector2D(5, 6), v);
+	}
+
+	@Test
 	void testTranslated() {
 		Vector2D v1 = new Vector2D(2, 5);
 		Vector2D v = v1.translated(new Vector2D(2, 6));
 		assertEquals(new Vector2D(4, 11), v);
 	}
-	
+
+	@Test
+	void testTranslated2() {
+		Vector2D v1 = new Vector2D(-5, -6);
+		Vector2D v = v1.translated(new Vector2D(10, 12));
+		assertEquals(new Vector2D(5, 6), v);
+	}
+
 	@Test
 	void testTranslateNull() {
 		Vector2D v = new Vector2D(2, 5);
@@ -72,7 +107,15 @@ class Vector2DTest {
 		Vector2D v = new Vector2D(2, 5);
 		v.rotate(Math.PI);
 		assertEquals(new Vector2D(-2, -5), v);
-		
+
+	}
+
+	@Test
+	void testRotate2() {
+		Vector2D v = new Vector2D(2, 5);
+		v.rotate(Math.PI / 2);
+		assertEquals(new Vector2D(-5, 2), v);
+
 	}
 
 	@Test
@@ -83,6 +126,13 @@ class Vector2DTest {
 	}
 
 	@Test
+	void testRotated2() {
+		Vector2D v1 = new Vector2D(2, 5);
+		Vector2D v = v1.rotated(Math.PI / 2);
+		assertEquals(new Vector2D(-5, 2), v);
+	}
+
+	@Test
 	void testScale() {
 		Vector2D v = new Vector2D(2, 5);
 		v.scale(2);
@@ -90,9 +140,23 @@ class Vector2DTest {
 	}
 
 	@Test
+	void testScale2() {
+		Vector2D v = new Vector2D(4, 11);
+		v.scale(0.5);
+		assertEquals(new Vector2D(2, 5.5), v);
+	}
+
+	@Test
 	void testScaled() {
 		Vector2D v1 = new Vector2D(2, 5);
 		Vector2D v = v1.scaled(3);
 		assertEquals(new Vector2D(6, 15), v);
+	}
+
+	@Test
+	void testScaled2() {
+		Vector2D v1 = new Vector2D(4, 11);
+		Vector2D v = v1.scaled(0.5);
+		assertEquals(new Vector2D(2, 5.5), v);
 	}
 }
