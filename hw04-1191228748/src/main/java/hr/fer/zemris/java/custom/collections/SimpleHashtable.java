@@ -3,8 +3,10 @@
  */
 package hr.fer.zemris.java.custom.collections;
 
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * 
@@ -25,7 +27,7 @@ import java.util.NoSuchElementException;
  * @author Zvonimir Šimunović
  *
  * @param <K> type of the keys stored in this hash table
- * @param <V> type of the values od elements 
+ * @param <V> type of the values od elements
  */
 public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntry<K, V>> {
 
@@ -37,6 +39,11 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 	 * Percentage threshold that determines when do we resize the table
 	 */
 	private final static double resizePercentage = 0.75;
+
+	/**
+	 * Counts the number of modifications to the hash table
+	 */
+	private int modificationCount;
 
 	/**
 	 * Represents one entry in the table. It consists of a non-null unique key that
@@ -69,9 +76,10 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 		 * @param key   key part of the entry, non-null and unique
 		 * @param value value part of the entry
 		 * @param next  reference to the next element in the table slot
+		 * @throws NullPointerException if key is {@code null}
 		 */
 		public TableEntry(K key, V value, TableEntry<K, V> next) {
-			this.key = key;
+			this.key = Objects.requireNonNull(key);
 			this.value = value;
 			this.next = next;
 		}
@@ -113,12 +121,12 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 	/**
 	 * Table that contains keys and values of the hashtable.
 	 */
-	TableEntry<K, V>[] table;
+	private TableEntry<K, V>[] table;
 
 	/**
 	 * Size of the hashtable.
 	 */
-	int size;
+	private int size;
 
 	/**
 	 * Default constructor that sets the size of the table to {@value #defaultSize}
@@ -160,49 +168,58 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 			throw new NullPointerException("Key value cannot be null!");
 		}
 
+		// Resize the array if necessary
+		// TODO Jel size provjeravamo ili broj popunjenih slotova u tablici? Kada
+		// provjeravamo?
+		if (size >= table.length * resizePercentage) {
+			resize();
+		}
+
 		int slot = Math.abs(key.hashCode()) % table.length;
 
+		// If the slot is empty
 		if (table[slot] == null) {
+
 			size++;
-
-			// Do we need to resize the table array?
-			// TODO Jel size provjeravamo ili broj popunjenih slotova u tablici?
-			if (size >= table.length * resizePercentage) {
-				resize();
-			}
-
 			table[slot] = new TableEntry<>(key, value, null);
+			modificationCount++;
 			return;
 		}
 
-		TableEntry<K, V> entry = table[slot];
+		// Slot is not empty so lets add or update the element
+		for (TableEntry<K, V> entry = table[slot]; entry != null; entry = entry.next) {
 
-		// Is there already a key like the one given?
-		while (entry.next != null) {
+			// Is there already a key like the one given?
 			if (entry.getKey().equals(key)) {
 				entry.setValue(value);
 				return;
 			}
-			entry = entry.next;
+
+			// This entry is the last in this slot
+			if (entry.next == null) {
+				entry.next = new TableEntry<>(key, value, null);
+				modificationCount++;
+				size++;
+				return;
+			}
 
 		}
 
-		// No such key already
-		entry.next = new TableEntry<>(key, value, null);
-		size++;
 	}
 
 	/**
 	 * Resizes the table to 2 * current size. Puts element in their new positions.
 	 */
 	@SuppressWarnings("unchecked")
-	private void resize() { 
+	private void resize() {
 		TableEntry<K, V>[] oldTable = table;
-		
+
 		this.table = (TableEntry<K, V>[]) new TableEntry[2 * oldTable.length];
-		
+
 		// TODO kill all references to old table?
-		
+
+		size = 0;
+
 		for (int i = 0; i < oldTable.length; i++) {
 
 			for (TableEntry<K, V> entry = oldTable[i]; entry != null; entry = entry.next) {
@@ -283,7 +300,11 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 		for (int i = 0; i < table.length; i++) {
 
 			for (TableEntry<K, V> entry = table[i]; entry != null; entry = entry.next) {
-				if (entry.getValue().equals(value)) {
+				if (entry.getValue() == null) {
+					if (entry.getValue() == value) {
+						return true;
+					}
+				} else if (entry.getValue().equals(value)) {
 					return true;
 				}
 			}
@@ -310,14 +331,17 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 
 						table[i] = entry.next;
 						entry.next = null;
-						return;
+					} else {
+						// Current one has a previous element
+						previous.next = entry.next;
+						entry.next = null;
 					}
 
-					// Current one has a previous element
-					previous.next = entry.next;
-					entry.next = null;
+					modificationCount++;
+					size--;
 					return;
 				}
+
 				previous = entry;
 			}
 		}
@@ -356,10 +380,12 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 	 * Clears the hashtable
 	 */
 	public void clear() {
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < table.length; i++) {
 			// TODO treba li sve elemente postavljat na null?
 			table[i] = null;
 		}
+		modificationCount++;
+		size = 0;
 	}
 
 	@Override
@@ -381,59 +407,88 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 		 */
 		private int currentTableIndex;
 		/**
-		 * Counts the elements that we iterated upon
-		 */
-		private int elementsCount;
-		/**
 		 * Current entry in the hashtable
 		 */
 		private TableEntry<K, V> current;
 		/**
-		 * Previous entry in the hashtable (needed for removing elements)
+		 * Next entry in the hashtable
 		 */
-		private TableEntry<K, V> previous;
+		private TableEntry<K, V> nextElement;
+		/**
+		 * Modification count that was saved during the construction
+		 */
+		private long savedModificationCount;
 
-		@Override
-		public boolean hasNext() {
-			return elementsCount < size - 1; // Is it at least second to last element
+		/**
+		 * Conctruts an {@code IteratorImpl} object
+		 */
+		public IteratorImpl() {
+			super();
+			nextTableSlot();
+
+			savedModificationCount = modificationCount;
 		}
 
 		@Override
-		public TableEntry<K, V> next() {
+		public boolean hasNext() {
+			checkModificationCount();
+			return nextElement != null; // Is it at least second to last element
+		}
+
+		@Override
+		public SimpleHashtable.TableEntry<K, V> next() {
+			checkModificationCount();
 			if (!hasNext()) {
 				throw new NoSuchElementException();
 			}
 
-			// TODO Paziti na pristup indexima
-			previous = current;
-			current = current.next;
+			current = nextElement;
 
-			if (current == null) {
-				while (table[currentTableIndex] != null) {
-					currentTableIndex++;
-				}
-				current = table[currentTableIndex];
-				previous = null;
+			// Last element in this slot.
+			if (nextElement.next == null) {
+				nextTableSlot();
+			} else {
+				nextElement = nextElement.next;
 			}
 
-			elementsCount++;
 			return current;
 		}
 
+		/**
+		 * Sets the {@code nextElement} to the next non-null table slot. If there is not
+		 * one like that then sets {@code nextElement} to {@code null}.
+		 */
+		private void nextTableSlot() {
+			do {
+				currentTableIndex++;
+			} while (currentTableIndex < table.length && table[currentTableIndex] == null);
+
+			// No elements in hash table
+			if (currentTableIndex == table.length) {
+				nextElement = null;
+			} else {
+				nextElement = table[currentTableIndex];
+			}
+		}
+
 		@Override
-		public void remove() { // TODO provjerit treba li postavljati current
-			// First element in table
-			if (previous == null) {
-				table[currentTableIndex] = current.next;
-				current.next = null;
-				current = table[currentTableIndex];
-				return;
+		public void remove() {
+			checkModificationCount();
+			// TODO provjerit treba li postavljati current
+			// Next not called yet or remove called already
+			if (current == null) {
+				throw new IllegalStateException("No element to be removed!");
 			}
 
-			// Current one has a previous element
-			previous.next = current.next;
-			current.next = null;
-			current = previous.next;
+			SimpleHashtable.this.remove(current.getKey());
+			current = null;
+			savedModificationCount++;
+		}
+
+		private void checkModificationCount() {
+			if (savedModificationCount != modificationCount) {
+				throw new ConcurrentModificationException();
+			}
 		}
 
 	}

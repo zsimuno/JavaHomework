@@ -223,5 +223,77 @@ class LinkedListIndexedCollectionTest {
 		assertTrue(list.isEmpty());
 
 	}
+	
+	@Test
+	void testStringCollection() {
+		LinkedListIndexedCollection<String> col = new LinkedListIndexedCollection<String>();
+		col.add("Java");
+		col.add("Java");
+		col.insert("Here i am!", 1);
+		assertEquals(1, col.indexOf("Here i am!"));
+		assertEquals(3, col.size());
+		
+	}
+	
+	@Test
+	void testAddNull() {
+		LinkedListIndexedCollection<String> col = new LinkedListIndexedCollection<String>();
+		assertThrows(NullPointerException.class, () -> {
+			col.add(null);
+		});
+		
+		
+	}
+	
+	@Test
+	void containsNullStringCol() {
+		LinkedListIndexedCollection<String> col = new LinkedListIndexedCollection<String>();
+		col.add("Java");
+		col.add("Java");
+		col.insert("Here i am!", 2);
+		assertFalse(col.contains(null));
+	}
+	
+	@Test
+	void testIntegerContainsString() {
+		LinkedListIndexedCollection<Integer> col = new LinkedListIndexedCollection<Integer>();
+		col.add(2);
+		col.insert(10, 1);
+		assertFalse(col.contains("2"));
+	
+	}
+	
+	@Test
+	void removeStringFromIntegerCol() {
+		LinkedListIndexedCollection<Integer> col = new LinkedListIndexedCollection<Integer>();
+		col.add(2);
+		col.insert(10, 1);
+		assertFalse(col.remove("2"));
+	}
+	
+	@Test
+	void removeNullFromIntegerCol() {
+		LinkedListIndexedCollection<Integer> col = new LinkedListIndexedCollection<Integer>();
+		col.add(2);
+		col.insert(10, 1);
+		assertFalse(col.remove(null));
+	}
+	
+	@Test
+	void removeFromIntegerCol() {
+		LinkedListIndexedCollection<Integer> col = new LinkedListIndexedCollection<Integer>();
+		col.add(2);
+		col.insert(10, 1);
+		assertTrue(col.remove(Integer.valueOf(2)));
+		assertEquals(1, col.size());
+	}
+	
+	@Test
+	void indexOfNullIntegerCol() {
+		LinkedListIndexedCollection<Integer> col = new LinkedListIndexedCollection<Integer>();
+		col.add(2);
+		col.insert(10, 1);
+		assertEquals(-1, col.indexOf(null));
+	}
 
 }

@@ -117,9 +117,9 @@ public class Vector2D {
 	}
 
 	/**
-	 * Copies this vector in to a new {@code Vector2D}.
+	 * Copies this vector in to a new {@code Vector2D} object and returns it.
 	 * 
-	 * @return new {@code Vector2D} that is a copy of this one
+	 * @return new {@code Vector2D} object that is a copy of this one
 	 */
 	public Vector2D copy() {
 		return new Vector2D(x, y); // TODO dobro?
