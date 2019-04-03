@@ -379,16 +379,17 @@ class SimpleHashtableTest {
 		// create collection:
 		SimpleHashtable<String, Integer> examMarks = new SimpleHashtable<>(2);
 		// fill data:
-		examMarks.put("Ivana", 1);
-		examMarks.put("Ante", 2);
-		examMarks.put("Jasna", 3);
-		examMarks.put("Kristina", 4);
-		examMarks.put("Ivana", 5); // overwrites old grade for Ivana
+		examMarks.put("Ivana", 4);
+		examMarks.put("Ante", 1);
+		examMarks.put("Jasna", 1);
+		examMarks.put("Kristina", 1);
+		examMarks.put("Ivana", 1); // overwrites old grade for Ivana
 		int sum = 0;
 		for (SimpleHashtable.TableEntry<String, Integer> pair : examMarks) {
 			sum += pair.getValue();
 		}
-		assertEquals(14, sum);
+		
+		assertEquals(4, sum);
 	}
 
 	@Test
@@ -406,6 +407,7 @@ class SimpleHashtableTest {
 			iter.next();
 			iter.remove();
 		}
+		
 		assertEquals(0, examMarks.size());
 
 		assertFalse(examMarks.containsKey("Ivana"));
