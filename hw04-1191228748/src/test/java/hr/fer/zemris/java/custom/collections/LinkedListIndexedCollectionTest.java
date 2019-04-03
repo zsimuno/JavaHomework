@@ -295,5 +295,35 @@ class LinkedListIndexedCollectionTest {
 		col.insert(10, 1);
 		assertEquals(-1, col.indexOf(null));
 	}
+	
+	@Test
+	void addIntegerToNumberList() {
+		LinkedListIndexedCollection<Number> col1 = new LinkedListIndexedCollection<Number>();
+		LinkedListIndexedCollection<Integer> col2 = new LinkedListIndexedCollection<Integer>();
+		col1.add(2.1);
+		col1.add(2);
+		col2.add(5);
+		col2.add(6);
+		col1.addAllSatisfying(col2, (number) -> {
+			return number.intValue() % 2 == 0;
+		});
+		assertEquals(3, col1.size());
+		assertFalse(col1.contains(5));
+		assertTrue(col1.contains(6));
+	}
+	
+	@Test
+	void addIntegerToNumberList2() {
+		LinkedListIndexedCollection<Number> col1 = new LinkedListIndexedCollection<Number>();
+		LinkedListIndexedCollection<Integer> col2 = new LinkedListIndexedCollection<Integer>();
+		col1.add(2.1);
+		col1.add(2);
+		col2.add(5);
+		col2.add(6);
+		col1.addAll(col2);
+		assertEquals(4, col1.size());
+		assertTrue(col1.contains(5));
+		assertTrue(col1.contains(6));
+	}
 
 }

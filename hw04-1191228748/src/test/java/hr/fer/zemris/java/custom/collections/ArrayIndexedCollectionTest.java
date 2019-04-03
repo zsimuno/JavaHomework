@@ -149,7 +149,7 @@ class ArrayIndexedCollectionTest {
 		col.add(Integer.valueOf(1));
 		col.add(Integer.valueOf(2));
 		ArrayIndexedCollection<Object> col2 = new ArrayIndexedCollection<Object>();
-		
+
 		Processor<Object> processor = col2::add;
 
 		col.forEach(processor);
@@ -213,29 +213,29 @@ class ArrayIndexedCollectionTest {
 			ar.insert("Out of bounds", 5);
 		});
 	}
-	
+
 	@Test
 	void testIndexOf() {
 		assertEquals(2, ar.indexOf("London"));
 	}
-	
+
 	@Test
 	void testIndexOfNull() {
 		assertEquals(-1, ar.indexOf(null));
 	}
-	
+
 	@Test
 	void indexOfNonexistent() {
 		assertEquals(-1, ar.indexOf("Where am I?"));
 	}
-	
+
 	@Test
 	void removeIndex() {
 		ar.remove(2);
 		assertFalse(ar.contains("Here i am!"));
 		assertEquals(3, ar.size());
 	}
-	
+
 	@Test
 	void removeIndexOOB() {
 		assertThrows(IndexOutOfBoundsException.class, () -> {
@@ -249,7 +249,7 @@ class ArrayIndexedCollectionTest {
 		assertTrue(ar.isEmpty());
 
 	}
-	
+
 	@Test
 	void testStringCollection() {
 		ArrayIndexedCollection<String> col = new ArrayIndexedCollection<String>();
@@ -258,19 +258,18 @@ class ArrayIndexedCollectionTest {
 		col.insert("Here i am!", 1);
 		assertEquals(1, col.indexOf("Here i am!"));
 		assertEquals(3, col.size());
-		
+
 	}
-	
+
 	@Test
 	void testAddNull() {
 		ArrayIndexedCollection<String> col = new ArrayIndexedCollection<String>();
 		assertThrows(NullPointerException.class, () -> {
 			col.add(null);
 		});
-		
-		
+
 	}
-	
+
 	@Test
 	void containsNullStringCol() {
 		ArrayIndexedCollection<String> col = new ArrayIndexedCollection<String>();
@@ -279,16 +278,16 @@ class ArrayIndexedCollectionTest {
 		col.insert("Here i am!", 2);
 		assertFalse(col.contains(null));
 	}
-	
+
 	@Test
 	void testIntegerContainsString() {
 		ArrayIndexedCollection<Integer> col = new ArrayIndexedCollection<Integer>();
 		col.add(2);
 		col.insert(10, 1);
 		assertFalse(col.contains("2"));
-	
+
 	}
-	
+
 	@Test
 	void removeStringFromIntegerCol() {
 		ArrayIndexedCollection<Integer> col = new ArrayIndexedCollection<Integer>();
@@ -296,7 +295,7 @@ class ArrayIndexedCollectionTest {
 		col.insert(10, 1);
 		assertFalse(col.remove("2"));
 	}
-	
+
 	@Test
 	void removeNullFromIntegerCol() {
 		ArrayIndexedCollection<Integer> col = new ArrayIndexedCollection<Integer>();
@@ -304,7 +303,7 @@ class ArrayIndexedCollectionTest {
 		col.insert(10, 1);
 		assertFalse(col.remove(null));
 	}
-	
+
 	@Test
 	void removeFromIntegerCol() {
 		ArrayIndexedCollection<Integer> col = new ArrayIndexedCollection<Integer>();
@@ -313,7 +312,7 @@ class ArrayIndexedCollectionTest {
 		assertTrue(col.remove(Integer.valueOf(2)));
 		assertEquals(1, col.size());
 	}
-	
+
 	@Test
 	void indexOfNullIntegerCol() {
 		ArrayIndexedCollection<Integer> col = new ArrayIndexedCollection<Integer>();
@@ -322,4 +321,33 @@ class ArrayIndexedCollectionTest {
 		assertEquals(-1, col.indexOf(null));
 	}
 
+	@Test
+	void addIntegerToNumberList() {
+		ArrayIndexedCollection<Number> col1 = new ArrayIndexedCollection<Number>();
+		ArrayIndexedCollection<Integer> col2 = new ArrayIndexedCollection<Integer>();
+		col1.add(2.1);
+		col1.add(2);
+		col2.add(5);
+		col2.add(6);
+		col1.addAllSatisfying(col2, (number) -> {
+			return number.intValue() % 2 == 0;
+		});
+		assertEquals(3, col1.size());
+		assertFalse(col1.contains(5));
+		assertTrue(col1.contains(6));
+	}
+	
+	@Test
+	void addIntegerToNumberList2() {
+		ArrayIndexedCollection<Number> col1 = new ArrayIndexedCollection<Number>();
+		ArrayIndexedCollection<Integer> col2 = new ArrayIndexedCollection<Integer>();
+		col1.add(2.1);
+		col1.add(2);
+		col2.add(5);
+		col2.add(6);
+		col1.addAll(col2);
+		assertEquals(4, col1.size());
+		assertTrue(col1.contains(5));
+		assertTrue(col1.contains(6));
+	}
 }

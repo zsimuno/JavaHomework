@@ -87,7 +87,7 @@ public class ArrayIndexedCollection<T> implements List<T> {
 	 * @throws NullPointerException     If the given collection is null
 	 * @throws IllegalArgumentException if initialCapacity is below 1
 	 */
-	public ArrayIndexedCollection(Collection<T> collection, int initialCapacity) {
+	public ArrayIndexedCollection(Collection<? extends T> collection, int initialCapacity) {
 		this(initialCapacity, Objects.requireNonNull(collection).size());
 
 		this.addAll(collection);
@@ -106,7 +106,7 @@ public class ArrayIndexedCollection<T> implements List<T> {
 	 *                   newly constructed collection
 	 * @throws NullPointerException If the given collection is null
 	 */
-	public ArrayIndexedCollection(Collection<T> collection) {
+	public ArrayIndexedCollection(Collection<? extends T> collection) {
 		this(collection, defaultArrayCapacity);
 	}
 

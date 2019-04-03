@@ -89,10 +89,9 @@ public interface Collection<T> {
 	 * 
 	 * @param other other collection which we add elements from
 	 */
-	default void addAll(Collection<T> other) {
-		Processor<T> processor = this::add;
+	default void addAll(Collection<? extends T> other) {
 
-		other.forEach(processor);
+		other.forEach(this::add);
 	}
 
 	/**
@@ -112,8 +111,8 @@ public interface Collection<T> {
 	 * @param col
 	 * @param tester
 	 */
-	default void addAllSatisfying(Collection<T> col, Tester<T> tester) {
-		ElementsGetter<T> getter = col.createElementsGetter();
+	default void addAllSatisfying(Collection<? extends T> col, Tester<? super T> tester) {
+		ElementsGetter<? extends T> getter = col.createElementsGetter();
 		while (getter.hasNextElement()) {
 			T nextElement = getter.getNextElement();
 			if (tester.test(nextElement)) {

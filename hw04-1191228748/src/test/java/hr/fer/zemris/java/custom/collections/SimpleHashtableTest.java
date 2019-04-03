@@ -304,7 +304,7 @@ class SimpleHashtableTest {
 		hash.remove("Not here!");
 		assertEquals(2, hash.size());
 	}
-	
+
 	@Test
 	void removeNull() {
 		SimpleHashtable<String, Integer> hash = new SimpleHashtable<>();
@@ -330,6 +330,28 @@ class SimpleHashtableTest {
 		assertEquals(4, examMarks.size());
 
 		assertEquals("[Ante=2, Ivana=5, Jasna=2, Kristina=5]", examMarks.toString());
+	}
+
+	@Test
+	void testToString2() {
+		SimpleHashtable<String, String> hashTable = new SimpleHashtable<String, String>(1);
+		System.out.println(hashTable.toString());
+		hashTable.put("C1", "value2");
+		System.out.println(hashTable.toString());
+		hashTable.put("C4", "value1");
+		System.out.println(hashTable.toString());
+		hashTable.put("C2", "value4");
+		System.out.println(hashTable.toString());
+		hashTable.put("C3", "value3");
+		System.out.println(hashTable.toString());
+		hashTable.put("C0", "value3");
+		System.out.println(hashTable.toString());
+//		[] 
+//		[C1=value2] 
+//		[C4=value1, C1=value2] 
+//		[C4=value1, C1=value2, C2=value4]
+//		[C3=value3, C4=value1, C1=value2, C2=value4] 
+//		[C3=value3, C4=value1, C0=value3, C1=value2, C2=value4]
 	}
 
 	@Test

@@ -87,7 +87,7 @@ public class LinkedListIndexedCollection<T> implements List<T> {
 	 *                   this newly constructed collection
 	 * @throws NullPointerException if {@code collection} is null
 	 */
-	public LinkedListIndexedCollection(Collection<T> collection) {
+	public LinkedListIndexedCollection(Collection<? extends T> collection) {
 		this();
 		this.addAll(Objects.requireNonNull(collection));
 	}

@@ -9,12 +9,6 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /**
- * 
- * 
- * @author Zvonimir Šimunović
- *
- */
-/**
  * Implements a hash table that maps keys to values. Keys are non-null objects
  * that are unique to every entry. Values don't have to be unique but every key
  * has only one value.
@@ -169,49 +163,54 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 		}
 
 		// Resize the array if necessary
-		// TODO Jel size provjeravamo ili broj popunjenih slotova u tablici? Kada
-		// provjeravamo?
-		if (size >= table.length * resizePercentage) {
-			resize();
-		}
 
-		int slot = Math.abs(key.hashCode()) % table.length;
+		int slot = getTableSlot(key);
+		TableEntry<K, V> last = null;
 
-		// If the slot is empty
-		if (table[slot] == null) {
-
-			size++;
-			table[slot] = new TableEntry<>(key, value, null);
-			modificationCount++;
-			return;
-		}
-
-		// Slot is not empty so lets add or update the element
+		// Check if the key already exists
 		for (TableEntry<K, V> entry = table[slot]; entry != null; entry = entry.next) {
-
-			// Is there already a key like the one given?
+			// If it exists, update it
 			if (entry.getKey().equals(key)) {
 				entry.setValue(value);
 				return;
 			}
+			
+			// Save the last if we need to add a new element
+			last = entry;
 
-			// This entry is the last in this slot
-			if (entry.next == null) {
-				entry.next = new TableEntry<>(key, value, null);
-				modificationCount++;
-				size++;
-				return;
-			}
 
 		}
+
+		// If the slot is empty
+		if (table[slot] == null) {
+			table[slot] = new TableEntry<>(key, value, null);
+			
+		} else {// Slot is not empty so we put the new element to be the last in the list
+			last.next = new TableEntry<>(key, value, null);
+		}
+		
+		modificationCount++;
+		size++;
+		resizeIfNeeded();
+		return;
 
 	}
 
 	/**
-	 * Resizes the table to 2 * current size. Puts element in their new positions.
+	 * Resizes the table to 2 * current size if the number of elements is greater
+	 * than {@value #resizePercentage} the size of the table. Puts element in their
+	 * new appropriate positions.
 	 */
 	@SuppressWarnings("unchecked")
-	private void resize() {
+	private void resizeIfNeeded() {
+
+		// Ckeck if we need to resize
+		if (size < table.length * resizePercentage) {
+			return;
+		}
+		// TODO Jel size provjeravamo ili broj popunjenih slotova u tablici? Kada
+		// provjeravamo?
+
 		TableEntry<K, V>[] oldTable = table;
 
 		this.table = (TableEntry<K, V>[]) new TableEntry[2 * oldTable.length];
@@ -230,6 +229,16 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 	}
 
 	/**
+	 * Returns the correct table slot of the given key
+	 * 
+	 * @param key key that we use to determine the slot in the table
+	 * @return slot in the table
+	 */
+	private int getTableSlot(Object key) {
+		return Math.abs(key.hashCode()) % table.length;
+	}
+
+	/**
 	 * Returns the {@code value} object that is associated with the given key. If
 	 * the key doesn't exist {@code null} is returned. Note that the {@code value}
 	 * can also be {@code null}.
@@ -242,7 +251,7 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 		if (key == null)
 			return null;
 
-		int slot = Math.abs(key.hashCode()) % table.length;
+		int slot = getTableSlot(key);
 
 		for (TableEntry<K, V> entry = table[slot]; entry != null; entry = entry.next) {
 			if (entry.getKey().equals(key)) {
@@ -276,7 +285,7 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 		if (key == null)
 			return false;
 
-		int slot = Math.abs(key.hashCode()) % table.length;
+		int slot = getTableSlot(key);
 
 		for (TableEntry<K, V> entry = table[slot]; entry != null; entry = entry.next) {
 			if (entry.getKey().equals(key)) {
@@ -359,6 +368,10 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 
 	@Override
 	public String toString() {
+		if (isEmpty()) {
+			return "[]";
+		}
+
 		StringBuilder sb = new StringBuilder();
 		sb.append("[");
 		for (int i = 0; i < table.length; i++) {
@@ -474,7 +487,6 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 		@Override
 		public void remove() {
 			checkModificationCount();
-			// TODO provjerit treba li postavljati current
 			// Next not called yet or remove called already
 			if (current == null) {
 				throw new IllegalStateException("No element to be removed!");

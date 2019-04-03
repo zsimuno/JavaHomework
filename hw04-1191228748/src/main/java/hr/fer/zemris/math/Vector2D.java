@@ -3,13 +3,15 @@
  */
 package hr.fer.zemris.math;
 
+import java.util.Objects;
+
 /**
  * Vector2D Class {@code Vector2D} represents a vector in a 2D plane.
  * 
  * @author Zvonimir Šimunović
  *
  */
-public class Vector2D {
+public class Vector2D { 
 
 	/**
 	 * x value
@@ -20,6 +22,11 @@ public class Vector2D {
 	 * y value
 	 */
 	private double y;
+
+	/**
+	 * Precision for calling equals method
+	 */
+	private static final double precision = 1e-7;
 
 	/**
 	 * Constructs a vector from given x and y values
@@ -54,8 +61,13 @@ public class Vector2D {
 	 * Translates the vector by the given {@code offset}
 	 * 
 	 * @param offset offset by which the vector will be translated
+	 * @throws NullPointerException if {@code offset} is {@code null}
 	 */
 	public void translate(Vector2D offset) {
+		if(offset == null) {
+			throw new NullPointerException();
+		}
+		
 		x += offset.getX();
 		y += offset.getY();
 	}
@@ -67,8 +79,12 @@ public class Vector2D {
 	 * @param offset offset by which the vector will be translated
 	 * @return a new {@code Vector2D} that we get from translating this one by the
 	 *         given {@code offset}
+	 * @throws NullPointerException if {@code offset} is {@code null}
 	 */
 	public Vector2D translated(Vector2D offset) {
+		if(offset == null) {
+			throw new NullPointerException();
+		}
 		return new Vector2D(x + offset.x, y + offset.y);
 	}
 
@@ -99,7 +115,7 @@ public class Vector2D {
 	 * 
 	 * @param scaler scale by which the vector will be scaled
 	 */
-	public void scale(double scaler) { // TODO ima li smisla?
+	public void scale(double scaler) { 
 		x *= scaler;
 		y *= scaler;
 	}
@@ -122,6 +138,31 @@ public class Vector2D {
 	 * @return new {@code Vector2D} object that is a copy of this one
 	 */
 	public Vector2D copy() {
-		return new Vector2D(x, y); // TODO dobro?
+		return new Vector2D(x, y);
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(x, y);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof Vector2D))
+			return false;
+		Vector2D other = (Vector2D) obj;
+		return Math.abs(x - other.x) < precision && Math.abs(y - other.y) < precision;
+	}
+
+	@Override
+	public String toString() {
+		return "(" + x + ", " + y + ")";
+	}
+	
+	
+
 }
