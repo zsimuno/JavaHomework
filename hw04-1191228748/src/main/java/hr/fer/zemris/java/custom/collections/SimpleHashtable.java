@@ -228,7 +228,7 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 	 * @return slot in the table
 	 */
 	private int getTableSlot(Object key) {
-		return Math.abs(key.hashCode()) % table.length;
+		return Math.abs(key.hashCode() % table.length);
 	}
 
 	/**
@@ -323,28 +323,28 @@ public class SimpleHashtable<K, V> implements Iterable<SimpleHashtable.TableEntr
 		if (key == null)
 			return;
 
-		for (int i = 0; i < table.length; i++) {
-			for (TableEntry<K, V> entry = table[i], previous = null; entry != null; entry = entry.next) {
+		int slot = getTableSlot(key);
 
-				if (entry.getKey().equals(key)) {
+		for (TableEntry<K, V> entry = table[slot], previous = null; entry != null; entry = entry.next) {
 
-					if (previous == null) { // entry is the fist element in the slot
+			if (entry.getKey().equals(key)) {
 
-						table[i] = entry.next;
-						entry.next = null;
-					} else {
-						// Current one has a previous element
-						previous.next = entry.next;
-						entry.next = null;
-					}
+				if (previous == null) { // entry is the fist element in the slot
 
-					modificationCount++;
-					size--;
-					return;
+					table[slot] = entry.next;
+					entry.next = null;
+				} else {
+					// Current one has a previous element
+					previous.next = entry.next;
+					entry.next = null;
 				}
 
-				previous = entry;
+				modificationCount++;
+				size--;
+				return;
 			}
+
+			previous = entry;
 		}
 
 	}
