@@ -89,9 +89,9 @@ public class Vector2D {
 	}
 
 	/**
-	 * Rotates the vector by the given {@code angle}
+	 * Rotates the vector by the given {@code angle} in radians.
 	 * 
-	 * @param angle angle by which the vector will be rotated
+	 * @param angle angle in radians by which the vector will be rotated
 	 */
 	public void rotate(double angle) {
 		double newX = x * Math.cos(angle) - y * Math.sin(angle);
@@ -101,9 +101,9 @@ public class Vector2D {
 
 	/**
 	 * Constructs and returns a new {@code Vector2D} from rotating this vector by
-	 * the given {@code angle}.
+	 * the given {@code angle} in radians.
 	 * 
-	 * @param angle angle by which the vector will be rotated
+	 * @param angle in radians angle by which the vector will be rotated
 	 * @return new {@code Vector2D} from rotating this vector by the given
 	 *         {@code angle}.
 	 */

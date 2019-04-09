@@ -32,7 +32,7 @@ public class ColorCommand implements Command {
 
 	@Override
 	public void execute(Context ctx, Painter painter) {
-		// TODO ColorCommand execute
+		ctx.getCurrentState().setCurrentColor(color);
 
 	}
 

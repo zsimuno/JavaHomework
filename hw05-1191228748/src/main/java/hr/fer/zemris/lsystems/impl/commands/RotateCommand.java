@@ -29,8 +29,7 @@ public class RotateCommand implements Command {
 
 	@Override
 	public void execute(Context ctx, Painter painter) {
-		// TODO Rotate execute
-
+		ctx.getCurrentState().getLookDirection().rotate(angle * (Math.PI / 180.0));;
 	}
 
 }

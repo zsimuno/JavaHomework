@@ -17,7 +17,7 @@ public class PopCommand implements Command {
 
 	@Override
 	public void execute(Context ctx, Painter painter) {
-		// TODO PopCommand execute
+		ctx.popState();
 	}
 
 }

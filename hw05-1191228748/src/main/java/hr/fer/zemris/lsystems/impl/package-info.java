@@ -1,5 +1,5 @@
 /**
- * Package is used for Lindermayer systems implementation.
+ * Package is used for classes that implements Lindermayer systems.
  * 
  * @author Zvonimir Šimunović
  *

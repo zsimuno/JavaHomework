@@ -5,6 +5,7 @@ package hr.fer.zemris.lsystems.impl.commands;
 
 import hr.fer.zemris.lsystems.Painter;
 import hr.fer.zemris.lsystems.impl.Command;
+import hr.fer.zemris.lsystems.impl.TurtleState;
 import hr.fer.zemris.lsystems.impl.TurtleState.Context;
 
 /**
@@ -29,8 +30,10 @@ public class ScaleCommand implements Command {
 
 	@Override
 	public void execute(Context ctx, Painter painter) {
-		// TODO ScaleCommand execute
-
+		TurtleState currentState = ctx.getCurrentState();
+		double oldMoveLen = currentState.getMoveLenght();
+		
+		currentState.setMoveLenght(oldMoveLen * factor);
 	}
 
 }

@@ -145,7 +145,7 @@ public class TurtleState {
 		/**
 		 * Stack that contains turtle states as {@link TurtleState}.
 		 */
-		private ObjectStack<TurtleState> states;
+		private ObjectStack<TurtleState> states = new ObjectStack<>();
 
 		/**
 		 * Returns the state form the top of the stack without removing it.

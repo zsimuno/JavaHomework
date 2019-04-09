@@ -68,48 +68,50 @@ public class LSystemBuilderImpl implements LSystemBuilder {
 	public LSystem build() {
 		LSystem localLSystem = new LSystem() {
 
-
 			/**
 			 * 
 			 */
 			@Override
 			public String generate(int level) {
-				if(level == 0)
+				if (level == 0)
 					return axiom;
-				
+
 				char[] previous = generate(level - 1).toCharArray();
-				
+
 				StringBuilder current = new StringBuilder();
-				
+
 				for (char c : previous) {
 					String production = registeredProductions.get(c);
-					
+
 					current.append((production == null) ? c : production);
 				}
-				
+
 				return current.toString();
 			}
 
 			/**
 			 * Draws in the given level with a given painter
+			 * 
 			 * @param arg0 given level
 			 */
 			@Override
 			public void draw(int level, Painter painter) {
 				Context context = new Context();
 
-				// TODO ima li ovi state smisla?
-				context.pushState(new TurtleState(origin, (new Vector2D(1, 0)).rotated(angle * (Math.PI / 180)),
-						Color.black, unitLength * Math.pow(unitLengthDegreeScaler, level)));
-				
+				Vector2D angleVector = new Vector2D(1, 0);
+				angleVector.rotate(angle * (Math.PI / 180.0));
+				double move = unitLength * Math.pow(unitLengthDegreeScaler, level);
+
+				context.pushState(new TurtleState(origin, angleVector, Color.black, move));
+
 				char[] finalGenerate = this.generate(level).toCharArray();
 
 				for (char c : finalGenerate) {
 					Command command = registeredCommands.get(c);
-					
-					if(command == null) 
+
+					if (command == null)
 						continue;
-					
+
 					command.execute(context, painter);
 				}
 			}
@@ -119,14 +121,67 @@ public class LSystemBuilderImpl implements LSystemBuilder {
 	}
 
 	/**
-	 * 
+	 * @throws IllegalArgumentException
 	 */
 	@Override
 	public LSystemBuilder configureFromText(String[] lines) {
-		// TODO configureFromText
+		// TODO Mozda provjeravati je li input valjan
 
 		for (String line : lines) {
-			String[] currentLine = line.split(" ");
+
+			if (line.isEmpty()) {
+				continue;
+			}
+
+			String[] currentLine = line.split("\\s+\\/{0,1}\\s*|\\s*\\/{0,1}\\s+|\\/");
+
+			// Check which directive is in the current line
+			switch (currentLine[0]) {
+
+			case "origin":
+				origin = new Vector2D(parseNumber(currentLine, 1), parseNumber(currentLine, 2));
+				break;
+
+			case "angle":
+				angle = parseNumber(currentLine, 1);
+				break;
+
+			case "unitLength":
+				unitLength = parseNumber(currentLine, 1);
+				break;
+
+			case "unitLengthDegreeScaler":
+				unitLengthDegreeScaler = parseNumber(currentLine, 1) / parseNumber(currentLine, 2);
+				break;
+
+			case "command":
+				if (currentLine.length == 1)
+					throw new IllegalArgumentException("Invalid command input " + line +"!");
+
+				// TODO Maybe check for invalid input
+				// Checks if it's a one word command or two word command
+				Command command = parseCommand(
+						(currentLine.length == 3) ? currentLine[2] : currentLine[2] + " " + currentLine[3]);
+
+				registeredCommands.put(currentLine[1].charAt(0), command);
+				break;
+
+			case "axiom":
+				if (currentLine.length < 2)
+					throw new IllegalArgumentException("Invalid command input " + line +"!");
+
+				axiom = currentLine[1];
+				break;
+
+			case "production":
+				if (currentLine.length == 1)
+					throw new IllegalArgumentException("Invalid command input " + line +"!");
+				registeredProductions.put(currentLine[1].charAt(0), currentLine[2]);
+				break;
+
+			default:
+				throw new IllegalArgumentException("Invalid command " + line +"!");
+			}
 		}
 		return this;
 	}
@@ -139,54 +194,58 @@ public class LSystemBuilderImpl implements LSystemBuilder {
 		registeredCommands.put(symbol, parseCommand(action));
 		return this;
 	}
-	
+
 	/**
 	 * Gets the command in string form and returns it as a {@link Command} object
 	 * 
 	 * @param string
-	 * @throws
-	 * @return
+	 * @throws @return
 	 */
 	private Command parseCommand(String string) {
-		Command value = null;
-		
-		String[] command = string.split(" ");
+		String[] command = string.split("\\s+");
 		// TODO mozda provjeriti ako nije dobro napisano?
-		switch(command[0]) {
+		switch (command[0]) {
 		case "draw":
-			return new DrawCommand(parseNumber(command));
+			return new DrawCommand(parseNumber(command, 1));
+
 		case "skip":
-			return new SkipCommand(parseNumber(command));
+			return new SkipCommand(parseNumber(command, 1));
+
 		case "scale":
-			return new ScaleCommand(parseNumber(command));
+			return new ScaleCommand(parseNumber(command, 1));
+
 		case "rotate":
-			return new RotateCommand(parseNumber(command));
+			return new RotateCommand(parseNumber(command, 1));
+
 		case "push":
 			return new PushCommand();
+
 		case "pop":
 			return new PopCommand();
+
 		case "color":
 			try {
 				return new ColorCommand(Color.decode("#" + command[1]));
 			} catch (NumberFormatException | IndexOutOfBoundsException e) {
-				throw new IllegalArgumentException("Invalid command input!");
-			}	
+				throw new IllegalArgumentException("Invalid command input "+ string +"!");
+			}
+
 		default:
 			throw new IllegalArgumentException("Invalid command!");
 		}
 
 	}
-	
+
 	/**
 	 * @param string
 	 * @return
 	 */
-	private Double parseNumber(String[] string) {
+	private Double parseNumber(String[] string, int index) {
 		try {
-			return Double.parseDouble(string[1]);
+			return Double.parseDouble(string[index]);
 		} catch (NumberFormatException | IndexOutOfBoundsException e) {
-			throw new IllegalArgumentException("Invalid command input!");
-		} 
+			throw new IllegalArgumentException("Invalid command input " + String.join(" ", string) + "!");
+		}
 	}
 
 	/**

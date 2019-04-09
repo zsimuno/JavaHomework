@@ -23,7 +23,7 @@ class LSystemBuilderImplTest {
 	@BeforeAll
 	static void beforeAll() {
 		LSystemBuilderImpl lsBuilder = new LSystemBuilderImpl();
-		LSystem ls = lsBuilder.setAxiom("F").registerProduction('F', "F+F--F+F").build();
+		ls = lsBuilder.setAxiom("F").registerProduction('F', "F+F--F+F").build();
 	}
 
 	@Test

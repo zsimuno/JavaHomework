@@ -18,7 +18,7 @@ public class PushCommand implements Command {
 
 	@Override
 	public void execute(Context ctx, Painter painter) {
-		// TODO PushCommand execute
+		ctx.pushState(ctx.getCurrentState().copy());
 
 	}
 
