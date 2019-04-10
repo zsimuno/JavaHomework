@@ -111,7 +111,7 @@ public class DatabaseDemos {
 
 		StudentDatabase db = new StudentDatabase(students);
 		
-		QueryParser parser = new QueryParser("jmbag = \"0000000051\"");
+		QueryParser parser = new QueryParser("jmbag		 = \"0000000051\"");
 		if (parser.isDirectQuery()) {
 			StudentRecord r = db.forJMBAG(parser.getQueriedJMBAG());
 			System.out.println(r.toString());

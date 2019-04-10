@@ -13,10 +13,10 @@ class ConditionalExpressionTest {
 				"Bos*",
 				ComparisonOperators.LIKE);
 
-		StudentRecord record = new StudentRecord("0000000057", "Širanović", "Hrvoje", "2");
+		StudentRecord record = new StudentRecord("0000000057", "Piranović", "Hrvoje", "2");
 
 		assertEquals("Bos*", expr.getStringLiteral());
-		assertEquals("Širanović", expr.getFieldGetter().get(record));
+		assertEquals("Piranović", expr.getFieldGetter().get(record));
 
 		boolean recordSatisfies = expr.getComparisonOperator().satisfied(
 				expr.getFieldGetter().get(record), expr.getStringLiteral());
@@ -31,7 +31,7 @@ class ConditionalExpressionTest {
 				"Ana",
 				ComparisonOperators.GREATER);
 
-		StudentRecord record = new StudentRecord("0000000057", "Širanović", "Hrvoje", "2");
+		StudentRecord record = new StudentRecord("0000000057", "Piranović", "Hrvoje", "2");
 
 		assertEquals("Ana", expr.getStringLiteral());
 		assertEquals("Hrvoje", expr.getFieldGetter().get(record));
@@ -49,7 +49,7 @@ class ConditionalExpressionTest {
 				"0000000057",
 				ComparisonOperators.EQUALS);
 
-		StudentRecord record = new StudentRecord("0000000057", "Širanović", "Hrvoje", "2");
+		StudentRecord record = new StudentRecord("0000000057", "Piranović", "Hrvoje", "2");
 
 		assertEquals("0000000057", expr.getStringLiteral());
 		assertEquals("0000000057", expr.getFieldGetter().get(record));

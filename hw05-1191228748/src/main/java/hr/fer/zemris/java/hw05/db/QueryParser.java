@@ -22,6 +22,9 @@ public class QueryParser {
 	 */
 	private QueryLexer lexer;
 
+	/**
+	 * List of all conditional expressions
+	 */
 	private ArrayList<ConditionalExpression> expressionsList = new ArrayList<>();
 
 	/**

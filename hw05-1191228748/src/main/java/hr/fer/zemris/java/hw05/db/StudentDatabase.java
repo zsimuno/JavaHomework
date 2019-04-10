@@ -94,13 +94,6 @@ public class StudentDatabase {
 	 */
 	public List<StudentRecord> filter(IFilter filter) {
 		ArrayList<StudentRecord> records = new ArrayList<>();
-		
-		// TODO treba li i map i list?
-//		database.forEach((jmbag, studentRecord) -> {
-//			if (filter.accepts(studentRecord)) {
-//				records.add(studentRecord);
-//			}
-//		});
 
 		for (StudentRecord studentRecord : studentRecords) {
 			if (filter.accepts(studentRecord)) {

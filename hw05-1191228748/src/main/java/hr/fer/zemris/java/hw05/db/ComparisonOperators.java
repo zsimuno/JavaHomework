@@ -76,7 +76,7 @@ public class ComparisonOperators {
 					}
 
 					// If current char is the same as the one after the wildcard
-					if (value2.charAt(i + 1) == value1.charAt(j)) {
+					if (value2.charAt(i) == value1.charAt(j)) {
 						break;
 					}
 

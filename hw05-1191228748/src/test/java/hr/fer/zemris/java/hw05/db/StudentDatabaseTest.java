@@ -22,10 +22,10 @@ class StudentDatabaseTest {
 				"0000000051	Skočir	Andro	4",
 				"0000000052	Slijepčević	Josip	5",
 				"0000000053	Srdarević	Dario	2",
-				"0000000054	Šamija	Pavle	3",
-				"0000000055	Šimunov	Ivan	4",
-				"0000000056	Šimunović	Veljko	5",
-				"0000000057	Širanović	Hrvoje	2" };
+				"0000000054	Pamija	Pavle	3",
+				"0000000055	Pimunov	Ivan	4",
+				"0000000056	Pimunović	Veljko	5",
+				"0000000057	Piranović	Hrvoje	2" };
 
 		db = new StudentDatabase(students);
 	}
@@ -59,8 +59,13 @@ class StudentDatabaseTest {
 
 	@Test
 	void testForJmbag2() {
-		StudentRecord student = new StudentRecord("0000000057", "Širanović", "Hrvoje", "2");
+		StudentRecord student = new StudentRecord("0000000057", "Piranović", "Hrvoje", "2");
 		assertEquals(student, db.forJMBAG("0000000057"));
+	}
+	
+	@Test
+	void testForJmbagNull() {
+		assertNull(db.forJMBAG("0000000027"));
 	}
 
 	@Test

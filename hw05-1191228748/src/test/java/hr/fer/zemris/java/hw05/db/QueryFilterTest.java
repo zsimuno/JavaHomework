@@ -19,10 +19,10 @@ class QueryFilterTest {
 				"0000000051	Skočir	Andro	4",
 				"0000000052	Slijepčević	Josip	5",
 				"0000000053	Srdarević	Dario	2",
-				"0000000054	Šamija	Pavle	3",
-				"0000000055	Šimunov	Ivan	4",
-				"0000000056	Šimunović	Veljko	5",
-				"0000000057	Širanović	Hrvoje	2" };
+				"0000000054	Pamija	Pavle	3",
+				"0000000055	Pimunov	Ivan	4",
+				"0000000056	Pimunović	Veljko	5",
+				"0000000057	Piranović	Hrvoje	2" };
 
 		db = new StudentDatabase(students);
 	}
@@ -47,7 +47,7 @@ class QueryFilterTest {
 		
 		StudentRecord r = db.forJMBAG(parser.getQueriedJMBAG());
 		assertEquals("Ivan", FieldValueGetters.FIRST_NAME.get(r));
-		assertEquals("Šimunov", FieldValueGetters.LAST_NAME.get(r));
+		assertEquals("Pimunov", FieldValueGetters.LAST_NAME.get(r));
 			
 	}
 	
@@ -59,7 +59,7 @@ class QueryFilterTest {
 		
 		StudentRecord r = db.forJMBAG(parser.getQueriedJMBAG());
 		assertEquals("Hrvoje", FieldValueGetters.FIRST_NAME.get(r));
-		assertEquals("Širanović", FieldValueGetters.LAST_NAME.get(r));
+		assertEquals("Piranović", FieldValueGetters.LAST_NAME.get(r));
 			
 	}
 	
@@ -70,29 +70,29 @@ class QueryFilterTest {
 		
 		for(StudentRecord r : db.filter(new QueryFilter(parser.getQuery()))) {
 			assertEquals("Veljko", FieldValueGetters.FIRST_NAME.get(r));
-			assertEquals("Šimunović", FieldValueGetters.LAST_NAME.get(r));
+			assertEquals("Pimunović", FieldValueGetters.LAST_NAME.get(r));
 		}
 	}
 	
 	@Test
 	void testMultipleConditions2() {
-		QueryParser parser = new QueryParser("firstName like \"*\" and lastName LiKe \"Šam*\"");
+		QueryParser parser = new QueryParser("firstName like \"*\" and lastName LiKe \"Pam*\"");
 		assertFalse(parser.isDirectQuery());
 		
 		for(StudentRecord r : db.filter(new QueryFilter(parser.getQuery()))) {
 			assertEquals("Pavle", FieldValueGetters.FIRST_NAME.get(r));
-			assertEquals("Šamija", FieldValueGetters.LAST_NAME.get(r));
+			assertEquals("Pamija", FieldValueGetters.LAST_NAME.get(r));
 		}
 	}
 	
 	@Test
 	void testMultipleConditions3() {
-		QueryParser parser = new QueryParser("lastName > \"Srdarević\" anD lastName LIKE \"Šimun*\"");
+		QueryParser parser = new QueryParser("lastName > \"Srdarević\" anD lastName LIKE \"Pimun*\"");
 		assertFalse(parser.isDirectQuery());
 		
 		ArrayList<StudentRecord> expectedResult = new ArrayList<>();
-		expectedResult.add(new StudentRecord("0000000055", "Šimunov", "Ivan", "4"));
-		expectedResult.add(new StudentRecord("0000000056", "Šimunović", "Veljko", "5"));
+		expectedResult.add(new StudentRecord("0000000055", "Pimunov", "Ivan", "4"));
+		expectedResult.add(new StudentRecord("0000000056", "Pimunović", "Veljko", "5"));
 		
 		for(StudentRecord r : db.filter(new QueryFilter(parser.getQuery()))) {
 			assertTrue(expectedResult.contains(r));

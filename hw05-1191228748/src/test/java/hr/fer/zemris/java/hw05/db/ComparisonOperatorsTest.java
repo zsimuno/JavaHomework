@@ -108,6 +108,12 @@ class ComparisonOperatorsTest {
 		assertTrue(oper.satisfied("AAAA", "AA*AA"));
 	}
 	
+	@Test
+	void testLike4() {
+		IComparisonOperator oper = ComparisonOperators.LIKE;
+		assertTrue(oper.satisfied("Bijanić", "B*ć"));
+	}
+	
 	
 
 }
