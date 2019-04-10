@@ -14,7 +14,7 @@ public class QueryToken {
 	/**
 	 * value stored in this token
 	 */
-	private Object value;
+	private String value;
 
 	/**
 	 * Constructs a Token based on inputed type and value
@@ -22,7 +22,7 @@ public class QueryToken {
 	 * @param type  type of the token
 	 * @param value value that will be stored in the token
 	 */
-	public QueryToken(QueryTokenType type, Object value) {
+	public QueryToken(QueryTokenType type, String value) {
 		this.type = type;
 		this.value = value;
 
@@ -33,7 +33,7 @@ public class QueryToken {
 	 * 
 	 * @return value stored in the token
 	 */
-	public Object getValue() {
+	public String getValue() {
 		return value;
 
 	}

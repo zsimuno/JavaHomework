@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * Program that reads the data from database.
@@ -33,20 +34,48 @@ public class StudentDB {
 
 		StudentDatabase studentDB;
 		try {
-			studentDB = new StudentDatabase((String[])lines.toArray());
+			studentDB = new StudentDatabase((String[]) lines.toArray());
 		} catch (IllegalArgumentException e) {
 			System.out.println(e.getMessage());
 			return;
 		}
-		
-		
-		// Read user queries untill he inputs "exit"
-		while(true) {
+
+		Scanner sc = new Scanner(System.in);
+
+		// Read user queries until he inputs "exit"
+		while (true) {
+			String input = sc.nextLine();
+
+			if (input.equals("exit"))
+				return;
+			
+			if(!input.substring(0, 5).equals("query")) {
+				System.out.println("Invalid query input!");
+				continue;
+			}
+			
+			String query = input.substring(5);
+			
+			// TODO what on empty query?
+			
+			QueryParser parser;
+
+			try {
+				parser = new QueryParser(query);
+			} catch (QueryParserException e) {
+				System.out.println(e.getMessage());
+				continue;
+			}
 			
 			
+			if (parser.isDirectQuery()) {
+				StudentRecord r = studentDB.forJMBAG(parser.getQueriedJMBAG());
+			} else {
+				for (StudentRecord r : studentDB.filter(new QueryFilter(parser.getQuery()))) {
+				}
+			}
 		}
-		
-		
+
 	}
 
 }

@@ -87,8 +87,13 @@ public class StudentRecord {
 		if (!(obj instanceof StudentRecord))
 			return false;
 		StudentRecord other = (StudentRecord) obj;
-		return finalGrade == other.finalGrade && Objects.equals(firstName, other.firstName) && jmbag == other.jmbag
-				&& Objects.equals(lastName, other.lastName);
+		return  Objects.equals(jmbag, other.jmbag);
+	}
+
+	@Override
+	public String toString() {
+		return "StudentRecord [jmbag=" + jmbag + ", lastName=" + lastName + ", firstName=" + firstName + ", finalGrade="
+				+ finalGrade + "]";
 	}
 
 }

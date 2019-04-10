@@ -24,6 +24,19 @@ public class StudentDatabase {
 	 * List of student records
 	 */
 	private ArrayList<StudentRecord> studentRecords = new ArrayList<>();
+	
+	/**
+	 * Contains all valid grades
+	 */
+	private static ArrayList<String> grades;
+	static {
+		grades = new ArrayList<>();
+		grades.add("1");
+		grades.add("2");
+		grades.add("3");
+		grades.add("4");
+		grades.add("5");
+	}
 
 	/**
 	 * Constructs a {@link StudentDatabase} object with given lines where every line
@@ -34,12 +47,7 @@ public class StudentDatabase {
 	 */
 	public StudentDatabase(String[] lines) {
 		
-		ArrayList<String> grades = new ArrayList<>();
-		grades.add("1");
-		grades.add("2");
-		grades.add("3");
-		grades.add("4");
-		grades.add("5");
+		
 		
 		for (String lineString : lines) {
 			String[] line = lineString.split("\\s+");
@@ -52,8 +60,8 @@ public class StudentDatabase {
 				throw new IllegalArgumentException("There are duplicate JMBAGs!");
 			}
 
-			if (grades.contains(line[3])) {
-				throw new IllegalArgumentException("Invalid grade input!");
+			if (!grades.contains(line[3])) {
+				throw new IllegalArgumentException("Invalid grade input " + line[3] + "!");
 			}
 			
 
@@ -75,7 +83,6 @@ public class StudentDatabase {
 	 */
 	public StudentRecord forJMBAG(String jmbag) {
 		return database.get(jmbag);
-
 	}
 
 	/**
@@ -87,6 +94,13 @@ public class StudentDatabase {
 	 */
 	public List<StudentRecord> filter(IFilter filter) {
 		ArrayList<StudentRecord> records = new ArrayList<>();
+		
+		// TODO treba li i map i list?
+//		database.forEach((jmbag, studentRecord) -> {
+//			if (filter.accepts(studentRecord)) {
+//				records.add(studentRecord);
+//			}
+//		});
 
 		for (StudentRecord studentRecord : studentRecords) {
 			if (filter.accepts(studentRecord)) {

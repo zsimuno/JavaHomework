@@ -58,22 +58,11 @@ public class QueryLexer {
 			throw new QueryLexerException("No more tokens!");
 		}
 
-		ignoreWhitespace();
-		if (currentToken.getType() == QueryTokenType.EOF) {
-			return currentToken;
-		}
-
-		return nextToken();
-
-	}
-
-	/**
-	 * Ignores all whitespace
-	 */
-	private void ignoreWhitespace() {
+		// Ignores all whitespace
 		while (true) {
 			if (currentIndex == data.length) {
 				currentToken = new QueryToken(QueryTokenType.EOF, null);
+				return currentToken;
 			}
 
 			if (Character.isWhitespace(data[currentIndex])) {
@@ -83,6 +72,9 @@ public class QueryLexer {
 
 			break;
 		}
+
+		return nextToken();
+
 	}
 
 	/**
@@ -97,20 +89,22 @@ public class QueryLexer {
 		if (Character.isLetter(currentChar)) { // Variable name or "and" or "like" operator
 			String tokenString = getTokenString(Character::isLetter);
 
-			if(tokenString.toLowerCase().equals("and")) {
-				currentToken = new QueryToken(QueryTokenType.AND, tokenString);
-				
-			} else if(tokenString.toLowerCase().equals("like")) {
-				currentToken = new QueryToken(QueryTokenType.OPERATOR, tokenString);
-				
+			if (tokenString.toLowerCase().equals("and")) {
+				currentToken = new QueryToken(QueryTokenType.AND, "AND");
+
+			} else if (tokenString.toLowerCase().equals("like")) {
+				currentToken = new QueryToken(QueryTokenType.OPERATOR, "LIKE");
+
 			} else {
 				currentToken = new QueryToken(QueryTokenType.ATTRIBUTE, tokenString);
-				
+
 			}
-			
+
 		} else if (currentChar == '\"') { // String literal
 
-			String tokenString = getTokenString((c) -> c == '\"');
+			currentIndex++; // Move from quotation
+
+			String tokenString = getTokenString((c) -> c != '\"');
 
 			// If the loop ended but current character is not the quotation mark then string
 			// is not valid
@@ -128,12 +122,12 @@ public class QueryLexer {
 			String tokenValue = "";
 
 			switch (currentChar) {
-			
+
 			case '=':
-				type = QueryTokenType.EQUALSSIGN;
+				type = QueryTokenType.OPERATOR;
 				tokenValue = "=";
 				break;
-				
+
 			case '<':
 			case '>':
 				type = QueryTokenType.OPERATOR;
@@ -151,7 +145,7 @@ public class QueryLexer {
 					type = QueryTokenType.OPERATOR;
 					tokenValue = "!=";
 					currentIndex++;
-					
+
 				} else {
 					throw new QueryLexerException("Invalid input " + currentChar + " !");
 				}

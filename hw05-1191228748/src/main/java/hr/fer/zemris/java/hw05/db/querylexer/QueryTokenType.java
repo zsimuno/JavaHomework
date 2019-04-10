@@ -27,10 +27,6 @@ public enum QueryTokenType {
 	 */
 	ATTRIBUTE, 
 	/**
-	 * Equals sign '=' token type
-	 */
-	EQUALSSIGN,
-	/**
 	 * Operator token type
 	 */
 	OPERATOR;
