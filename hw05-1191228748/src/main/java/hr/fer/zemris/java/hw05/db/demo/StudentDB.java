@@ -1,7 +1,7 @@
 /**
  * 
  */
-package hr.fer.zemris.java.hw05.db;
+package hr.fer.zemris.java.hw05.db.demo;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -10,6 +10,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import hr.fer.zemris.java.hw05.db.*;
 
 /**
  * Program that reads the data from database.
