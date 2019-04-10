@@ -104,7 +104,7 @@ public class QueryLexer {
 				currentToken = new QueryToken(QueryTokenType.OPERATOR, tokenString);
 				
 			} else {
-				currentToken = new QueryToken(QueryTokenType.VARIABLE, tokenString);
+				currentToken = new QueryToken(QueryTokenType.ATTRIBUTE, tokenString);
 				
 			}
 			
@@ -145,7 +145,17 @@ public class QueryLexer {
 					currentIndex++;
 				}
 				break;
-				
+			case '!':
+				// Must have an equals sign after
+				if (currentIndex < data.length - 1 && data[currentIndex + 1] == '=') {
+					type = QueryTokenType.OPERATOR;
+					tokenValue = "!=";
+					currentIndex++;
+					
+				} else {
+					throw new QueryLexerException("Invalid input " + currentChar + " !");
+				}
+				break;
 			default:
 				throw new QueryLexerException("Invalid input " + currentChar + " !");
 			}

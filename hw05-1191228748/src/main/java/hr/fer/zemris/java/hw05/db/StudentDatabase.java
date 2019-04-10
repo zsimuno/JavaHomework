@@ -30,8 +30,40 @@ public class StudentDatabase {
 	 * is one student record.
 	 * 
 	 * @param lines lines where every line is one student record
+	 * @throws IllegalArgumentException if the input database is invalid
 	 */
 	public StudentDatabase(String[] lines) {
+		
+		ArrayList<String> grades = new ArrayList<>();
+		grades.add("1");
+		grades.add("2");
+		grades.add("3");
+		grades.add("4");
+		grades.add("5");
+		
+		for (String lineString : lines) {
+			String[] line = lineString.split("\\s+");
+
+			if (line.length != 4) {
+				throw new IllegalArgumentException("Invalid input from file! Input: " + String.join(" ", line));
+			}
+
+			if (database.containsKey(line[0])) {
+				throw new IllegalArgumentException("There are duplicate JMBAGs!");
+			}
+
+			if (grades.contains(line[3])) {
+				throw new IllegalArgumentException("Invalid grade input!");
+			}
+			
+
+			StudentRecord record = new StudentRecord(line[0], line[1], line[2], line[3]);
+
+			studentRecords.add(record);
+			database.put(line[0], record);
+			
+			
+		}
 
 	}
 
@@ -66,5 +98,4 @@ public class StudentDatabase {
 
 	}
 
-	
 }

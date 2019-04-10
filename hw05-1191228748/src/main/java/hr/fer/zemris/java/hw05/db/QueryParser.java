@@ -52,7 +52,7 @@ public class QueryParser {
 	private void parse() {
 		while (!isTokenType(QueryTokenType.EOF)) {
 
-			if(!isTokenType(QueryTokenType.VARIABLE)) {
+			if(!isTokenType(QueryTokenType.ATTRIBUTE)) {
 				parserException();
 			}
 			
@@ -68,7 +68,14 @@ public class QueryParser {
 			}
 			
 			nextToken();
-			// Just skip and?
+			if(!isTokenType(QueryTokenType.AND) || !isTokenType(QueryTokenType.EOF)) {
+				parserException();
+			}
+			
+			// Skip "and"
+			if(isTokenType(QueryTokenType.AND)) {
+				nextToken();
+			}
 
 		}
 	}

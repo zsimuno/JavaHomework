@@ -16,7 +16,7 @@ import java.util.List;
  *
  */
 public class StudentDB {
-	
+
 	/**
 	 * Method that starts the program.
 	 * 
@@ -25,14 +25,28 @@ public class StudentDB {
 	public static void main(String[] args) {
 		List<String> lines;
 		try {
-			lines = Files.readAllLines(
-					Paths.get("./database.txt"),
-					StandardCharsets.UTF_8
-					);
+			lines = Files.readAllLines(Paths.get("./database.txt"), StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			System.out.println("Coudn't read the file!");
 			return;
 		}
+
+		StudentDatabase studentDB;
+		try {
+			studentDB = new StudentDatabase((String[])lines.toArray());
+		} catch (IllegalArgumentException e) {
+			System.out.println(e.getMessage());
+			return;
+		}
+		
+		
+		// Read user queries untill he inputs "exit"
+		while(true) {
+			
+			
+		}
+		
+		
 	}
 
 }

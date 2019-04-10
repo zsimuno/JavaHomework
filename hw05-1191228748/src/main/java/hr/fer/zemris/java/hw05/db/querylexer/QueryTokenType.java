@@ -25,7 +25,7 @@ public enum QueryTokenType {
 	/**
 	 * Variable token type
 	 */
-	VARIABLE, 
+	ATTRIBUTE, 
 	/**
 	 * Equals sign '=' token type
 	 */
