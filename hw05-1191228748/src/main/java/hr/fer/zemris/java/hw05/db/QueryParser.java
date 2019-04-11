@@ -95,7 +95,9 @@ public class QueryParser {
 	 * @throws SmartScriptParserException on parse error
 	 */
 	private void parse() {
+		
 		boolean multipleAttributes = false;
+		
 		while (!isTokenType(QueryTokenType.EOF)) {
 
 			// Should be an attribute. Parse it.
@@ -148,13 +150,8 @@ public class QueryParser {
 			// If the given query has only a single attribute
 			if (!multipleAttributes) {
 
-				// Attribute must be jmbag
-				if (!attribute.equals("jmbag") ) {
-					parserException("Single command query must only be on jmbag!");
-				}
-
 				// Checks if it's a direct query
-				if (operatorValue.equals("=") ) {
+				if (attribute.equals("jmbag") && operatorValue.equals("=") ) {
 					isDirectQuery = true;
 					directQueryJmbag = stringLiteral;
 				}
@@ -162,6 +159,11 @@ public class QueryParser {
 			}
 
 			expressionsList.add(new ConditionalExpression(valueGetter, stringLiteral, operator));
+		}
+		
+		// No commands were inputted
+		if(expressionsList.isEmpty()) {
+			parserException("There must be at least one command!");
 		}
 	}
 

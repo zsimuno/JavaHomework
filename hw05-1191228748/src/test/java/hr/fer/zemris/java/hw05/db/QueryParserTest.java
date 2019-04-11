@@ -25,7 +25,10 @@ class QueryParserTest {
 	
 	@Test
 	void testSingleNonJmbag() {
-		assertThrows(QueryParserException.class, () -> new QueryParser("lastName  	=	\"0123456789\" "));
+		QueryParser qp2 = new QueryParser("lastName  	=	\"0123456789\" ");
+		assertFalse(qp2.isDirectQuery());
+		assertThrows(IllegalStateException.class, () -> qp2.getQueriedJMBAG());
+		assertEquals(1, qp2.getQuery().size());
 	}
 
 }

@@ -38,13 +38,13 @@ public class StudentDB {
 					Paths.get("./database.txt"),
 					StandardCharsets.UTF_8);
 		} catch (IOException e) {
-			System.out.println(e.getMessage());
+			System.out.println(e);
 			System.out.println("Coudn't read the file!");
 			return;
 		}
 
 		try {
-			studentDB = new StudentDatabase((String[]) lines.toArray());
+			studentDB = new StudentDatabase(lines);
 		} catch (IllegalArgumentException e) {
 			System.out.println(e.getMessage());
 			return;
@@ -82,9 +82,14 @@ public class StudentDB {
 			
 			List<StudentRecord> records = getFromDatabase(parser);
 			List<String> output = RecordFormatter.format(records);
+			if(parser.isDirectQuery()) {
+				output.add(0, "Using index for record retrieval.");
+			}
 			output.forEach(System.out::println);
 
 		}
+		
+		System.out.println("Goodbye!");
 		
 		sc.close();
 
@@ -98,13 +103,12 @@ public class StudentDB {
 	 * @return list of student records based on filtering conditions.
 	 */
 	private static List<StudentRecord> getFromDatabase(QueryParser parser) {
-
-		
-
 		if (parser.isDirectQuery()) {
 			StudentRecord r = studentDB.forJMBAG(parser.getQueriedJMBAG());
 			ArrayList<StudentRecord> list = new ArrayList<>();
-			list.add(r);
+			if(r != null) {
+				list.add(r);
+			}
 			return list;
 			
 		} else {

@@ -3,6 +3,8 @@
  */
 package hr.fer.zemris.java.hw05.db.demo;
 
+import java.util.Arrays;
+
 import hr.fer.zemris.java.hw05.db.*;
 
 /**
@@ -109,7 +111,7 @@ public class DatabaseDemos {
 				"0000000056	Šimunović	Veljko	5",
 				"0000000057	Širanović	Hrvoje	2" };
 
-		StudentDatabase db = new StudentDatabase(students);
+		StudentDatabase db = new StudentDatabase(Arrays.asList(students));
 		
 		QueryParser parser = new QueryParser("jmbag		 = \"0000000051\"");
 		if (parser.isDirectQuery()) {

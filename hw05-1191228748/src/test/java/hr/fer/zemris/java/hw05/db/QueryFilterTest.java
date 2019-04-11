@@ -3,6 +3,7 @@ package hr.fer.zemris.java.hw05.db;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ class QueryFilterTest {
 				"0000000056	Pimunović	Veljko	5",
 				"0000000057	Piranović	Hrvoje	2" };
 
-		db = new StudentDatabase(students);
+		db = new StudentDatabase(Arrays.asList(students));
 	}
 
 	@Test

@@ -62,14 +62,19 @@ public class LSystemBuilderImpl implements LSystemBuilder {
 	private String axiom = "";
 
 	/**
+	 * Builds an LSystem
 	 * 
+	 * @return newly built LSystem
 	 */
 	@Override
 	public LSystem build() {
 		LSystem localLSystem = new LSystem() {
 
 			/**
+			 * Generates string from axiom and productions based on level.
 			 * 
+			 * @param level level which we want to generate
+			 * @return string generated from axiom and productions based on level.
 			 */
 			@Override
 			public String generate(int level) {
@@ -92,7 +97,8 @@ public class LSystemBuilderImpl implements LSystemBuilder {
 			/**
 			 * Draws in the given level with a given painter
 			 * 
-			 * @param arg0 given level
+			 * @param level   given level
+			 * @param painter given painter
 			 */
 			@Override
 			public void draw(int level, Painter painter) {
@@ -121,11 +127,14 @@ public class LSystemBuilderImpl implements LSystemBuilder {
 	}
 
 	/**
-	 * @throws IllegalArgumentException
+	 * Configures an LSystem from text..
+	 * 
+	 * @param lines lines of text with which we build the builder
+	 * @return LSystem builder made from given lines of text
+	 * @throws IllegalArgumentException if the text is invalid
 	 */
 	@Override
 	public LSystemBuilder configureFromText(String[] lines) {
-		// TODO Mozda provjeravati je li input valjan
 
 		for (String line : lines) {
 
@@ -156,38 +165,49 @@ public class LSystemBuilderImpl implements LSystemBuilder {
 
 			case "command":
 				if (currentLine.length == 1)
-					throw new IllegalArgumentException("Invalid command input " + line +"!");
+					throw new IllegalArgumentException("Invalid command input " + line + "!");
+				
+				// Symbol must be one letter
+				if(currentLine[1].length() != 1) 
+					throw new IllegalArgumentException("Invalid command input " + line + "!");
 
-				// TODO Maybe check for invalid input
 				// Checks if it's a one word command or two word command
 				Command command = parseCommand(
 						(currentLine.length == 3) ? currentLine[2] : currentLine[2] + " " + currentLine[3]);
-
+				
 				registeredCommands.put(currentLine[1].charAt(0), command);
 				break;
 
 			case "axiom":
 				if (currentLine.length < 2)
-					throw new IllegalArgumentException("Invalid command input " + line +"!");
+					throw new IllegalArgumentException("Invalid command input " + line + "!");
 
 				axiom = currentLine[1];
 				break;
 
 			case "production":
 				if (currentLine.length == 1)
-					throw new IllegalArgumentException("Invalid command input " + line +"!");
+					throw new IllegalArgumentException("Invalid command input " + line + "!");
+				
+				// Symbol must be one letter
+				if(currentLine[1].length() != 1) 
+					throw new IllegalArgumentException("Invalid command input " + line + "!");
+				
 				registeredProductions.put(currentLine[1].charAt(0), currentLine[2]);
 				break;
 
 			default:
-				throw new IllegalArgumentException("Invalid command " + line +"!");
+				throw new IllegalArgumentException("Invalid command " + line + "!");
 			}
 		}
 		return this;
 	}
 
 	/**
+	 * Registers one command
 	 * 
+	 * @param symbol the symbol of command
+	 * @param action action of the command
 	 */
 	@Override
 	public LSystemBuilder registerCommand(char symbol, String action) {
@@ -198,36 +218,44 @@ public class LSystemBuilderImpl implements LSystemBuilder {
 	/**
 	 * Gets the command in string form and returns it as a {@link Command} object
 	 * 
-	 * @param string
-	 * @throws @return
+	 * @param string command as string
+	 * @return given command as {@link Command} object
+	 * @throws IllegalArgumentException if the command is invalid
 	 */
 	private Command parseCommand(String string) {
 		String[] command = string.split("\\s+");
-		// TODO mozda provjeriti ako nije dobro napisano?
+
 		switch (command[0]) {
 		case "draw":
+			checkLength(command, 2);
 			return new DrawCommand(parseNumber(command, 1));
 
 		case "skip":
+			checkLength(command, 2);
 			return new SkipCommand(parseNumber(command, 1));
 
 		case "scale":
+			checkLength(command, 2);
 			return new ScaleCommand(parseNumber(command, 1));
 
 		case "rotate":
+			checkLength(command, 2);
 			return new RotateCommand(parseNumber(command, 1));
 
 		case "push":
+			checkLength(command, 1);
 			return new PushCommand();
 
 		case "pop":
+			checkLength(command, 1);
 			return new PopCommand();
 
 		case "color":
+			checkLength(command, 2);
 			try {
 				return new ColorCommand(Color.decode("#" + command[1]));
 			} catch (NumberFormatException | IndexOutOfBoundsException e) {
-				throw new IllegalArgumentException("Invalid command input "+ string +"!");
+				throw new IllegalArgumentException("Invalid command input " + string + "!");
 			}
 
 		default:
@@ -237,8 +265,23 @@ public class LSystemBuilderImpl implements LSystemBuilder {
 	}
 
 	/**
-	 * @param string
-	 * @return
+	 * Checks if the array is expected size and throws exception if it's not
+	 * 
+	 * @param array          array we check
+	 * @param expectedLength expected length of the array
+	 * @throws IllegalArgumentException if there are wrong number of elements
+	 */
+	private void checkLength(String[] array, int expectedLength) {
+		if (array.length != expectedLength)
+			throw new IllegalArgumentException("Invalid command!");
+	}
+
+	/**
+	 * Parses a double from a string array at given index.
+	 * 
+	 * @param string string array
+	 * @param index  index of element we wan to parse to double
+	 * @return given number as {@link Double} object
 	 */
 	private Double parseNumber(String[] string, int index) {
 		try {
@@ -249,7 +292,10 @@ public class LSystemBuilderImpl implements LSystemBuilder {
 	}
 
 	/**
+	 * Registers one production
 	 * 
+	 * @param symbol     the symbol of production
+	 * @param production the production
 	 */
 	@Override
 	public LSystemBuilder registerProduction(char symbol, String production) {
@@ -258,7 +304,9 @@ public class LSystemBuilderImpl implements LSystemBuilder {
 	}
 
 	/**
+	 * Sets the angle
 	 * 
+	 * @return this LSystemBuilder
 	 */
 	@Override
 	public LSystemBuilder setAngle(double arg0) {
@@ -267,7 +315,9 @@ public class LSystemBuilderImpl implements LSystemBuilder {
 	}
 
 	/**
+	 * Sets the axiom
 	 * 
+	 * @return this LSystemBuilder
 	 */
 	@Override
 	public LSystemBuilder setAxiom(String axiom) {
@@ -276,7 +326,9 @@ public class LSystemBuilderImpl implements LSystemBuilder {
 	}
 
 	/**
+	 * Sets the origin
 	 * 
+	 * @return this LSystemBuilder
 	 */
 	@Override
 	public LSystemBuilder setOrigin(double x, double y) {
@@ -285,7 +337,9 @@ public class LSystemBuilderImpl implements LSystemBuilder {
 	}
 
 	/**
+	 * Sets the unit length
 	 * 
+	 * @return this LSystemBuilder
 	 */
 	@Override
 	public LSystemBuilder setUnitLength(double unitLength) {
@@ -294,7 +348,9 @@ public class LSystemBuilderImpl implements LSystemBuilder {
 	}
 
 	/**
+	 * Sets the unit length degree scaler
 	 * 
+	 * @return this LSystemBuilder
 	 */
 	@Override
 	public LSystemBuilder setUnitLengthDegreeScaler(double unitLengthDegreeScaler) {

@@ -9,14 +9,6 @@ package hr.fer.zemris.java.hw05.db.querylexer;
  * @author Zvonimir Šimunović
  *
  */
-/**
- * @author Zvonimir Šimunović
- *
- */
-/**
- * @author Zvonimir Šimunović
- *
- */
 public class QueryLexer {
 
 	/**

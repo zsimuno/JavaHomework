@@ -4,7 +4,7 @@
 package hr.fer.zemris.java.hw05.db;
 
 /**
- * TODO javadoc
+ * Class that contains one conditional expression used to filter student records.
  * 
  * @author Zvonimir Šimunović
  *
@@ -12,24 +12,28 @@ package hr.fer.zemris.java.hw05.db;
 public class ConditionalExpression {
 
 	/**
-	 * 
+	 * Used for retrieving the desired field for comparison
 	 */
 	private IFieldValueGetter fieldGetter;
 
 	/**
-	 * 
+	 * String to which the student record field is compared to
 	 */
 	private String stringLiteral;
 
 	/**
-	 * 
+	 * Operator which we use to compare the string literal and student record field
 	 */
 	private IComparisonOperator comparisonOperator;
 
 	/**
-	 * @param fieldGetter
-	 * @param stringLiteral
-	 * @param comparisonOperator
+	 * Constructs a {@link ConditionalExpression} object
+	 * 
+	 * @param fieldGetter        Used for retrieving the desired field for
+	 *                           comparison
+	 * @param stringLiteral      String to which the student record field is
+	 *                           compared to
+	 * @param comparisonOperator Operator which we use to compare
 	 */
 	public ConditionalExpression(IFieldValueGetter fieldGetter, String stringLiteral,
 			IComparisonOperator comparisonOperator) {
@@ -39,6 +43,8 @@ public class ConditionalExpression {
 	}
 
 	/**
+	 * Returns field getter used for retrieving the desired field for comparison
+	 * 
 	 * @return the fieldGetter
 	 */
 	public IFieldValueGetter getFieldGetter() {
@@ -46,6 +52,8 @@ public class ConditionalExpression {
 	}
 
 	/**
+	 * Returns string to which the student record field is compared to
+	 * 
 	 * @return the stringLiteral
 	 */
 	public String getStringLiteral() {
@@ -53,6 +61,9 @@ public class ConditionalExpression {
 	}
 
 	/**
+	 * Returns the operator which we use to compare the string literal and student
+	 * record field
+	 * 
 	 * @return the comparisonOperator
 	 */
 	public IComparisonOperator getComparisonOperator() {

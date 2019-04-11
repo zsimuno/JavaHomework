@@ -45,14 +45,14 @@ public class StudentDatabase {
 	 * @param lines lines where every line is one student record
 	 * @throws IllegalArgumentException if the input database is invalid
 	 */
-	public StudentDatabase(String[] lines) {
+	public StudentDatabase(List<String> lines) {
 		
 		
 		
 		for (String lineString : lines) {
 			String[] line = lineString.split("\\s+");
 
-			if (line.length != 4) {
+			if (line.length != 4 && line.length != 5) {
 				throw new IllegalArgumentException("Invalid input from file! Input: " + String.join(" ", line));
 			}
 
@@ -60,12 +60,28 @@ public class StudentDatabase {
 				throw new IllegalArgumentException("There are duplicate JMBAGs!");
 			}
 
-			if (!grades.contains(line[3])) {
-				throw new IllegalArgumentException("Invalid grade input " + line[3] + "!");
+			
+			
+			
+			StudentRecord record;
+			
+			// Multiple last names?
+			if(line.length == 5) {
+				
+				if (!grades.contains(line[4])) {
+					throw new IllegalArgumentException("Invalid grade input " + line[3] + "!");
+				}
+				record = new StudentRecord(line[0], line[1] + line[2], line[3], line[4]);
+				
+			} else {
+				
+				if (!grades.contains(line[3])) {
+					throw new IllegalArgumentException("Invalid grade input " + line[3] + "!");
+				}
+				record = new StudentRecord(line[0], line[1], line[2], line[3]);
+				
 			}
 			
-
-			StudentRecord record = new StudentRecord(line[0], line[1], line[2], line[3]);
 
 			studentRecords.add(record);
 			database.put(line[0], record);

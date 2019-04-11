@@ -5,6 +5,7 @@ package hr.fer.zemris.java.hw05.db;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -27,7 +28,7 @@ class StudentDatabaseTest {
 				"0000000056	Pimunović	Veljko	5",
 				"0000000057	Piranović	Hrvoje	2" };
 
-		db = new StudentDatabase(students);
+		db = new StudentDatabase(Arrays.asList(students));
 	}
 
 	@Test
@@ -37,7 +38,7 @@ class StudentDatabaseTest {
 				"0000000051	Skočir	Andro	4",
 				"0000000050	Slijepčević	Josip	5", };
 
-		assertThrows(IllegalArgumentException.class, () -> new StudentDatabase(studentList));
+		assertThrows(IllegalArgumentException.class, () -> new StudentDatabase(Arrays.asList(studentList)));
 	}
 	
 	@Test
@@ -47,7 +48,7 @@ class StudentDatabaseTest {
 				"0000000051	Skočir	Andro	12",
 				"0000000050	Slijepčević	Josip	5", };
 
-		assertThrows(IllegalArgumentException.class, () -> new StudentDatabase(studentList));
+		assertThrows(IllegalArgumentException.class, () -> new StudentDatabase(Arrays.asList(studentList)));
 	}
 
 	@Test
