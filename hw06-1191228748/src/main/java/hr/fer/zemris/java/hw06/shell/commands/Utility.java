@@ -61,11 +61,33 @@ public class Utility {
 
 				StringBuilder argument = new StringBuilder();
 
-				while (true) {
-					argument.append(args.charAt(i));
+				while (i < argsLenght && args.charAt(i) != '\"') {
+					char currentChar = args.charAt(i);
 
-					if (i >= argsLenght || args.charAt(i) == '\"') {
-						break;
+					if (currentChar == '\\') {
+						i++; // Skip the backslash
+						
+						// Quoted path was not closed
+						if (i == argsLenght) {
+							throw new IllegalArgumentException("Invalid quoted path!");
+						}
+
+						switch (args.charAt(i)) {
+						case '\\':
+							argument.append('\\');
+							break;
+						case '\"':
+							argument.append('\"');
+							break;
+
+						default:
+							argument.append("\\\\");
+							i--; // Don't skip current unescaped character
+							break;
+						}
+						
+					} else {
+						argument.append(currentChar);
 					}
 
 					i++;
@@ -74,19 +96,22 @@ public class Utility {
 				if (i >= argsLenght) { // Quoted path was not closed
 					throw new IllegalArgumentException("Invalid quoted path!");
 				}
+				
+
+				i++; // Skip quote
+				
+				if(i < argsLenght && !Character.isWhitespace(args.charAt(i))) {
+					throw new IllegalArgumentException("Invalid argument!");
+				}
 
 				arguments.add(argument.toString());
 
-			} else { // Not quoted path
+			} else { // Not quoted path or some argument
 				StringBuilder argument = new StringBuilder();
 
-				while (true) {
+				while (i < argsLenght && !Character.isWhitespace(args.charAt(i))) {
 					argument.append(args.charAt(i));
-
-					if (i >= argsLenght || Character.isWhitespace(args.charAt(i))) {
-						break;
-					}
-
+					
 					i++;
 				}
 
@@ -95,7 +120,7 @@ public class Utility {
 
 		}
 
-		return (String[]) arguments.toArray();
+		return arguments.toArray(new String[arguments.size()]);
 	}
 
 	/**
@@ -106,6 +131,50 @@ public class Utility {
 	 */
 	public static String[] parseNonPathArguments(String argumentsString) {
 		return argumentsString.split("\\s+");
+	}
+
+	/**
+	 * Converts a byte array in to a string array representation of a hexadecimal
+	 * number. Turns every byte array member in one String array member in hex
+	 * representation.
+	 * 
+	 * @param byteArray byte array of numbers
+	 * @param length    index of last element in the byte array
+	 * @return string array representation of the byte array
+	 */
+	public static String[] bytetohex(byte[] byteArray, int length) {
+		if (byteArray.length == 0)
+			return new String[0];
+
+		ArrayList<String> result = new ArrayList<String>();
+
+		for (int i = 0; i < length; i++) {
+			int current = (byteArray[i] < 0) ? 256 + byteArray[i] : byteArray[i];
+
+			int second = current % 16;
+			current /= 16;
+
+			result.add(toHex(current % 16) + toHex(second));
+
+		}
+
+		return result.toArray(new String[result.size()]);
+
+	}
+
+	/**
+	 * Converts integer to hexadecimal string
+	 * 
+	 * @param number integer to be converted
+	 * @return hexadecimal string
+	 */
+	private static String toHex(int number) {
+		if (number > 9) {
+			return Character.toString('A' + number - 10);
+		}
+
+		return Integer.toString(number);
+
 	}
 
 }

@@ -17,6 +17,8 @@ import hr.fer.zemris.java.hw06.shell.commands.*;
  *
  */
 public class MyShell {
+	
+	
 
 	/**
 	 * Main method that starts the program.
@@ -25,8 +27,8 @@ public class MyShell {
 	 */
 	public static void main(String[] args) {
 
-
 		Scanner sc = new Scanner(System.in);
+
 
 		Environment environment = new Environment() {
 			/**
@@ -37,7 +39,7 @@ public class MyShell {
 			// Input all commands in the map
 			{
 				commands = new TreeMap<>();
-				commands.put("cat", new LsShellCommand());
+				commands.put("cat", new CatShellCommand());
 				commands.put("charsets", new CharsetsShellCommand());
 				commands.put("copy", new CopyShellCommand());
 				commands.put("exit", new ExitShellCommand());
@@ -64,7 +66,6 @@ public class MyShell {
 
 			@Override
 			public void writeln(String text) throws ShellIOException {
-				// TODO kada exception ovdje i u upisu?
 				System.out.println(text);
 
 			}
@@ -95,27 +96,7 @@ public class MyShell {
 
 			@Override
 			public String readLine() throws ShellIOException {
-				System.out.printf("%c ", promptSymbol);
-
-				StringBuilder input = new StringBuilder();
-				while (true) {
-
-					// Input from user
-					String nextLine = sc.nextLine().trim();
-
-					// If more lines
-					if (nextLine.endsWith(moreLinesSymbol.toString())) {
-						System.out.printf("%c ", multiLinesSymbol);
-
-						// Deleting multi lines symbol
-						input.append(nextLine.substring(0, nextLine.length() - 1));
-
-					} else {
-						input.append(nextLine);
-						break;
-					}
-				}
-				return input.toString();
+				return sc.nextLine();
 			}
 
 			@Override
@@ -140,23 +121,45 @@ public class MyShell {
 			}
 		};
 
-		System.out.println("Welcome to MyShell v 1.0");
+		environment.writeln("Welcome to MyShell v 1.0");
 
 		SortedMap<String, ShellCommand> commands = environment.commands();
 
 		ShellStatus status = ShellStatus.CONTINUE;
 		do {
 			String userInput;
+			// Read user input
 			try {
-				userInput = environment.readLine(); // TODO mozda ovo treba biti za jednu liniju samo 
+				environment.write(environment.getPromptSymbol().toString() + " ");
+
+				StringBuilder input = new StringBuilder();
+				while (true) {
+
+					// Input from user
+					String nextLine = environment.readLine().trim();
+
+					// If more lines
+					if (nextLine.endsWith(environment.getMorelinesSymbol().toString())) {
+						environment.write(environment.getMultilineSymbol().toString() + " ");
+
+						// Deleting multi lines symbol
+						input.append(nextLine.substring(0, nextLine.length() - 1));
+
+					} else {
+						input.append(nextLine);
+						break;
+					}
+				}
+				
+				userInput = input.toString();
 				
 			} catch (ShellIOException e) {
-				System.out.println(e.getMessage());
+				environment.writeln(e.getMessage());
 				break;
 			}
 			
 			if(userInput.isBlank()) {
-				System.out.println("A command must be inputted!");
+				environment.writeln("A command must be inputted!");
 				continue;
 			}
 			
@@ -164,12 +167,21 @@ public class MyShell {
 			String arguments = extractArguments(userInput);
 
 			if(!commands.containsKey(commandName)) {
-				System.out.println("No such command!");
+				environment.writeln("No such command!");
 				continue;
 			}
 			
 			ShellCommand command = commands.get(commandName);
-			status = command.executeCommand(environment, arguments);
+			
+			// Watch out for writing or reading errors
+			try {
+				status = command.executeCommand(environment, arguments); 
+				
+			} catch (ShellIOException e) {
+				environment.writeln(e.getMessage());
+				break;
+			}
+			
 
 		} while (status != ShellStatus.TERMINATE);
 

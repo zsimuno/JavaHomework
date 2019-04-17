@@ -24,10 +24,11 @@ public class TreeShellCommand implements ShellCommand {
 
 	@Override
 	public ShellStatus executeCommand(Environment env, String arguments) {
-		// TODO TreeShellCommand executeCommand
+		// TODO Tree check and finish
 		String[] args;
 		try {
 			args = Utility.parseMultipleArguments(arguments);
+			
 		} catch (IllegalArgumentException e) {
 			env.writeln(e.getMessage());
 			return ShellStatus.CONTINUE;
@@ -41,12 +42,17 @@ public class TreeShellCommand implements ShellCommand {
 		String directoryPath = args[0];
 		
 		Path directory = Paths.get(directoryPath);
+		
+		if(!Files.isDirectory(directory)) {
+			env.writeln("Argument is not a directory!");
+			return ShellStatus.CONTINUE;
+		}
 
 		// TODO Handle exceptions
 		try {
 			Files.walkFileTree(directory, new TreeOutput());
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			env.writeln("Eror while drawing tree: " + e.getMessage());
 		}
 		
@@ -71,8 +77,7 @@ public class TreeShellCommand implements ShellCommand {
 
 		@Override
 		public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-			// TODO Auto-generated method stub
-			return null;
+			return FileVisitResult.CONTINUE;
 		}
 
 		@Override

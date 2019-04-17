@@ -159,7 +159,7 @@ public class Crypto {
 		Path p = Paths.get(filePath1);
 		Path p2 = Paths.get(filePath2);
 
-		// Open the file input stream
+		// Open the file input and output stream
 		try (InputStream is = Files.newInputStream(p); OutputStream os = Files.newOutputStream(p2)) {
 			byte[] buff = new byte[1024];
 			

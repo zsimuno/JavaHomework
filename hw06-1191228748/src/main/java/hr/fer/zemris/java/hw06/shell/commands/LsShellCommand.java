@@ -1,6 +1,7 @@
 package hr.fer.zemris.java.hw06.shell.commands;
 
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -27,8 +28,8 @@ public class LsShellCommand implements ShellCommand {
 
 	@Override
 	public ShellStatus executeCommand(Environment env, String arguments) {
-		// TODO LsShellCommand executeCommand
-		
+		// TODO Ls maybe finish
+
 		String[] args;
 		try {
 			args = Utility.parseMultipleArguments(arguments);
@@ -36,25 +37,57 @@ public class LsShellCommand implements ShellCommand {
 			env.writeln(e.getMessage());
 			return ShellStatus.CONTINUE;
 		}
-		
-		if(args.length != 1) {
+
+		if (args.length != 1) {
 			env.writeln("Invalid number of arguments!");
 			return ShellStatus.CONTINUE;
 		}
-		
-		String directoryPath = args[0];
-		
 
-//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//		Path path = Paths.get("d:/tmp/javaPrimjeri/readme.txt");
-//		BasicFileAttributeView faView = Files.getFileAttributeView(
-//		path, BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS
-//		);
-//		BasicFileAttributes attributes = faView.readAttributes();
-//		FileTime fileTime = attributes.creationTime();
-//		String formattedDateTime = sdf.format(new Date(fileTime.toMillis()));
-//		System.out.println(formattedDateTime);
-		
+		// Get the directory path
+		Path directoryPath = Paths.get(args[0]);
+
+		if (!Files.isDirectory(directoryPath)) {
+			env.writeln("Not a directory!");
+			return ShellStatus.CONTINUE;
+		}
+
+		// Get all files and directories and write the necessary data
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(directoryPath)) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+			for (Path path : stream) {
+
+				BasicFileAttributeView faView = Files.getFileAttributeView(path, BasicFileAttributeView.class,
+						LinkOption.NOFOLLOW_LINKS);
+				BasicFileAttributes attributes = faView.readAttributes();
+
+				// First column
+				String directory = attributes.isDirectory() ? "d" : "-";
+				String readable = Files.isReadable(path) ? "r" : "-";
+				String writable = Files.isWritable(path) ? "w" : "-";
+				String executable = Files.isExecutable(path) ? "x" : "-";
+
+				// Second column
+				String fileSize = Long.toString(Files.size(path));
+				fileSize = " ".repeat(10 - fileSize.length()) + fileSize;
+
+				// Third column
+				FileTime fileTime = attributes.creationTime();
+				String formattedDateTime = sdf.format(new Date(fileTime.toMillis()));
+
+				// Last column
+				String name = path.getFileName().toString();
+
+				// Write it to the user
+				env.writeln(directory + readable + writable + executable + " " + fileSize + " " + formattedDateTime
+						+ " " + name);
+
+			}
+		} catch (IOException e) {
+			env.writeln(e.getMessage());
+			return ShellStatus.CONTINUE;
+		}
+
 		return ShellStatus.CONTINUE;
 	}
 
@@ -68,8 +101,8 @@ public class LsShellCommand implements ShellCommand {
 		return Utility.turnToUnmodifiableList(new String[] {
 				"takes a single argument – directory – and writes a directory listing (not recursive).",
 				"The output consists of 4 columns. First column indicates if current object is directory ( d ), readable ( r ),",
-				"writable ( w ) and executable ( x ). Second column contains object size in bytes." ,
-				"Follows file creation date/time and finally file name."});
+				"writable ( w ) and executable ( x ). Second column contains object size in bytes.",
+				"Follows file creation date/time and finally file name." });
 	}
 
 }

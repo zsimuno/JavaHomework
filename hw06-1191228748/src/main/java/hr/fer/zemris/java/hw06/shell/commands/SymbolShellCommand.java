@@ -16,23 +16,22 @@ public class SymbolShellCommand implements ShellCommand {
 
 	@Override
 	public ShellStatus executeCommand(Environment env, String arguments) {
-		// TODO parse arguments in symbol command
 		
 		String[] args = Utility.parseNonPathArguments(arguments);
 		
 		if(args.length == 1) { // Get symbol
-			
+			Character symbol;
 			switch (args[0]) {
 			case "PROMPT":
-				env.getPromptSymbol();
+				symbol = env.getPromptSymbol();
 				break;
 				
 			case "MORELINES":
-				env.getMorelinesSymbol();
+				symbol = env.getMorelinesSymbol();
 				break;
 				
 			case "MULTILINE":
-				env.getMultilineSymbol();
+				symbol = env.getMultilineSymbol();
 				break;
 				
 			default:
@@ -40,25 +39,31 @@ public class SymbolShellCommand implements ShellCommand {
 				return ShellStatus.CONTINUE;
 			}
 			
+			env.writeln("Symbol for " + args[0] + " is '" + symbol.toString() + "'");
+			
 		} else if (args.length == 2) { // Change symbol
 
 			// Is given symbol one character
-			if(args[0].length() != 1) {
+			if(args[1].length() != 1) {
 				env.writeln("Symbols are single character only!");
 				return ShellStatus.CONTINUE;
 			}
-			char newSymbol = args[1].charAt(0);
+			Character newSymbol = args[1].charAt(0);
+			Character oldSymbol;
 			
 			switch (args[0]) {
 			case "PROMPT":
+				oldSymbol = env.getPromptSymbol();
 				env.setPromptSymbol(newSymbol);
 				break;
 				
 			case "MORELINES":
+				oldSymbol = env.getMorelinesSymbol();
 				env.setMorelinesSymbol(newSymbol);
 				break;
 				
 			case "MULTILINE":
+				oldSymbol = env.getMultilineSymbol();
 				env.setMultilineSymbol(newSymbol);
 				break;
 				
@@ -66,6 +71,9 @@ public class SymbolShellCommand implements ShellCommand {
 				env.writeln("No such shell symbol.");
 				return ShellStatus.CONTINUE;
 			}
+			
+			env.writeln("Symbol for " + args[0] + " changed from '" + oldSymbol.toString() + "' to '" + newSymbol.toString() + "'");
+			
 		} else {
 			env.writeln("Wrong number of arguments.");
 		}
