@@ -20,11 +20,11 @@ public class MkdirShellCommand implements ShellCommand {
 
 	@Override
 	public ShellStatus executeCommand(Environment env, String arguments) {
-		// TODO Mkdir maybe finish
 		
 		String[] args;
 		try {
 			args = Utility.parseMultipleArguments(arguments);
+			
 		} catch (IllegalArgumentException e) {
 			env.writeln(e.getMessage());
 			return ShellStatus.CONTINUE;

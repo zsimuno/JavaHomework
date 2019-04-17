@@ -15,18 +15,6 @@ import java.util.Arrays;
 public class Util {
 
 	/**
-	 * COntains valid hexadecimal numbers
-	 */
-	private static List<Character> validHexChars;
-
-	static {
-		validHexChars = Arrays
-				.asList(new Character[] { 
-						'0','1', '2', '3', '4', '5', '6', '7', '8', '9',
-						'a', 'b', 'c', 'd', 'e', 'f' });
-	}
-
-	/**
 	 * Converts a string representation of a hexadecimal number in to a byte array.
 	 * 
 	 * @param keyText string representation of a hexadecimal number
@@ -45,7 +33,7 @@ public class Util {
 			Character c1 = Character.toLowerCase(keyText.charAt(i));
 			Character c2 = Character.toLowerCase(keyText.charAt(i + 1));
 
-			if (!validHexChars.contains(c1) || !validHexChars.contains(c2)) {
+			if (!isValidHexChar(c1) || !isValidHexChar(c2)) {
 				throw new IllegalArgumentException("Invalid character!");
 			}
 
@@ -55,6 +43,26 @@ public class Util {
 
 		return result;
 
+	}
+
+	/**
+	 * COntains valid hexadecimal numbers
+	 */
+	private static List<Character> validHexChars;
+
+	static {
+		validHexChars = Arrays.asList(new Character[] { 'a', 'b', 'c', 'd', 'e', 'f' });
+	}
+
+	/**
+	 * Checks if the given character is a valid lower case hex character.
+	 * 
+	 * @param ch character to be checked
+	 * @return {@code true} if the character is a valid hex character, {@code false}
+	 *         otherwise
+	 */
+	private static boolean isValidHexChar(Character ch) {
+		return Character.isDigit(ch) || validHexChars.contains(ch);
 	}
 
 	/**
@@ -82,23 +90,23 @@ public class Util {
 	public static String bytetohex(byte[] byteArray) {
 		if (byteArray.length == 0)
 			return "";
-		
+
 		StringBuilder result = new StringBuilder();
 
 		for (int i = 0; i < byteArray.length; i++) {
 			int current = (byteArray[i] < 0) ? 256 + byteArray[i] : byteArray[i];
-			
-			 int second = current % 16;
-			 current /= 16;
-			 
-			 result.append(toHex(current % 16));
-			 result.append(toHex(second));
+
+			int second = current % 16;
+			current /= 16;
+
+			result.append(toHex(current % 16));
+			result.append(toHex(second));
 		}
-		
+
 		return result.toString();
 
 	}
-	
+
 	/**
 	 * Converts integer to hexadecimal string
 	 * 
@@ -106,11 +114,11 @@ public class Util {
 	 * @return hexadecimal string
 	 */
 	private static String toHex(int number) {
-		if(number > 9 ) {
-			return Character.toString('a' + number - 10 );
-		} 
-		
+		if (number > 9) {
+			return Character.toString('a' + number - 10);
+		}
+
 		return Integer.toString(number);
-			
+
 	}
 }

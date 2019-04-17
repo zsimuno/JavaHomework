@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests for {@link Util} class TODO more tests
+ * Tests for {@link Util} class
  * 
  * @author Zvonimir Šimunović
  *
@@ -74,7 +74,7 @@ class UtilTest {
 	@Test
 	void testToByteWrongChar() {
 		assertThrows(IllegalArgumentException.class, () -> {
-			Util.hextobyte("01aG22");
+			Util.hextobyte("0aG2");
 		});
 
 	}

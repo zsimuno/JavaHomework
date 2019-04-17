@@ -24,7 +24,7 @@ public class CopyShellCommand implements ShellCommand {
 
 	@Override
 	public ShellStatus executeCommand(Environment env, String arguments) {
-		// TODO Copy finish maybe
+
 		String[] args;
 		try {
 			args = Utility.parseMultipleArguments(arguments);

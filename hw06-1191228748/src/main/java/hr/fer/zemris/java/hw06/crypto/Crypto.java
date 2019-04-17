@@ -104,7 +104,7 @@ public class Crypto {
 
 		// Open the file input stream
 		try (InputStream is = Files.newInputStream(p)) {
-			byte[] buff = new byte[1024];
+			byte[] buff = new byte[4096];
 			while (true) {
 				int r = is.read(buff);
 				if (r == -1)
@@ -126,7 +126,7 @@ public class Crypto {
 
 		// Compare digests
 		if (expectedDigest.equals(actualDigest)) {
-			System.out.println("Digesting completed. Digest of hw06test.bin matches expected digest.");
+			System.out.println("Digesting completed. Digest of " + filePath + " matches expected digest.");
 
 		} else {
 			System.out.println("Digesting completed. Digest of " + filePath
@@ -161,11 +161,11 @@ public class Crypto {
 
 		// Open the file input and output stream
 		try (InputStream is = Files.newInputStream(p); OutputStream os = Files.newOutputStream(p2)) {
-			byte[] buff = new byte[1024];
-			
+			byte[] buff = new byte[4096];
+
 			while (true) {
 				int r = is.read(buff);
-				
+
 				if (r == -1) {
 					// Finishing the cipher
 					try {
@@ -176,7 +176,7 @@ public class Crypto {
 					}
 					break;
 				}
-					
+
 				// Update cipher and write into new file
 				os.write(cipher.update(buff, 0, r));
 			}
@@ -185,7 +185,6 @@ public class Crypto {
 			System.exit(1);
 
 		}
-
 
 		System.out.println((encrypt ? "Encryption" : "Decryption") + " completed. Generated file " + filePath2
 				+ " based on file " + filePath1 + ".");
@@ -223,7 +222,8 @@ public class Crypto {
 	}
 
 	/**
-	 * Checks if there are requested number of command line arguments.
+	 * Checks if there are requested number of command line arguments. Quits the
+	 * program if there is.
 	 * 
 	 * @param numberOfArgs number of arguments we need to have
 	 * @param args         command line arguments
@@ -231,7 +231,7 @@ public class Crypto {
 	private static void checkCmdArgs(int numberOfArgs, String[] args) {
 		if (args.length != numberOfArgs) {
 			System.out.println("Wrong number of command line arguments!");
-			return;
+			System.exit(1);
 		}
 
 	}

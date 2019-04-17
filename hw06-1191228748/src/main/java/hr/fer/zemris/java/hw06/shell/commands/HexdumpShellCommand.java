@@ -23,7 +23,7 @@ public class HexdumpShellCommand implements ShellCommand {
 
 	@Override
 	public ShellStatus executeCommand(Environment env, String arguments) {
-		// TODO Hex check and finish
+
 		String[] args;
 		try {
 			args = Utility.parseMultipleArguments(arguments);
@@ -57,8 +57,10 @@ public class HexdumpShellCommand implements ShellCommand {
 				if (r == -1)
 					break;
 
+				// Turn to array 
 				String[] hexArray = Utility.bytetohex(buff, r);
 
+				// Prepare to write and write if needed
 				for (int i = 0; i < hexArray.length; i++) {
 					lineCount++;
 
@@ -77,6 +79,7 @@ public class HexdumpShellCommand implements ShellCommand {
 						textLine.append(new String(buff, i, 1, Charset.defaultCharset()));
 					}
 
+					// Write a new line if needed
 					if (lineCount == 16) {
 						lineCount = 0;
 
@@ -101,6 +104,7 @@ public class HexdumpShellCommand implements ShellCommand {
 				if (lineCount != 0) {
 					StringBuilder output = new StringBuilder();
 
+					// Append whitespace in place of missing hex strings
 					while (lineCount != 16) {
 						lineCount++;
 						

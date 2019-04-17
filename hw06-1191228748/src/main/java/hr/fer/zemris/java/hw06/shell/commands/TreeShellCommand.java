@@ -24,7 +24,6 @@ public class TreeShellCommand implements ShellCommand {
 
 	@Override
 	public ShellStatus executeCommand(Environment env, String arguments) {
-		// TODO Tree check and finish
 		String[] args;
 		try {
 			args = Utility.parseMultipleArguments(arguments);
@@ -48,7 +47,6 @@ public class TreeShellCommand implements ShellCommand {
 			return ShellStatus.CONTINUE;
 		}
 
-		// TODO Handle exceptions
 		try {
 			Files.walkFileTree(directory, new TreeOutput());
 			

@@ -28,7 +28,6 @@ public class LsShellCommand implements ShellCommand {
 
 	@Override
 	public ShellStatus executeCommand(Environment env, String arguments) {
-		// TODO Ls maybe finish
 
 		String[] args;
 		try {

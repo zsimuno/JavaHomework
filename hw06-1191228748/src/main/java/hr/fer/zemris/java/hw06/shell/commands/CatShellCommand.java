@@ -27,8 +27,6 @@ public class CatShellCommand implements ShellCommand {
 
 	@Override
 	public ShellStatus executeCommand(Environment env, String arguments) {
-		// TODO Cat finish maybe
-
 		// Get arguments
 		String[] args;
 		try {
