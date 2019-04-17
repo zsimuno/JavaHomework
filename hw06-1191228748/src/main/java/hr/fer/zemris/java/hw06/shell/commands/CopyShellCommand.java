@@ -18,8 +18,25 @@ public class CopyShellCommand implements ShellCommand {
 
 	@Override
 	public ShellStatus executeCommand(Environment env, String arguments) {
-		// TODO executeCommand CopyShellCommand
-		return null;
+		// TODO CopyShellCommand executeCommand
+		String[] args;
+		try {
+			args = Utility.parseMultipleArguments(arguments);
+		} catch (IllegalArgumentException e) {
+			env.writeln(e.getMessage());
+			return ShellStatus.CONTINUE;
+		}
+		
+		if(args.length != 2) {
+			env.writeln("Invalid number of arguments!");
+			return ShellStatus.CONTINUE;
+		}
+		
+		String sourceFilePath = args[0];
+		String destinationPath = args[0]; // Can be file or directory
+		
+		
+		return ShellStatus.CONTINUE;
 	}
 
 	@Override

@@ -28,21 +28,34 @@ public class LsShellCommand implements ShellCommand {
 	@Override
 	public ShellStatus executeCommand(Environment env, String arguments) {
 		// TODO LsShellCommand executeCommand
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		Path path = Paths.get("d:/tmp/javaPrimjeri/readme.txt");
-		BasicFileAttributeView faView = Files.getFileAttributeView(path, BasicFileAttributeView.class,
-				LinkOption.NOFOLLOW_LINKS);
-		BasicFileAttributes attributes = null;
+		
+		String[] args;
 		try {
-			attributes = faView.readAttributes();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			args = Utility.parseMultipleArguments(arguments);
+		} catch (IllegalArgumentException e) {
+			env.writeln(e.getMessage());
+			return ShellStatus.CONTINUE;
 		}
-		FileTime fileTime = attributes.creationTime();
-		String formattedDateTime = sdf.format(new Date(fileTime.toMillis()));
-		System.out.println(formattedDateTime);
-		return null;
+		
+		if(args.length != 1) {
+			env.writeln("Invalid number of arguments!");
+			return ShellStatus.CONTINUE;
+		}
+		
+		String directoryPath = args[0];
+		
+
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//		Path path = Paths.get("d:/tmp/javaPrimjeri/readme.txt");
+//		BasicFileAttributeView faView = Files.getFileAttributeView(
+//		path, BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS
+//		);
+//		BasicFileAttributes attributes = faView.readAttributes();
+//		FileTime fileTime = attributes.creationTime();
+//		String formattedDateTime = sdf.format(new Date(fileTime.toMillis()));
+//		System.out.println(formattedDateTime);
+		
+		return ShellStatus.CONTINUE;
 	}
 
 	@Override

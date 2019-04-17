@@ -18,7 +18,22 @@ public class HexdumpShellCommand implements ShellCommand {
 	@Override
 	public ShellStatus executeCommand(Environment env, String arguments) {
 		// TODO HexdumpShellCommand executeCommand
-		return null;
+		String[] args;
+		try {
+			args = Utility.parseMultipleArguments(arguments);
+		} catch (IllegalArgumentException e) {
+			env.writeln(e.getMessage());
+			return ShellStatus.CONTINUE;
+		}
+		
+		if(args.length != 1) {
+			env.writeln("Invalid number of arguments!");
+			return ShellStatus.CONTINUE;
+		}
+		
+		String filePath = args[0];
+		
+		return ShellStatus.CONTINUE;
 	}
 
 	@Override

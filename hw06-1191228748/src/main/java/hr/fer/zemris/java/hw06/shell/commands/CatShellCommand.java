@@ -1,5 +1,6 @@
 package hr.fer.zemris.java.hw06.shell.commands;
 
+import java.nio.charset.Charset;
 import java.util.List;
 
 import hr.fer.zemris.java.hw06.shell.Environment;
@@ -22,7 +23,31 @@ public class CatShellCommand implements ShellCommand {
 
 	@Override
 	public ShellStatus executeCommand(Environment env, String arguments) {
-		// TODO  executeCommand CatShellCommand
+		// TODO CatShellCommand executeCommand
+
+		String[] args;
+		try {
+			args = Utility.parseMultipleArguments(arguments);
+		} catch (IllegalArgumentException e) {
+			env.writeln(e.getMessage());
+			return ShellStatus.CONTINUE;
+		}
+
+		
+		if(args.length == 1) {
+			String filePath = args[0];
+			Charset charset = Charset.defaultCharset();
+			
+			
+		} else if (args.length == 2) {
+			String filePath = args[0];
+			String charsetString = args[1];
+			
+			
+		} else {
+			env.writeln("Invalid number of arguments!");
+			
+		}
 
 		return ShellStatus.CONTINUE;
 	}
@@ -34,11 +59,11 @@ public class CatShellCommand implements ShellCommand {
 
 	@Override
 	public List<String> getCommandDescription() {
-		return Utility.turnToUnmodifiableList(new String[] {
-				"Takes one or two arguments. The first argument is path to some file and is mandatory.",
-				"The second argument is charset name that should be used to interpret chars from bytes.",
-				"If not provided, a default platform charset should be used.",
-				"This command opens given file and writes its content to console." });
+		return Utility.turnToUnmodifiableList(
+				new String[] { "Takes one or two arguments. The first argument is path to some file and is mandatory.",
+						"The second argument is charset name that should be used to interpret chars from bytes.",
+						"If not provided, a default platform charset should be used.",
+						"This command opens given file and writes its content to console." });
 	}
 
 }

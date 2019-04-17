@@ -24,7 +24,7 @@ public class CharsetsShellCommand implements ShellCommand {
 	public ShellStatus executeCommand(Environment env, String arguments) {
 
 		if (!Utility.hasNoArguments(arguments)) {
-			env.writeln("Wrong number of arguments");
+			env.writeln("Continue command takes no arguments!");
 			return ShellStatus.CONTINUE;
 		}
 

@@ -3,7 +3,7 @@
  */
 package hr.fer.zemris.java.hw06.shell.commands;
 
-import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.List;
  *
  */
 public class Utility {
-	
+
 	/**
 	 * Checks if there are no arguments.
 	 * 
@@ -25,61 +25,7 @@ public class Utility {
 	public static boolean hasNoArguments(String arguments) {
 		return arguments.isBlank();
 	}
-	
-	
-	// TODO paziti da mogu oba argumenta bit path sa navodnicima
-	
-	/**
-	 * Checks if there is one argument.
-	 * 
-	 * @param arguments the arguments.
-	 * @return {@code true} if there is one argument, {@code false} otherwise.
-	 */
-	public static boolean hasOneArgument(String arguments) {
-		if(!arguments.contains("\"")) {
-			return arguments.trim().contains(" ");
-		}
-		
-		for (int i = 0; i < arguments.length(); i++) {
-			
-		}
-		return arguments.trim().contains(" "); // TODO hasOneArgument 
-	}
-	
-	/**
-	 * Checks if there is two arguments.
-	 * 
-	 * @param arguments the arguments.
-	 * @return {@code true} if there is two arguments, {@code false} otherwise.
-	 */
-	public static boolean hasTwoArguments(String arguments) {
-		return arguments.split("\\s+").length == 2; // TODO hasTwoArguments
-	}
-	
-	
-	/**
-	 * Parses a given file path in to one readable by {@link Path} object.
-	 * 
-	 * @param path file path.
-	 * @return path readable by {@link Path} object.
-	 */
-	public static String parseFile(String path) {
-		return path;
-		// TODO parseFile
-	}
 
-	/**
-	 * Parses a given directory path in to one readable by {@link Path} object.
-	 * 
-	 * @param path directory path.
-	 * @return path readable by {@link Path} object.
-	 */
-	public static String parseDirectory(String path) {
-		return path;
-		// TODO parseDirectory
-	}
-	
-	
 	/**
 	 * Turns the given string array in to an unmodifiable list.
 	 * 
@@ -89,7 +35,77 @@ public class Utility {
 	public static List<String> turnToUnmodifiableList(String[] array) {
 		return Collections.unmodifiableList(Arrays.asList(array));
 	}
-	
-	
+
+	/**
+	 * Parses arguments that are file paths to array of arguments.
+	 * 
+	 * @param args the arguments that we parse to array.
+	 * @return array of path arguments.
+	 * @throws IllegalArgumentException if there was a parsing error.
+	 */
+	public static String[] parseMultipleArguments(String args) {
+		ArrayList<String> arguments = new ArrayList<>();
+
+		int argsLenght = args.length();
+
+		for (int i = 0; i < argsLenght; i++) {
+
+			char current = args.charAt(i);
+
+			if (Character.isWhitespace(current)) {
+				continue;
+
+			} else if (current == '\"') { // Quoted path
+
+				i++; // Skip quote
+
+				StringBuilder argument = new StringBuilder();
+
+				while (true) {
+					argument.append(args.charAt(i));
+
+					if (i >= argsLenght || args.charAt(i) == '\"') {
+						break;
+					}
+
+					i++;
+				}
+
+				if (i >= argsLenght) { // Quoted path was not closed
+					throw new IllegalArgumentException("Invalid quoted path!");
+				}
+
+				arguments.add(argument.toString());
+
+			} else { // Not quoted path
+				StringBuilder argument = new StringBuilder();
+
+				while (true) {
+					argument.append(args.charAt(i));
+
+					if (i >= argsLenght || Character.isWhitespace(args.charAt(i))) {
+						break;
+					}
+
+					i++;
+				}
+
+				arguments.add(argument.toString());
+			}
+
+		}
+
+		return (String[]) arguments.toArray();
+	}
+
+	/**
+	 * Parses arguments that are not paths. Result i string array of arguments.
+	 * 
+	 * @param argumentsString the arguments that we parse to array.
+	 * @return array of non-path arguments.
+	 */
+	public static String[] parseNonPathArguments(String argumentsString) {
+		return argumentsString.split("\\s+");
+	}
 
 }

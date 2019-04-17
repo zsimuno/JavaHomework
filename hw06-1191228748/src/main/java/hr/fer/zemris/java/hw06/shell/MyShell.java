@@ -46,6 +46,7 @@ public class MyShell {
 				commands.put("ls", new LsShellCommand());
 				commands.put("mkdir", new MkdirShellCommand());
 				commands.put("tree", new TreeShellCommand());
+				commands.put("symbol", new SymbolShellCommand());
 			}
 
 			/**
@@ -94,7 +95,7 @@ public class MyShell {
 
 			@Override
 			public String readLine() throws ShellIOException {
-				System.out.printf("%n%c ", promptSymbol);
+				System.out.printf("%c ", promptSymbol);
 
 				StringBuilder input = new StringBuilder();
 				while (true) {
@@ -103,11 +104,11 @@ public class MyShell {
 					String nextLine = sc.nextLine().trim();
 
 					// If more lines
-					if (nextLine.endsWith(moreLinesSymbol.toString() + "\n")) {
-						System.out.printf("%n%c ", multiLinesSymbol);
+					if (nextLine.endsWith(moreLinesSymbol.toString())) {
+						System.out.printf("%c ", multiLinesSymbol);
 
-						// Deleting new line and multi lines symbol
-						input.append(nextLine.substring(0, nextLine.length() - 2));
+						// Deleting multi lines symbol
+						input.append(nextLine.substring(0, nextLine.length() - 1));
 
 					} else {
 						input.append(nextLine);
@@ -149,8 +150,8 @@ public class MyShell {
 			try {
 				userInput = environment.readLine(); // TODO mozda ovo treba biti za jednu liniju samo 
 				
-			} catch (Exception e) {
-				System.out.println("Error while reading user input!");
+			} catch (ShellIOException e) {
+				System.out.println(e.getMessage());
 				break;
 			}
 			
@@ -203,7 +204,7 @@ public class MyShell {
 			return "";
 		} 
 
-		return input[0];
+		return input[1];
 	}
 
 }
