@@ -43,7 +43,14 @@ public class LsShellCommand implements ShellCommand {
 		}
 
 		// Get the directory path
-		Path directoryPath = Paths.get(args[0]);
+		Path directoryPath;
+		try {
+			directoryPath = Paths.get(args[0]);
+			
+		} catch (Exception e) {
+			env.writeln("Problem with given path!");
+			return ShellStatus.CONTINUE;
+		}
 
 		if (!Files.isDirectory(directoryPath)) {
 			env.writeln("Not a directory!");

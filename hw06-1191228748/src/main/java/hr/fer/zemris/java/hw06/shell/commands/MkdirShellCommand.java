@@ -35,7 +35,15 @@ public class MkdirShellCommand implements ShellCommand {
 			return ShellStatus.CONTINUE;
 		}
 
-		Path directoryPath = Paths.get(args[0]);
+		
+		Path directoryPath;
+		try {
+			directoryPath = Paths.get(args[0]);
+			
+		} catch (Exception e) {
+			env.writeln("Problem with given path!");
+			return ShellStatus.CONTINUE;
+		}
 		
 		if(Files.exists(directoryPath)  && Files.isDirectory(directoryPath)) {
 			env.writeln("Directory already exists!");

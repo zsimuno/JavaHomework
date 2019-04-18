@@ -44,8 +44,8 @@ public class CatShellCommand implements ShellCommand {
 		} else if (args.length == 2) { // Charset provided
 
 			String charsetString = args[1];
-			
-			if(!Charset.isSupported(charsetString)) {
+
+			if (!Charset.isSupported(charsetString)) {
 				env.writeln("Invalid charset!");
 				return ShellStatus.CONTINUE;
 			}
@@ -62,15 +62,22 @@ public class CatShellCommand implements ShellCommand {
 			return ShellStatus.CONTINUE;
 		}
 
-		// Get file
-		Path path = Paths.get(args[0]);
+		Path path;
+		try {
+			// Get file
+			path = Paths.get(args[0]);
+		} catch (Exception e) {
+			env.writeln("Problem with given path!");
+			return ShellStatus.CONTINUE;
+		}
+		
 
 		if (Files.isDirectory(path)) {
 			env.writeln("Can't use the command on directories!");
 			return ShellStatus.CONTINUE;
 		}
-				
-		if(!Files.isReadable(path)) {
+
+		if (!Files.isReadable(path)) {
 			env.writeln("File is not readable!");
 			return ShellStatus.CONTINUE;
 		}
@@ -83,9 +90,9 @@ public class CatShellCommand implements ShellCommand {
 			});
 
 		} catch (Exception e) {
-			env.writeln(e.getMessage());
+			env.writeln("File cannot be read!");
 			return ShellStatus.CONTINUE;
-		}
+		} 
 
 		return ShellStatus.CONTINUE;
 	}

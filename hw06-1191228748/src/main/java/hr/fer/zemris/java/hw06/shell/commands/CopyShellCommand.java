@@ -38,8 +38,15 @@ public class CopyShellCommand implements ShellCommand {
 			return ShellStatus.CONTINUE;
 		}
 
-		Path sourceFilePath = Paths.get(args[0]);
-		Path destinationPath = Paths.get(args[1]); // Can be file or directory
+		Path sourceFilePath;
+		Path destinationPath; // Can be file or directory
+		try {
+			sourceFilePath = Paths.get(args[0]);
+			destinationPath = Paths.get(args[1]); // Can be file or directory
+		} catch (Exception e) {
+			env.writeln("Problem with given path!");
+			return ShellStatus.CONTINUE;
+		}
 
 		if (Files.isDirectory(sourceFilePath)) {
 			env.writeln("Source path must be a file!");
@@ -48,8 +55,14 @@ public class CopyShellCommand implements ShellCommand {
 
 		// If destination directory than add the file with the same name to that
 		// directory
-		if (Files.isDirectory(destinationPath)) {
-			destinationPath = Paths.get(destinationPath.toString(), sourceFilePath.getFileName().toString());
+		if (Files.isDirectory(destinationPath)) {			
+			try {
+				destinationPath = Paths.get(destinationPath.toString(), sourceFilePath.getFileName().toString());
+			} catch (Exception e) {
+				env.writeln("Problem with given path!");
+				return ShellStatus.CONTINUE;
+			}
+			
 		}
 		
 		
@@ -79,6 +92,12 @@ public class CopyShellCommand implements ShellCommand {
 		
 		if(!Files.exists(destinationPath.getParent())) {
 			env.writeln("Parent directory of the file doesn't exist!");
+			return ShellStatus.CONTINUE;
+		}
+		
+		// Checks if the destination path ends with a file
+		if(!destinationPath.getFileName().toString().contains(".")) {
+			env.writeln("Destination path must be a file or an existing folder!");
 			return ShellStatus.CONTINUE;
 		}
 

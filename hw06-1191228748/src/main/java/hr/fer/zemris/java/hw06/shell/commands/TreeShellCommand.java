@@ -27,63 +27,67 @@ public class TreeShellCommand implements ShellCommand {
 		String[] args;
 		try {
 			args = Utility.parseMultipleArguments(arguments);
-			
+
 		} catch (IllegalArgumentException e) {
 			env.writeln(e.getMessage());
 			return ShellStatus.CONTINUE;
 		}
-		
-		if(args.length != 1) {
+
+		if (args.length != 1) {
 			env.writeln("Invalid number of arguments!");
 			return ShellStatus.CONTINUE;
 		}
-		
-		String directoryPath = args[0];
-		
-		Path directory = Paths.get(directoryPath);
-		
-		if(!Files.isDirectory(directory)) {
+
+		Path directory;
+		try {
+			directory = Paths.get(args[0]);
+			
+		} catch (Exception e) {
+			env.writeln("Problem with given path!");
+			return ShellStatus.CONTINUE;
+		}
+
+		if (!Files.isDirectory(directory)) {
 			env.writeln("Argument is not a directory!");
 			return ShellStatus.CONTINUE;
 		}
 
+		FileVisitor<Path> printTree = new FileVisitor<Path>() {
+			private int level;
+
+			@Override
+			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+				env.writeln(" ".repeat(2 * level) + dir.getFileName());
+				level++;
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				env.writeln(" ".repeat(2 * level) + file.getFileName());
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+				level--;
+				return FileVisitResult.CONTINUE;
+			}
+		};
+
 		try {
-			Files.walkFileTree(directory, new TreeOutput());
-			
+			Files.walkFileTree(directory, printTree);
+
 		} catch (Exception e) {
 			env.writeln("Eror while drawing tree: " + e.getMessage());
 		}
-		
+
 		return ShellStatus.CONTINUE;
-	}
-	
-	private static class TreeOutput implements FileVisitor<Path> {
-		private int level;
-
-		@Override
-		public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-			System.out.println(" ".repeat(2 * level) + dir.getFileName());
-			level++;
-			return FileVisitResult.CONTINUE;
-		}
-
-		@Override
-		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-			System.out.println(" ".repeat(2 * level) + file.getFileName());
-			return FileVisitResult.CONTINUE;
-		}
-
-		@Override
-		public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-			return FileVisitResult.CONTINUE;
-		}
-
-		@Override
-		public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-			level--;
-			return FileVisitResult.CONTINUE;
-		}
-
 	}
 
 	@Override
@@ -93,7 +97,8 @@ public class TreeShellCommand implements ShellCommand {
 
 	@Override
 	public List<String> getCommandDescription() {
-		return Utility.turnToUnmodifiableList(new String[]{"Expects a single argument: directory name and prints a directory tree."});
+		return Utility.turnToUnmodifiableList(
+				new String[] { "Expects a single argument: directory name and prints a directory tree." });
 	}
 
 }

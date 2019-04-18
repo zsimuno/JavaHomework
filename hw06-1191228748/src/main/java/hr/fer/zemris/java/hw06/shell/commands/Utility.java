@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Utility class we use to help us with parsing arguments of the commands.
+ * Utility class we use in commands for extracting or modifying the data.
  * 
  * @author Zvonimir Šimunović
  *

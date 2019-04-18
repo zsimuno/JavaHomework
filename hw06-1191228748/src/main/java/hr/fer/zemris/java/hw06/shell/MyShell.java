@@ -17,8 +17,6 @@ import hr.fer.zemris.java.hw06.shell.commands.*;
  *
  */
 public class MyShell {
-	
-	
 
 	/**
 	 * Main method that starts the program.
@@ -28,7 +26,6 @@ public class MyShell {
 	public static void main(String[] args) {
 
 		Scanner sc = new Scanner(System.in);
-
 
 		Environment environment = new Environment() {
 			/**
@@ -66,13 +63,23 @@ public class MyShell {
 
 			@Override
 			public void writeln(String text) throws ShellIOException {
-				System.out.println(text);
+
+				try {
+					System.out.println(text);
+				} catch (Exception e) {
+					throw new ShellIOException(e.getMessage());
+				}
 
 			}
 
 			@Override
 			public void write(String text) throws ShellIOException {
-				System.out.printf(text);
+
+				try {
+					System.out.printf(text);
+				} catch (Exception e) {
+					throw new ShellIOException(e.getMessage());
+				}
 
 			}
 
@@ -96,7 +103,12 @@ public class MyShell {
 
 			@Override
 			public String readLine() throws ShellIOException {
-				return sc.nextLine();
+				try {
+					return sc.nextLine();
+				} catch (Exception e) {
+					throw new ShellIOException(e.getMessage());
+				}
+
 			}
 
 			@Override
@@ -150,38 +162,37 @@ public class MyShell {
 						break;
 					}
 				}
-				
+
 				userInput = input.toString();
-				
+
 			} catch (ShellIOException e) {
 				environment.writeln(e.getMessage());
 				break;
 			}
-			
-			if(userInput.isBlank()) {
+
+			if (userInput.isBlank()) {
 				environment.writeln("A command must be inputted!");
 				continue;
 			}
-			
+
 			String commandName = extractCommand(userInput);
 			String arguments = extractArguments(userInput);
 
-			if(!commands.containsKey(commandName)) {
+			if (!commands.containsKey(commandName)) {
 				environment.writeln("No such command!");
 				continue;
 			}
-			
+
 			ShellCommand command = commands.get(commandName);
-			
+
 			// Watch out for writing or reading errors
 			try {
-				status = command.executeCommand(environment, arguments); 
-				
+				status = command.executeCommand(environment, arguments);
+
 			} catch (ShellIOException e) {
 				environment.writeln(e.getMessage());
 				break;
 			}
-			
 
 		} while (status != ShellStatus.TERMINATE);
 
@@ -196,7 +207,7 @@ public class MyShell {
 	 * @return the command from the input
 	 */
 	private static String extractCommand(String userInput) {
-		
+
 		String[] input = userInput.split("\\s+", 2);
 
 		return input[0];
@@ -210,11 +221,11 @@ public class MyShell {
 	 */
 	private static String extractArguments(String userInput) {
 		String[] input = userInput.split("\\s+", 2);
-		
+
 		// No arguments, only command
-		if(input.length < 2) {
+		if (input.length < 2) {
 			return "";
-		} 
+		}
 
 		return input[1];
 	}

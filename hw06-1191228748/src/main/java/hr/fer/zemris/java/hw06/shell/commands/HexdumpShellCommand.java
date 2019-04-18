@@ -37,7 +37,19 @@ public class HexdumpShellCommand implements ShellCommand {
 			return ShellStatus.CONTINUE;
 		}
 
-		Path path = Paths.get(args[0]);
+		Path path;
+		try {
+			path = Paths.get(args[0]);
+			
+		} catch (Exception e) {
+			env.writeln("Problem with given path!");
+			return ShellStatus.CONTINUE;
+		}
+		
+		if (!Files.exists(path)) {
+			env.writeln("Can't use the command on path that doesn't exist!");
+			return ShellStatus.CONTINUE;
+		}
 
 		if (Files.isDirectory(path)) {
 			env.writeln("Can't use the command on directories!");
