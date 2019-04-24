@@ -69,8 +69,6 @@ public class StudentDB {
 
 			String query = input.substring(5);
 
-			// TODO what on empty query?
-
 			QueryParser parser;
 
 			try {

@@ -47,6 +47,11 @@ public class CopyShellCommand implements ShellCommand {
 			env.writeln("Problem with given path!");
 			return ShellStatus.CONTINUE;
 		}
+		
+		if(!Files.exists(sourceFilePath)) {
+			env.writeln("Source file doesn't exist!");
+			return ShellStatus.CONTINUE;
+		}
 
 		if (Files.isDirectory(sourceFilePath)) {
 			env.writeln("Source path must be a file!");
@@ -76,7 +81,7 @@ public class CopyShellCommand implements ShellCommand {
 		if (Files.exists(destinationPath)) {
 			while (true) {
 				env.writeln("Destination file exists. Do you want to overwrite it? (yes/no)");
-				env.write(env.getPromptSymbol().toString());
+				env.write(env.getPromptSymbol().toString() + " ");
 
 				String userInput = env.readLine();
 
