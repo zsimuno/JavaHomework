@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
+ * Represents a collection of n primes.
+ * 
  * @author Zvonimir Šimunović
  *
  */
@@ -17,6 +19,11 @@ public class PrimesCollection implements Iterable<Integer> {
 	 */
 	private int numberOfPrimes;
 
+	/**
+	 * Constructs a collection of n primes.
+	 * 
+	 * @param n number of primes in the collection.
+	 */
 	public PrimesCollection(int n) {
 		numberOfPrimes = n;
 	}
@@ -27,6 +34,12 @@ public class PrimesCollection implements Iterable<Integer> {
 		return new IteratorImpl();
 	}
 
+	/**
+	 * Implementation of a {@link Iterator} for this class.
+	 * 
+	 * @author Zvonimir Šimunović
+	 *
+	 */
 	private class IteratorImpl implements Iterator<Integer> {
 
 		/**

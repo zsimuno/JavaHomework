@@ -4,7 +4,7 @@ import hr.fer.zemris.java.custom.scripting.exec.ObjectMultistack;
 import hr.fer.zemris.java.custom.scripting.exec.ValueWrapper;
 
 /**
- * TODO javadoc
+ * Demo for {@link ObjectMultistack} class.
  * 
  * @author Zvonimir Šimunović
  *
@@ -12,7 +12,9 @@ import hr.fer.zemris.java.custom.scripting.exec.ValueWrapper;
 public class ObjectMultistackDemo {
 	
 	/**
-	 * @param args
+	 * Method that starts the program.
+	 * 
+	 * @param args command line arguments (not used here)
 	 */
 	public static void main(String[] args) {
 		ObjectMultistack multistack = new ObjectMultistack();
