@@ -35,10 +35,11 @@ public class IntegerStorage {
 	 * @param observer observer that is added.
 	 */
 	public void addObserver(IntegerStorageObserver observer) {
-		if (!observers.contains(observer)) {
-			observers = new ArrayList<>(observers);
-			observers.add(observer);
-		}
+		if (observers.contains(observer))
+			return;
+		observers = new ArrayList<>(observers);
+		observers.add(observer);
+
 	}
 
 	/**
@@ -47,10 +48,11 @@ public class IntegerStorage {
 	 * @param observer observer that is to be removed.
 	 */
 	public void removeObserver(IntegerStorageObserver observer) {
-		if(observers.contains(observer)) {
-			observers = new ArrayList<>(observers);
-			observers.remove(observer);
-		}
+		if (!observers.contains(observer))
+			return;
+		observers = new ArrayList<>(observers);
+		observers.remove(observer);
+
 	}
 
 	/**

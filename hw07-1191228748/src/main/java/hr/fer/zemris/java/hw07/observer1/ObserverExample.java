@@ -72,7 +72,7 @@ public class ObserverExample {
 		istorage.setValue(22);
 		istorage.setValue(15);
 		
-		// Throws exception
+		
 	}
 	
 	

@@ -18,7 +18,7 @@ public class IntegerStorage {
 	/**
 	 * List of all observers that currently observe this object.
 	 */
-	private List<IntegerStorageObserver> observers = new ArrayList<>(); // use ArrayList here!!!
+	private List<IntegerStorageObserver> observers = new ArrayList<>();
 
 	/**
 	 * Constructs and {@code IntegerStorage} with the given integer value.
@@ -35,10 +35,12 @@ public class IntegerStorage {
 	 * @param observer observer that is added.
 	 */
 	public void addObserver(IntegerStorageObserver observer) {
-		if (!observers.contains(observer)) {
-			observers = new ArrayList<>(observers);
-			observers.add(observer);
-		}
+		if (observers.contains(observer))
+			return;
+
+		observers = new ArrayList<>(observers);
+		observers.add(observer);
+
 	}
 
 	/**
@@ -47,10 +49,12 @@ public class IntegerStorage {
 	 * @param observer observer that is to be removed.
 	 */
 	public void removeObserver(IntegerStorageObserver observer) {
-		if(observers.contains(observer)) {
-			observers = new ArrayList<>(observers);
-			observers.remove(observer);
-		}
+		if (!observers.contains(observer))
+			return;
+		
+		observers = new ArrayList<>(observers);
+		observers.remove(observer);
+
 	}
 
 	/**
@@ -77,10 +81,10 @@ public class IntegerStorage {
 	public void setValue(int value) {
 		// Only if new value is different than the current value:
 		if (this.value != value) {
-			
+
 			// The IntegerStorageChange that will be passed down to observers
 			IntegerStorageChange istorageChange = new IntegerStorageChange(this, this.value, value);
-			
+
 			// Update current value
 			this.value = value;
 			// Notify all registered observers

@@ -181,7 +181,7 @@ public class StudentDemo {
 		return records.stream().filter((record) -> record.getGrade() == 5).sorted((s1, s2) -> {
 			Double points1 = s1.getMidTermPoints() + s1.getEndTermPoints() + s1.getLabPoints();
 			Double points2 = s2.getMidTermPoints() + s2.getEndTermPoints() + s2.getLabPoints();
-			return points1.compareTo(points2);
+			return points2.compareTo(points1);
 		}).collect(Collectors.toList());
 
 	}
