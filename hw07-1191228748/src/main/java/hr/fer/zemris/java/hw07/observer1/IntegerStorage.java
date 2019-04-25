@@ -57,7 +57,6 @@ public class IntegerStorage {
 	 * Removes all observers from observers list.
 	 */
 	public void clearObservers() {
-		observers = new ArrayList<IntegerStorageObserver>(observers); // TODO treba li ovo?
 		observers.clear();
 	}
 
