@@ -160,7 +160,6 @@ public class MyShell {
 
 			@Override
 			public void setCurrentDirectory(Path path) {
-				// TODO Set @throws
 				if(Files.notExists(path)) 
 					throw new IllegalArgumentException("Given path doesn't exist!");
 				

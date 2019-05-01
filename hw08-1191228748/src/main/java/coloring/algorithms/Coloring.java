@@ -1,5 +1,6 @@
 package coloring.algorithms;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -9,6 +10,8 @@ import java.util.function.Supplier;
 import marcupic.opjj.statespace.coloring.Picture;
 
 /**
+ * TODO Javadoc
+ * 
  * @author Zvonimir Šimunović
  *
  */
@@ -39,32 +42,38 @@ public class Coloring implements Consumer<Pixel>, Function<Pixel, List<Pixel>>, 
 		this.reference = reference;
 		this.picture = picture;
 		this.fillColor = fillColor;
-		// TODO refColor construction (a sam postavlja refColor na boju koju u slici ima
-		// slikovni element čija je lokacija predana kroz reference)
+		this.refColor = picture.getPixelColor(reference.x, reference.y);
 	}
 
 	@Override
 	public Pixel get() {
-		// TODO Auto-generated method stub
-		return null;
+		return reference;
 	}
 
 	@Override
 	public boolean test(Pixel t) {
-		// TODO Auto-generated method stub
-		return false;
+		return picture.getPixelColor(t.x, t.y) == refColor;
 	}
 
 	@Override
 	public List<Pixel> apply(Pixel t) {
-		// TODO Auto-generated method stub
-		return null;
+		LinkedList<Pixel> list = new LinkedList<>();
+
+		for(int i = -1; i <= 1; i++) {
+			for(int j = -1; j <= 1; j++) {
+				if(Math.abs(i) == Math.abs(j))
+					continue;
+				list.add(new Pixel(t.x + i, t.y + j));
+			}
+		}
+		
+		return list;
 	}
+	
 
 	@Override
 	public void accept(Pixel t) {
-		// TODO Auto-generated method stub
-
+		picture.setPixelColor(t.x, t.y, fillColor);
 	}
 
 }
