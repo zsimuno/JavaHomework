@@ -1,4 +1,4 @@
-package hr.fer.zemris.java.hw06.shell;
+package hr.fer.zemris.java.hw06.shell.namebuilder;
 
 /**
  * Interface that represents objects that we use i massername command so we can

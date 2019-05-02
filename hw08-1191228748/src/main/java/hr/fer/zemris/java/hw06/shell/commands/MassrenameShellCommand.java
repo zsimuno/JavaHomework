@@ -12,13 +12,13 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import hr.fer.zemris.java.hw06.shell.Environment;
-import hr.fer.zemris.java.hw06.shell.FilterResult;
-import hr.fer.zemris.java.hw06.shell.NameBuilder;
-import hr.fer.zemris.java.hw06.shell.NameBuilderParser;
-import hr.fer.zemris.java.hw06.shell.NameBuilderParserException;
 import hr.fer.zemris.java.hw06.shell.ShellCommand;
 import hr.fer.zemris.java.hw06.shell.ShellStatus;
 import hr.fer.zemris.java.hw06.shell.Utility;
+import hr.fer.zemris.java.hw06.shell.namebuilder.FilterResult;
+import hr.fer.zemris.java.hw06.shell.namebuilder.NameBuilder;
+import hr.fer.zemris.java.hw06.shell.namebuilder.NameBuilderParser;
+import hr.fer.zemris.java.hw06.shell.namebuilder.NameBuilderParserException;
 
 /**
  * Represents the {@code massrename} command for shell. This command massively

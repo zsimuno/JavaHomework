@@ -1,4 +1,4 @@
-package hr.fer.zemris.java.hw06.shell;
+package hr.fer.zemris.java.hw06.shell.namebuilder;
 
 import java.nio.file.Path;
 import java.util.regex.Matcher;

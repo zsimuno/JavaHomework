@@ -1,6 +1,6 @@
 
 /**
- * TODO
+ * Algorithms and classes used in coloring pictures.
  * 
  * @author Zvonimir Šimunović
  *

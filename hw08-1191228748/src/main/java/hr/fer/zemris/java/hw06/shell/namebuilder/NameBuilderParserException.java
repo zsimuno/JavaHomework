@@ -1,4 +1,4 @@
-package hr.fer.zemris.java.hw06.shell;
+package hr.fer.zemris.java.hw06.shell.namebuilder;
 
 /**
  * Class that is called when there is a lexer exception

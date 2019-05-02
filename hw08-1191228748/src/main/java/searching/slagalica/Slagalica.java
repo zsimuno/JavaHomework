@@ -92,9 +92,11 @@ public class Slagalica implements Supplier<KonfiguracijaSlagalice>,
 
 		for (int k = 0; k < change.length; k++) {
 			int[] newConfig = t.getPolje();
+			
 			int temp = newConfig[spaceIndex];
 			newConfig[spaceIndex] = newConfig[change[k]];
 			newConfig[change[k]] = temp;
+			
 			list.add(new Transition<KonfiguracijaSlagalice>(new KonfiguracijaSlagalice(newConfig), defaultPrice));
 
 		}

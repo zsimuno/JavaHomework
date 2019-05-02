@@ -1,4 +1,4 @@
-package hr.fer.zemris.java.hw06.shell;
+package hr.fer.zemris.java.hw06.shell.namebuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +94,6 @@ public class NameBuilderParser {
 	 */
 	private NameBuilder parseGroup() {
 
-		// TODO mozda preduga
 		currentIndex += 2; // Skip '$' and '{'
 		int exprBegin = currentIndex;
 		int strLength = expression.length();
@@ -127,34 +126,60 @@ public class NameBuilderParser {
 			throw new NameBuilderParserException("Supstitution command can have 1 or two arguments!");
 		}
 
-		int index;
-		try {
-			index = Integer.parseInt(parts[0].trim());
-		} catch (Exception e) {
-			throw new NameBuilderParserException(e.getMessage());
-		}
-
 		String pad = parts[1].trim();
 
 		if (pad.length() != 1 && pad.length() != 2) {
 			throw new NameBuilderParserException("Invalid supstitution command length argument!");
 		}
 
+		return group(getIndex(parts[0]), getPadding(pad), getMinWidth(pad));
+	}
+
+	/**
+	 * Returns the required index of the group from the string.
+	 * 
+	 * @param part part of the command that stores the index.
+	 * @return the required index of the group from the string.
+	 */
+	private int getIndex(String part) {
+		try {
+			return Integer.parseInt(part.trim());
+		} catch (Exception e) {
+			throw new NameBuilderParserException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Returns the character that will be used as padding in new name of the file
+	 * from the second part of the command. Padding will be one space (i.e. ' ') if
+	 * element is not provided or zero (Only valid character that can be provided).
+	 * 
+	 * @param pad part of the command that stores the padding character.
+	 * @return the character that will be used as padding in new name of the file..
+	 */
+	private char getPadding(String pad) {
 		char padding = pad.length() == 1 ? ' ' : pad.charAt(0);
 		if (padding != '0' && padding != ' ') {
 			throw new NameBuilderParserException("Invalid supstitution command length argument (invalid argument)!");
 		}
+		return padding;
+	}
 
-		int minWidth;
+	/**
+	 * Returns the minimal width of the selected group. Part of the name will be
+	 * padded with the padding character to be of minimal width.
+	 * 
+	 * @param pad part of the command that stores the minimal width.
+	 * @return the minimal width of the selected group
+	 */
+	private int getMinWidth(String pad) {
 		try {
-			minWidth = Integer.parseInt(
+			return Integer.parseInt(
 					pad.length() == 1 ? Character.toString(pad.charAt(0)) : Character.toString(pad.charAt(1)));
 
 		} catch (Exception e) {
 			throw new NameBuilderParserException(e.getMessage());
 		}
-
-		return group(index, padding, minWidth);
 	}
 
 	/**
