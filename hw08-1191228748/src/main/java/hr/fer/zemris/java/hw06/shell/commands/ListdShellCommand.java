@@ -1,6 +1,7 @@
 package hr.fer.zemris.java.hw06.shell.commands;
 
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
@@ -40,9 +41,9 @@ public class ListdShellCommand implements ShellCommand {
 				return ShellStatus.CONTINUE;
 			}
 		}
-
-		stack.stream().forEach((path) -> env.writeln(path.toString()));
-
+		StringBuilder sb = new StringBuilder();
+		stack.forEach((path) -> sb.insert(0, path.toString() + "\n"));
+		env.write(sb.toString());
 		return ShellStatus.CONTINUE;
 	}
 
