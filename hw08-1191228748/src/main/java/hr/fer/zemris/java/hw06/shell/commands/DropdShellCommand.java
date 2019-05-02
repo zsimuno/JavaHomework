@@ -35,6 +35,10 @@ public class DropdShellCommand implements ShellCommand {
 
 		} else {
 			stack = (Stack<Path>) data;
+			if(stack.isEmpty()) {
+				env.writeln("Stack is empty!");
+				return ShellStatus.CONTINUE;
+			}
 		}
 
 		stack.pop();

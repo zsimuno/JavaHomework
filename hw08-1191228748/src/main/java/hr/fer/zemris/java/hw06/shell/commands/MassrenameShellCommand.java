@@ -57,7 +57,7 @@ public class MassrenameShellCommand implements ShellCommand {
 		Path destinationPath;
 		try {
 			sourceFilePath = Utility.resolveDir(Paths.get(args[0]), env);
-			destinationPath = Utility.resolveDir(Paths.get(args[1]), env); // Can be file or directory
+			destinationPath = Utility.resolveDir(Paths.get(args[1]), env);
 		} catch (Exception e) {
 			env.writeln("Problem with given path!");
 			return ShellStatus.CONTINUE;
@@ -98,7 +98,7 @@ public class MassrenameShellCommand implements ShellCommand {
 			try {
 				show(files, mask, rest, env);
 			} catch (Exception e) {
-				env.writeln(e.getMessage());
+				env.writeln("Show cmd error: " + e.getMessage());
 				return ShellStatus.CONTINUE;
 			}
 			break;
@@ -107,7 +107,7 @@ public class MassrenameShellCommand implements ShellCommand {
 			try {
 				execute(files, destinationPath, mask, rest, env);
 			} catch (Exception e) {
-				env.writeln(e.getMessage());
+				env.writeln("Execute cmd error: " + e.getMessage());
 				return ShellStatus.CONTINUE;
 			}
 			break;
@@ -185,7 +185,7 @@ public class MassrenameShellCommand implements ShellCommand {
 	}
 
 	/**
-	 * Executes the show command. Moves the files with their new names.
+	 * Executes the execute command. Moves the files with their new names.
 	 * 
 	 * @param files list of files in the source directory.
 	 * @param mask  regex mask that is used to filter from source directory.
@@ -262,11 +262,10 @@ public class MassrenameShellCommand implements ShellCommand {
 
 	@Override
 	public List<String> getCommandDescription() {
-		return Utility.turnToUnmodifiableList( 
-				new String[] { "Massively renames and moves files to new directory.", "It supports 4 subcommands:",
-						"filter - shows the filtering result of the mask",
-						"groups - shows groups that are made with the filtering results",
-						"show - shows the file names after the renaming", "execute - renames and moves the files" });
+		return Utility.turnToUnmodifiableList(new String[] { "Massively renames and moves files to new directory.",
+				"It supports 4 subcommands:", "filter - shows the filtering result of the mask",
+				"groups - shows groups that are made with the filtering results",
+				"show - shows the file names after the renaming", "execute - renames and moves the files" });
 	}
 
 }

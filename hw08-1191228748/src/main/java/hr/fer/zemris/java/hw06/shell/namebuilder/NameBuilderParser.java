@@ -2,6 +2,7 @@ package hr.fer.zemris.java.hw06.shell.namebuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import static hr.fer.zemris.java.hw06.shell.namebuilder.DefaultNameBuilders.*;
 
 /**
  * Parser for {@link NameBuilder} objects. Generates objects from given
@@ -115,7 +116,7 @@ public class NameBuilderParser {
 				return group(Integer.parseInt(supstitutionCmd));
 
 			} catch (Exception e) {
-				throw new NameBuilderParserException(e.getMessage());
+				throw new NameBuilderParserException("Error while parsing index: " + e.getMessage());
 			}
 		}
 
@@ -127,10 +128,6 @@ public class NameBuilderParser {
 		}
 
 		String pad = parts[1].trim();
-
-		if (pad.length() != 1 && pad.length() != 2) {
-			throw new NameBuilderParserException("Invalid supstitution command length argument!");
-		}
 
 		return group(getIndex(parts[0]), getPadding(pad), getMinWidth(pad));
 	}
@@ -145,7 +142,7 @@ public class NameBuilderParser {
 		try {
 			return Integer.parseInt(part.trim());
 		} catch (Exception e) {
-			throw new NameBuilderParserException(e.getMessage());
+			throw new NameBuilderParserException("Error while parsing index: " + e.getMessage());
 		}
 	}
 
@@ -158,11 +155,9 @@ public class NameBuilderParser {
 	 * @return the character that will be used as padding in new name of the file..
 	 */
 	private char getPadding(String pad) {
-		char padding = pad.length() == 1 ? ' ' : pad.charAt(0);
-		if (padding != '0' && padding != ' ') {
-			throw new NameBuilderParserException("Invalid supstitution command length argument (invalid argument)!");
-		}
-		return padding;
+		if (pad.charAt(0) == '0' && pad.length() != 1)
+			return '0';
+		return ' ';
 	}
 
 	/**
@@ -174,73 +169,13 @@ public class NameBuilderParser {
 	 */
 	private int getMinWidth(String pad) {
 		try {
-			return Integer.parseInt(
-					pad.length() == 1 ? Character.toString(pad.charAt(0)) : Character.toString(pad.charAt(1)));
+			if (pad.charAt(0) == '0' && pad.length() != 1)
+				return Integer.parseInt(pad.substring(1));
+			return Integer.parseInt(pad);
 
 		} catch (Exception e) {
-			throw new NameBuilderParserException(e.getMessage());
+			throw new NameBuilderParserException("Error while parsing minimal width: " + e.getMessage());
 		}
 	}
 
-	/**
-	 * {@code NameBuilder} that appends the given text to the {@link StringBuilder}
-	 * object.
-	 * 
-	 * @param t text to be appended.
-	 * @return {@code NameBuilder} that appends the given text to the
-	 *         {@link StringBuilder} object.
-	 */
-	private static NameBuilder text(String t) {
-		return (result, sb) -> {
-			sb.append(t);
-		};
-	}
-
-	/**
-	 * {@code NameBuilder} that returns the group with the given index from the
-	 * filter result.
-	 * 
-	 * @param index index of the group.
-	 * @return {@code NameBuilder} that returns the group with the given index from
-	 *         the filter result.
-	 */
-	private static NameBuilder group(int index) {
-		return (result, sb) -> {
-			sb.append(result.group(index));
-		};
-	}
-
-	/**
-	 * {@code NameBuilder} that returns the group with the given index from the
-	 * filter result. Padds the result with the padding so that in has the given
-	 * minimum width.
-	 * 
-	 * @param index    index of the group.
-	 * @param padding  padding that is to be added.
-	 * @param minWidth minimum width of the result.
-	 * @return {@code NameBuilder} that returns the group with the given index from
-	 *         the filter result and padded with the given padding.
-	 */
-	private static NameBuilder group(int index, char padding, int minWidth) {
-		return (result, sb) -> {
-			String group = result.group(index);
-			String pad = Character.toString(padding).repeat(minWidth - group.length());
-			sb.append(pad + group);
-		};
-	}
-
-	/**
-	 * {@code NameBuilder} that executes every {@code NameBuilder} in the given
-	 * list.
-	 * 
-	 * @param list list of {@code NameBuilder} objects that are parsed from the
-	 *             expression in this parser.
-	 * @return {@code NameBuilder} object that executes every {@code NameBuilder} in
-	 *         the given list.
-	 */
-	private static NameBuilder execute(List<NameBuilder> list) {
-		return (result, sb) -> {
-			list.forEach((nb) -> nb.execute(result, sb));
-		};
-	}
 }

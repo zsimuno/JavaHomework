@@ -80,7 +80,7 @@ public class HexdumpShellCommand implements ShellCommand {
 					hexLine.append(hexArray[i] + ((lineCount == 8) ? "|" : " "));
 
 					// If last line
-					if (i == hexArray.length) {
+					if (i == hexArray.length - 1) {
 						// Append whitespace in place of missing hex strings
 						while (lineCount != 16) {
 							lineCount++;

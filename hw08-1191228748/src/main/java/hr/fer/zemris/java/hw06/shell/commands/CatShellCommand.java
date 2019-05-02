@@ -1,6 +1,6 @@
 package hr.fer.zemris.java.hw06.shell.commands;
 
-import java.io.BufferedReader;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -60,16 +60,27 @@ public class CatShellCommand implements ShellCommand {
 			return ShellStatus.CONTINUE;
 		}
 
-		// Read from file and decode and then write on screen
-		try (BufferedReader br = Files.newBufferedReader(path, charset)) {
+		// Open the file input and write to environment
+		try (InputStream is = Files.newInputStream(path)) {
+			byte[] buff = new byte[1024];
 
-			br.lines().forEach((line) -> {
-				env.writeln(line);
-			});
+			while (true) {
+				// Read from file
+				int r = is.read(buff);
+				
+				if (r < 1)
+					break;
+				
+				env.write(new String(buff, 0, r, charset));
+
+			}
+			
+			env.writeln("");
 
 		} catch (Exception e) {
-			env.writeln("File cannot be read!");
+			env.writeln("Problem with reading the file: " + e.getMessage());
 			return ShellStatus.CONTINUE;
+
 		}
 
 		return ShellStatus.CONTINUE;

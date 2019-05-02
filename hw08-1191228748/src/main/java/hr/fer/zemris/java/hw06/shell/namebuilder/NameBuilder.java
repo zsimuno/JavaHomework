@@ -1,5 +1,7 @@
 package hr.fer.zemris.java.hw06.shell.namebuilder;
 
+import java.util.Objects;
+
 /**
  * Interface that represents objects that we use i massername command so we can
  * build new names from given user input.
@@ -19,5 +21,21 @@ public interface NameBuilder {
 	 */
 	void execute(FilterResult result, StringBuilder sb);
 
-	// TODO NameBuilder nb = text("gradovi-").group(2).text("-").group(1, '0', 3); ????
+	/**
+	 * Returns a composed {@code NameBuilder} that executes this followed by the
+	 * execution of {@code other}.
+	 * 
+	 * @param other the builder to execute after this one.
+	 * @return composed {@code NameBuilder} that executes this followed by the
+	 *         execution of {@code other}.
+	 * @throws NullPointerException if {@code after} is null
+	 */
+	default NameBuilder then(NameBuilder other) {
+		Objects.requireNonNull(other);
+		return (result, sb) -> {
+			this.execute(result, sb);
+			other.execute(result, sb);
+		};
+	}
+
 }

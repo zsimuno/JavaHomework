@@ -48,7 +48,7 @@ public class PushdShellCommand implements ShellCommand {
 			return ShellStatus.CONTINUE;
 		}
 
-		if (Files.isDirectory(directoryPath)) {
+		if (!Files.isDirectory(directoryPath)) {
 			env.writeln("Given path must be an existing directory!");
 			return ShellStatus.CONTINUE;
 		}
@@ -64,7 +64,7 @@ public class PushdShellCommand implements ShellCommand {
 			stack = (Stack<Path>) data;
 		}
 
-		stack.push(directoryPath);
+		stack.push(env.getCurrentDirectory());
 		env.setCurrentDirectory(directoryPath);
 
 		return ShellStatus.CONTINUE;

@@ -37,6 +37,10 @@ public class PopdShellCommand implements ShellCommand {
 
 		} else {
 			stack = (Stack<Path>) data;
+			if(stack.isEmpty()) {
+				env.writeln("Stack is empty!");
+				return ShellStatus.CONTINUE;
+			}
 		}
 
 		Path top = stack.pop();

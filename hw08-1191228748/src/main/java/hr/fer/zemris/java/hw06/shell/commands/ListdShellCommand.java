@@ -35,9 +35,13 @@ public class ListdShellCommand implements ShellCommand {
 
 		} else {
 			stack = (Stack<Path>) data;
+			if(stack.isEmpty()) {
+				env.writeln("Nema pohranjenih direktorija.");
+				return ShellStatus.CONTINUE;
+			}
 		}
 
-		stack.forEach((path) -> env.writeln(path.toString()));
+		stack.stream().forEach((path) -> env.writeln(path.toString()));
 
 		return ShellStatus.CONTINUE;
 	}
