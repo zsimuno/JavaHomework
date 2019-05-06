@@ -1,5 +1,7 @@
 package hr.fer.zemris.math;
 
+import java.util.Arrays;
+
 /**
  * Represents a polynomial that has complex numbers for factors.
  * 
@@ -39,10 +41,13 @@ public class ComplexPolynomial {
 	 */
 	public ComplexPolynomial multiply(ComplexPolynomial p) {
 		Complex[] newFactors = new Complex[this.order() + p.order() + 1];
+		Arrays.fill(newFactors, Complex.ZERO);
 
-		for (int i = 1; i < this.factors.length; i++) {
+		for (int i = 0; i < this.factors.length; i++) {
 			for (int j = 0; j < p.factors.length; j++) {
-				newFactors[i + j] = newFactors[i + j].add(this.factors[i].multiply(p.factors[j]));
+				newFactors[i + j] = newFactors[i + j]
+								.add(this.factors[i]
+								.multiply(p.factors[j]));
 			}
 		}
 
@@ -73,7 +78,7 @@ public class ComplexPolynomial {
 		Complex result = factors[0];
 
 		for (int i = 1; i < factors.length; i++) {
-			result.multiply(factors[i]);
+			result = result.add(factors[i].multiply(z.power(i)));
 		}
 
 		return result;
@@ -89,4 +94,25 @@ public class ComplexPolynomial {
 
 		return result.toString();
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(factors);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof ComplexPolynomial))
+			return false;
+		ComplexPolynomial other = (ComplexPolynomial) obj;
+		return Arrays.equals(factors, other.factors);
+	}
+
 }

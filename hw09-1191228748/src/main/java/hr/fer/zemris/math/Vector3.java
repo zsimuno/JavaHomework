@@ -1,5 +1,7 @@
 package hr.fer.zemris.math;
 
+import java.util.Objects;
+
 /**
  * Represents a 3D vector with x, y and z points.
  * 
@@ -20,6 +22,11 @@ public class Vector3 {
 	 * Z value.
 	 */
 	private double z;
+
+	/**
+	 * Precision of the equals method
+	 */
+	private static final double precision = 1e-6;
 
 	/**
 	 * Constructs a new {@code Vector3} object from given coordinates.
@@ -152,4 +159,22 @@ public class Vector3 {
 	public String toString() {
 		return String.format("(%.6f, %.6f, %.6f)", x, y, z);
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(x, y, z);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof Vector3))
+			return false;
+		Vector3 other = (Vector3) obj;
+		return x - other.x < precision && y - other.y < precision && z - other.z < precision;
+	}
+
 }

@@ -1,6 +1,7 @@
 package hr.fer.zemris.math;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Represents a polynomial (in a rooted form) that has complex numbers for
@@ -42,7 +43,7 @@ public class ComplexRootedPolynomial {
 	public Complex apply(Complex z) {
 		Complex result = constant;
 		for (Complex complex : roots) {
-			result.multiply(z.sub(complex));
+			result = result.multiply(z.sub(complex));
 		}
 
 		return result;
@@ -93,7 +94,7 @@ public class ComplexRootedPolynomial {
 	 */
 	public int indexOfClosestRootFor(Complex z, double treshold) {
 		int minIndex = -1;
-		double minDistance = 0;
+		double minDistance = treshold;
 
 		for (int i = 0; i < roots.length; i++) {
 			double dist = roots[i].sub(z).module();
@@ -105,4 +106,27 @@ public class ComplexRootedPolynomial {
 
 		return minIndex;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(roots);
+		result = prime * result + Objects.hash(constant);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof ComplexRootedPolynomial))
+			return false;
+		ComplexRootedPolynomial other = (ComplexRootedPolynomial) obj;
+		return Objects.equals(constant, other.constant) && Arrays.equals(roots, other.roots);
+	}
+	
+	
 }
