@@ -3,14 +3,13 @@ package hr.fer.zemris.java.fractals;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import hr.fer.zemris.java.fractals.mandelbrot.Mandelbrot;
 import hr.fer.zemris.java.fractals.viewer.FractalViewer;
 import hr.fer.zemris.java.fractals.viewer.IFractalProducer;
 import hr.fer.zemris.java.fractals.viewer.IFractalResultObserver;
@@ -19,76 +18,89 @@ import hr.fer.zemris.math.ComplexPolynomial;
 import hr.fer.zemris.math.ComplexRootedPolynomial;
 
 /**
- * TODO javadoc
+ * Program used for drawing fractals with approximating the roots of a
+ * polynomial.
  * 
  * @author Zvonimir Šimunović
  *
  */
 public class Newton {
 
-	private static ArrayList<Complex> roots = new ArrayList<>(); // TODO mozda bolje prebacit
-
-	private static ComplexRootedPolynomial rootedPolynomial = new ComplexRootedPolynomial(Complex.ONE,
-			roots.toArray(new Complex[roots.size()]));
-	private static ComplexPolynomial polynomial = rootedPolynomial.toComplexPolynom();
-	private static ComplexPolynomial derived = polynomial.derive();
-
 	/**
-	 * @param args
+	 * Main method that starts the program.
+	 * 
+	 * @param args Command line arguments. (Not used here)
 	 */
 	public static void main(String[] args) {
-//		System.out.println("Welcome to Newton-Raphson iteration-based fractal viewer");
-//		System.out.println("Please enter at least two roots, one root per line. Enter 'done' when done.");
-//		Scanner sc = new Scanner(System.in);
-//		for (int i = 0;; i++) {
-//			System.out.printf("Root %d> ", i + 1);
-//			String input = sc.nextLine();
-//			if (input.equals("done"))
-//				break;
-//
-//			try {
-//				roots.add(Complex.parse(input));
-//			} catch (IllegalArgumentException e) {
-//				System.out.println(e.getMessage());
-//				System.out.println("Input again!");
-//				i--;
-//			}
-//		}
-//		System.out.println("Image of fractal will appear shortly. Thank you.");
-//		sc.close();
-
-		rootedPolynomial = new ComplexRootedPolynomial(Complex.ONE, roots.toArray(new Complex[roots.size()]));
-		polynomial = rootedPolynomial.toComplexPolynom();
-		derived = polynomial.derive();
-
-		roots.add(Complex.ONE);
-		roots.add(Complex.ONE_NEG);
-		roots.add(Complex.IM);
-		roots.add(Complex.IM_NEG);
 
 		FractalViewer.show(new MyProducer());
 
 	}
 
 	/**
+	 * Fractal producer that produces a fractal based on roots of the given
+	 * polynomial and index of those roots.
+	 * 
 	 * @author Zvonimir Šimunović
 	 *
 	 */
 	public static class MyProducer implements IFractalProducer {
-		/**
-		 * 
-		 */
-		private static final int numberOfIterations = 60; // TODO koliko?
 
 		/**
-		 * 
+		 * Polynomial constructed from given roots.
 		 */
-		private static final double convergenceThreshold = 1e-3;
+		private ComplexRootedPolynomial rootedPolynomial;
+		/**
+		 * Polynomial constructed from the rooted polynomial.
+		 */
+		private ComplexPolynomial polynomial;
+		/**
+		 * Polynomial constructed as a derivation of the given polynomial.
+		 */
+		private ComplexPolynomial derived;
 
 		/**
+		 * Constructs a new producer based on roots of the polynomial that user inputs.
 		 * 
 		 */
-		private static final double rootThreshold = 2e-3;
+		public MyProducer() {
+			System.out.println("Welcome to Newton-Raphson iteration-based fractal viewer");
+			Scanner sc = new Scanner(System.in);
+			ArrayList<Complex> roots = new ArrayList<>();
+			while (true) {
+				System.out.println("Please enter at least two roots, one root per line. Enter 'done' when done.");
+				
+
+				for (int i = 0;; i++) {
+					System.out.printf("Root %d> ", i + 1);
+					String input = sc.nextLine();
+					if (input.equals("done"))
+						break;
+
+					try {
+						roots.add(Complex.parse(input));
+					} catch (IllegalArgumentException e) {
+						System.out.println(e.getMessage());
+						System.out.println("Input again:");
+						i--;
+					}
+				}
+
+				if (roots.size() < 2) {
+					System.out.println("At least two roots must be entered!");
+					roots.clear();
+					continue;
+				}
+				System.out.println("Image of fractal will appear shortly. Thank you.");
+				break;
+			}
+
+			sc.close();
+
+			rootedPolynomial = new ComplexRootedPolynomial(Complex.ONE, roots.toArray(new Complex[roots.size()]));
+			polynomial = rootedPolynomial.toComplexPolynom();
+			derived = polynomial.derive();
+		}
 
 		@Override
 		public void produce(double reMin, double reMax, double imMin, double imMax, int width, int height,
@@ -106,16 +118,18 @@ public class Newton {
 
 			for (int i = 0; i < trackNumber; i++) {
 				int yMin = i * range;
-				int yMax = (i + 1) * range - 1;
+				int yMax = (i + 1) * range;
 				if (i == trackNumber - 1) {
 					yMax = height - 1;
 				}
-				CalculatingJob posao = new CalculatingJob(reMin, reMax, imMin, imMax, width, height, yMin, yMax, data);
-				results.add(pool.submit(posao));
+				CalculatingJob job = new CalculatingJob(reMin, reMax, imMin, imMax, width, height, yMin, yMax, data,
+						rootedPolynomial, derived);
+				results.add(pool.submit(job));
 			}
-			for (Future<Void> posao : results) {
+
+			for (Future<Void> job : results) {
 				try {
-					posao.get();
+					job.get();
 				} catch (InterruptedException | ExecutionException e) {
 				}
 			}
@@ -127,38 +141,91 @@ public class Newton {
 
 	}
 
-	public static class CalculatingJob implements Runnable {
+	/**
+	 * Represents the calculating job for out threads.
+	 * 
+	 * @author Zvonimir Šimunović
+	 *
+	 */
+	public static class CalculatingJob implements Callable<Void> {
+		/**
+		 * Minimal real.
+		 */
 		double reMin;
+		/**
+		 * Maximum real.
+		 */
 		double reMax;
+		/**
+		 * Minimal Imaginary.
+		 */
 		double imMin;
+		/**
+		 * Maximum Imaginary.
+		 */
 		double imMax;
+		/**
+		 * Width of the screen.
+		 */
 		int width;
+		/**
+		 * Height of the screen.
+		 */
 		int height;
+		/**
+		 * Minimal y value.
+		 */
 		int yMin;
+		/**
+		 * Maximal y value.
+		 */
 		int yMax;
+		/**
+		 * Data to be written in.
+		 */
 		short[] data;
 		/**
-		 * 
+		 * Rooted polynomial we approximate zeros of.
+		 */
+		private ComplexRootedPolynomial rootedPolynomial;
+		/**
+		 * Derivation of the given rooted polynomial.
+		 */
+		private ComplexPolynomial derived;
+		/**
+		 * Max number of iterations.
 		 */
 		private static final int numberOfIterations = 60; // TODO koliko?
 
 		/**
-		 * 
+		 * Threshold for convergence.
 		 */
 		private static final double convergenceThreshold = 1e-3;
 
 		/**
-		 * 
+		 * Threshold for closest root.
 		 */
 		private static final double rootThreshold = 2e-3;
 
-		public static CalculatingJob NO_JOB = new CalculatingJob();
-
-		private CalculatingJob() {
-		}
-
+		/**
+		 * Constructs a new {@code CalculatingJob} from given parameters.
+		 *
+		 * @param reMin            minimum value of real part of the complex number.
+		 * @param reMax            maximum value of real part of the complex number.
+		 * @param imMin            minimum value of imaginary part of the complex
+		 *                         number.
+		 * @param imMax            maximum value of imaginary part of the complex
+		 *                         number.
+		 * @param width            width of the screen.
+		 * @param height           height of the screen.
+		 * @param yMin             minimum value of y.
+		 * @param yMax             maximum value of y.
+		 * @param data             data to be filled with indexes of closest roots.
+		 * @param derived          Derivation of the given rooted polynomial.
+		 * @param rootedPolynomial Rooted polynomial we approximate zeros of.
+		 */
 		public CalculatingJob(double reMin, double reMax, double imMin, double imMax, int width, int height, int yMin,
-				int yMax, short[] data) {
+				int yMax, short[] data, ComplexRootedPolynomial rootedPolynomial, ComplexPolynomial derived) {
 			super();
 			this.reMin = reMin;
 			this.reMax = reMax;
@@ -169,19 +236,21 @@ public class Newton {
 			this.yMin = yMin;
 			this.yMax = yMax;
 			this.data = data;
+			this.rootedPolynomial = rootedPolynomial;
+			this.derived = derived;
 		}
 
 		@Override
-		public void run() {
+		public Void call() throws Exception {
 			int xMin = 0, xMax = width; // TODO zasto nam treba min?
-			int offset = 0;
+			int offset = yMin * xMax;
 			for (int y = yMin; y < yMax; y++) {
 				for (int x = xMin; x < xMax; x++) {
-					Complex zn = mapToComplexPlain(x, y, yMin, yMax, xMin, xMax, reMin, reMax, imMin, imMax);
+					Complex zn = mapToComplexPlain(x, y, 0, width, xMin, xMax, reMin, reMax, imMin, imMax);
 					int iter = 0;
 					double module;
 					do {
-						Complex numerator = polynomial.apply(zn);
+						Complex numerator = rootedPolynomial.apply(zn);
 						Complex denominator = derived.apply(zn);
 						Complex znold = zn;
 						Complex fraction = numerator.divide(denominator);
@@ -190,9 +259,10 @@ public class Newton {
 						iter++;
 					} while (module > convergenceThreshold && iter < numberOfIterations);
 
-					data[yMin + offset++] = (short) (rootedPolynomial.indexOfClosestRootFor(zn, rootThreshold) + 1);
+					data[offset++] = (short) (rootedPolynomial.indexOfClosestRootFor(zn, rootThreshold) + 1);
 				}
 			}
+			return null;
 
 		}
 
@@ -217,9 +287,12 @@ public class Newton {
 			double im = (yMax - 1.0 - y) / (yMax - 1) * (imMax - imMin) + imMin;
 			return new Complex(re, im);
 		}
+
 	}
 
 	/**
+	 * Thread factory that sets all threads as daemon.
+	 * 
 	 * @author Zvonimir Šimunović
 	 *
 	 */
@@ -227,8 +300,9 @@ public class Newton {
 
 		@Override
 		public Thread newThread(Runnable r) {
-			// TODO Auto-generated method stub
-			return null;
+			Thread thread = new Thread(r);
+			thread.setDaemon(true);
+			return thread;
 
 		}
 
