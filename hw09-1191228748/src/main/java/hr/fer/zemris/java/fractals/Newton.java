@@ -216,13 +216,12 @@ public class Newton {
 
 		@Override
 		public Void call() throws Exception {
-			int xMin = 0, xMax = width; // TODO zasto nam treba min?
-			int offset = yMin * xMax;
+			int offset = yMin * width;
 			for (int y = yMin; y < yMax; y++) {
 				if (cancel.get())
 					break;
-				for (int x = xMin; x < xMax; x++) {
-					Complex zn = mapToComplexPlain(x, y, 0, width, xMin, xMax, reMin, reMax, imMin, imMax);
+				for (int x = 0; x < width; x++) {
+					Complex zn = mapToComplexPlain(x, y, 0, width, 0, width, reMin, reMax, imMin, imMax);
 					int iter = 0;
 					double module;
 					do {

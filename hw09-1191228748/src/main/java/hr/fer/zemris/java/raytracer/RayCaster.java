@@ -14,7 +14,7 @@ import hr.fer.zemris.java.raytracer.viewer.RayTracerViewer;
 
 /**
  * 
- * TODO javadoc
+ * RayCaster program that renders a predefined scene.
  * 
  * @author Zvonimir Šimunović
  *
@@ -25,13 +25,21 @@ public class RayCaster {
 	private final static double comparisonPrecision = 1e-9;
 
 	/**
-	 * @param args
+	 * Main method that starts the program.
+	 * 
+	 * @param args Command line arguments. (Not used here)
 	 */
 	public static void main(String[] args) {
 		RayTracerViewer.show(getIRayTracerProducer(), new Point3D(10, 0, 0), new Point3D(0, 0, 0),
 				new Point3D(0, 0, 10), 20, 20);
 	}
 
+	/**
+	 * Method that constructs and returns the {@link IRayTracerProducer} object
+	 * needed to draw the scene.
+	 * 
+	 * @return {@link IRayTracerProducer} object needed to draw the scene.
+	 */
 	private static IRayTracerProducer getIRayTracerProducer() {
 		return new IRayTracerProducer() {
 
@@ -76,19 +84,20 @@ public class RayCaster {
 				System.out.println("Izračuni gotovi...");
 				observer.acceptResult(red, green, blue, requestNo);
 				System.out.println("Dojava gotova...");
-
 			}
-
 		};
-
+		
 	}
 
 	/**
-	 * @param scene
-	 * @param ray
-	 * @param rgb
+	 * Tracer used for a ray-tracer that calculates colors on objects in the scene.
+	 * Colors are gotten from various light sources.
+	 * 
+	 * @param scene scene in which objects are.
+	 * @param ray   ray from the viewer of the scene.
+	 * @param rgb   rgb value of pixels in the scene.
 	 */
-	protected static void tracer(Scene scene, Ray ray, short[] rgb) {
+	public static void tracer(Scene scene, Ray ray, short[] rgb) {
 		RayIntersection closest = RayCaster.findClosestIntersection(scene, ray);
 		if (closest == null) {
 			rgb[0] = 0;
@@ -145,15 +154,16 @@ public class RayCaster {
 			Ray ray = Ray.fromPoints(ls.getPoint(), intersection.getPoint());
 			RayIntersection closest = findClosestIntersection(scene, ray);
 
-			if (closest != null && 
-					closest.getDistance() + comparisonPrecision < ls.getPoint().sub(intersection.getPoint()).norm())
+			if (closest != null
+					&& closest.getDistance() + comparisonPrecision < ls.getPoint().sub(intersection.getPoint()).norm())
 				continue;
-//			 closest.getDistance() + comparisonPrecision < ls.getPoint().sub(intersection.getPoint()).norm()
+			
 			Point3D l = ls.getPoint().sub(intersection.getPoint()).normalize();
 			Point3D r = n.normalize().scalarMultiply(2 * l.scalarProduct(n) / n.norm()).sub(l).normalize();
 
 			double ln = Math.max(l.scalarProduct(n), 0);
 			double rv = Math.pow(r.scalarProduct(v), intersection.getKrn());
+			
 			rgb[0] += ls.getR() * (intersection.getKdr() * ln + intersection.getKrr() * rv);
 			rgb[1] += ls.getG() * (intersection.getKdg() * ln + intersection.getKrg() * rv);
 			rgb[2] += ls.getB() * (intersection.getKdb() * ln + intersection.getKrb() * rv);

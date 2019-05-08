@@ -9,13 +9,12 @@ import hr.fer.zemris.java.raytracer.model.IRayTracerProducer;
 import hr.fer.zemris.java.raytracer.model.IRayTracerResultObserver;
 import hr.fer.zemris.java.raytracer.model.Point3D;
 import hr.fer.zemris.java.raytracer.model.Ray;
-import hr.fer.zemris.java.raytracer.model.RayIntersection;
 import hr.fer.zemris.java.raytracer.model.Scene;
 import hr.fer.zemris.java.raytracer.viewer.RayTracerViewer;
 
 /**
  * 
- * TODO javadoc
+ * Demo class for calculating values and vectors needed for ray-casting.
  * 
  * @author Zvonimir Šimunović
  *
@@ -23,13 +22,21 @@ import hr.fer.zemris.java.raytracer.viewer.RayTracerViewer;
 public class RayCasterDemo {
 
 	/**
-	 * @param args
+	 * Main method that starts the program.
+	 * 
+	 * @param args Command line arguments. (Not used here)
 	 */
 	public static void main(String[] args) {
 		RayTracerViewer.show(getIRayTracerProducer(), new Point3D(10, 0, 0), new Point3D(0, 0, 0),
 				new Point3D(0, 0, 10), 20, 20);
 	}
 
+	/**
+	 * Method that constructs and returns the {@link IRayTracerProducer} object
+	 * needed to draw the scene.
+	 * 
+	 * @return {@link IRayTracerProducer} object needed to draw the scene.
+	 */
 	private static IRayTracerProducer getIRayTracerProducer() {
 		return new IRayTracerProducer() {
 
@@ -54,7 +61,7 @@ public class RayCasterDemo {
 
 				Point3D screenCorner = view.sub(xAxis.scalarMultiply(horizontal / 2))
 						.add(yAxis.scalarMultiply(vertical / 2));
-				
+
 				System.out.println("Izračunato");
 				System.out.println("===============================");
 				System.out.println("X-vektor:: " + pointToString(xAxis));
@@ -75,7 +82,7 @@ public class RayCasterDemo {
 						Point3D screenPoint = p1.sub(p2);
 						Ray ray = Ray.fromPoints(eye, screenPoint);
 
-						tracer(scene, ray, rgb);
+						RayCaster.tracer(scene, ray, rgb);
 
 						System.out.println();
 						System.out.println("Informacije za točku x=" + x + ", y=" + y);
@@ -94,26 +101,14 @@ public class RayCasterDemo {
 
 	}
 
+
+
 	/**
-	 * @param scene
-	 * @param ray
-	 * @param rgb
+	 * Formats a {@link Point3D} to string.
+	 * 
+	 * @param point a {@link Point3D} object.
+	 * @return string representation of the given {@code point}.
 	 */
-	protected static void tracer(Scene scene, Ray ray, short[] rgb) {
-		RayIntersection closest = RayCaster.findClosestIntersection(scene, ray);
-		if (closest == null) {
-			rgb[0] = 0;
-			rgb[1] = 0;
-			rgb[2] = 0;
-			return;
-		}
-		short[] newRgb = RayCaster.determineColorFor(closest, scene, ray);
-		rgb[0] = newRgb[0];
-		rgb[1] = newRgb[1];
-		rgb[2] = newRgb[2];
-
-	}
-
 	private static String pointToString(Point3D point) {
 		return String.format("(%.6f, %.6f, %.6f)", point.x, point.y, point.z);
 	}

@@ -92,7 +92,6 @@ public class Sphere extends GraphicalObject {
 
 			@Override
 			public Point3D getNormal() {
-				// TODO Check
 				return point.sub(center).normalize();
 			}
 
