@@ -19,8 +19,11 @@ public class Vector3Demo {
 		Vector3 i = new Vector3(1, 0, 0);
 		Vector3 j = new Vector3(0, 1, 0);
 		Vector3 k = i.cross(j);
+		
 		Vector3 l = k.add(j).scale(5);
+		
 		Vector3 m = l.normalized();
+		
 		System.out.println(i);
 		System.out.println(j);
 		System.out.println(k);

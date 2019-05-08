@@ -12,11 +12,28 @@ import hr.fer.zemris.java.raytracer.model.Ray;
 import hr.fer.zemris.java.raytracer.model.Scene;
 import hr.fer.zemris.java.raytracer.viewer.RayTracerViewer;
 
+/**
+ * RayCaster program that renders a predefined scene using threads and animating
+ * the scene.
+ * 
+ * @author Zvonimir Šimunović
+ *
+ */
 public class RayCasterParallel2 {
+	/**
+	 * Main method that starts the program.
+	 * 
+	 * @param args Command line arguments. (Not used here)
+	 */
 	public static void main(String[] args) {
 		RayTracerViewer.show(getIRayTracerProducer(), getIRayTracerAnimator(), 30, 30);
 	}
 
+	/**
+	 * Returns object that animates the scene.
+	 * 
+	 * @return object that animates the scene.
+	 */
 	private static IRayTracerAnimator getIRayTracerAnimator() {
 		return new IRayTracerAnimator() {
 			long time;

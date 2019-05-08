@@ -10,22 +10,14 @@ import java.util.Objects;
  */
 public class Vector3 {
 
-	/**
-	 * X value.
-	 */
+	/** X coordinate value. */
 	private double x;
-	/**
-	 * Y value.
-	 */
+	/** Y coordinate value. */
 	private double y;
-	/**
-	 * Z value.
-	 */
+	/** Z coordinate value. */
 	private double z;
 
-	/**
-	 * Precision of the equals method
-	 */
+	/** Precision of the equals method. */
 	private static final double precision = 1e-6;
 
 	/**
@@ -61,43 +53,45 @@ public class Vector3 {
 	}
 
 	/**
-	 * Creates a new {@link Vector3} that is {@code this} + {@code Vector3}.
+	 * Creates and returns a new {@link Vector3} object that is
+	 * {@code this + Vector3}.
 	 * 
-	 * @param other {@code Vector3} that is to be added to {@code this}
-	 * @return new {@link Vector3} that is {@code this} + {@code other}
+	 * @param other {@code Vector3} that is to be added to {@code this}.
+	 * @return {@link Vector3} object that is {@code this + Vector3}.
 	 */
 	public Vector3 add(Vector3 other) {
 		return new Vector3(this.x + other.x, this.y + other.y, this.z + other.z);
 	}
 
 	/**
-	 * Creates a new {@link Vector3} that is {@code this} - {@code Vector3}.
+	 * Creates and returns a new {@link Vector3} object that is
+	 * {@code this - Vector3}.
 	 * 
-	 * @param other {@code Vector3} that is to be subtracted from {@code this}
-	 * @return new {@link Vector3} that is {@code this} - {@code other}
+	 * @param other {@code Vector3} that is to be subtracted from {@code this}.
+	 * @return {@link Vector3} object that is {@code this - Vector3}.
 	 */
 	public Vector3 sub(Vector3 other) {
 		return new Vector3(this.x - other.x, this.y - other.y, this.z - other.z);
 	}
 
 	/**
-	 * Creates a new {@link Vector3} that is dot product of {@code this} and
-	 * {@code Vector3}.
+	 * Creates and returns a new {@link Vector3} object that is dot product of
+	 * {@code this} and {@code Vector3}.
 	 * 
 	 * @param other other {@code Vector3}.
-	 * @return new {@link Vector3} that is dot product of {@code this} and
+	 * @return {@link Vector3} object that is dot product of {@code this} and
 	 *         {@code Vector3}.
 	 */
 	public double dot(Vector3 other) {
-		return this.x * other.x + this.y * other.y;
+		return this.x * other.x + this.y * other.y + this.z * other.z;
 	}
 
 	/**
-	 * Creates a new {@link Vector3} that is vector product of {@code this} and
-	 * {@code Vector3}.
+	 * Creates and returns a new {@link Vector3} object that is vector product of
+	 * {@code this} and {@code Vector3}.
 	 * 
 	 * @param other other {@code Vector3}.
-	 * @return new {@link Vector3} that is vector product of {@code this} and
+	 * @return {@link Vector3} object that is vector product of {@code this} and
 	 *         {@code Vector3}.
 	 */
 	public Vector3 cross(Vector3 other) {
@@ -106,20 +100,21 @@ public class Vector3 {
 	}
 
 	/**
-	 * Scales this vector with the given scale.
+	 * Creates and returns {@code this} scaled with the given factor.
 	 * 
-	 * @param s factor of scaling.
-	 * @return {@code Vector3} object scaled with the given factor.
+	 * @param s factor for scaling.
+	 * @return {@code Vector3} object that is {@code this} scaled with the given
+	 *         factor.
 	 */
 	public Vector3 scale(double s) {
 		return new Vector3(this.x * s, this.y * s, this.z * s);
 	}
 
 	/**
-	 * Cosine of the angle between this vector and {@code other}.
+	 * Cosine of the angle between {@code this} and {@code other}.
 	 * 
 	 * @param other other {@code Vector3}.
-	 * @return Cosine of the angle between this vector and {@code other}.
+	 * @return Cosine of the angle between {@code this} and {@code other}.
 	 */
 	public double cosAngle(Vector3 other) {
 		return this.dot(other) / (this.norm() * other.norm());
@@ -174,7 +169,7 @@ public class Vector3 {
 		if (!(obj instanceof Vector3))
 			return false;
 		Vector3 other = (Vector3) obj;
-		return x - other.x < precision && y - other.y < precision && z - other.z < precision;
+		return Math.abs(x - other.x) < precision && Math.abs(y - other.y) < precision && Math.abs(z - other.z) < precision;
 	}
 
 }

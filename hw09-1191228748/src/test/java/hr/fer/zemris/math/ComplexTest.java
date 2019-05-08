@@ -4,160 +4,106 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-/**
- * Tests for {@link Complex} class.
- * 
- * @author Zvonimir Šimunović
- *
- */
 class ComplexTest {
 
 	@Test
-	void testParse1() {
-		Complex z = new Complex(-2.71, -3.15);
-		assertEquals(z, Complex.parse("-2.71-i3.15"));
+	void testAddition() {
+		Complex c1 = new Complex(15, 5);
+		Complex c2 = new Complex(5, 1);
+		assertEquals(new Complex(20, 6), c1.add(c2));
 	}
 
 	@Test
-	void testParse2() {
-		Complex z = new Complex(3.51, 0);
-		assertEquals(z, Complex.parse("3.51"));
+	void testSubctraction() {
+		Complex c1 = new Complex(15, 5);
+		Complex c2 = new Complex(5, 1);
+		assertEquals(new Complex(10, 4), c1.sub(c2));
 	}
 
 	@Test
-	void testParse3() {
-		Complex z = new Complex(0, -2.71);
-		assertEquals(z, Complex.parse("-i2.71"));
+	void testMultiplication() {
+		Complex c1 = new Complex(15, 5);
+		Complex c2 = new Complex(5, 1);
+		assertEquals(new Complex(70, 40), c1.multiply(c2));
 	}
 
 	@Test
-	void testParseNotComplex1() {
-		assertThrows(IllegalArgumentException.class, () -> {
-			Complex.parse("351i");
-		});
-
-	}
-
-	@Test
-	void testParseNotComplex2() {
-		assertThrows(IllegalArgumentException.class, () -> {
-			Complex.parse("-+2.71");
-		});
-
-	}
-
-	@Test
-	void testParseNotComplex3() {
-		assertThrows(IllegalArgumentException.class, () -> {
-			Complex.parse("+2.71-+3.15i");
-		});
-
-	}
-
-	@Test
-	void testAdd() {
-		Complex z1 = new Complex(10, 6);
-		Complex z2 = new Complex(3, 5);
-
-		assertEquals(new Complex(13, 11), z1.add(z2));
-	}
-
-	@Test
-	void testSub() {
-		Complex z1 = new Complex(10, 6);
-		Complex z2 = new Complex(3, 5);
-
-		assertEquals(new Complex(7, 1), z1.sub(z2));
-	}
-
-	@Test
-	void testMul() {
-		Complex z1 = new Complex(10, 6);
-		Complex z2 = new Complex(3, 5);
-
-		assertEquals(new Complex(0, 68), z1.multiply(z2));
-	}
-
-	@Test
-	void testDiv() {
-		Complex z1 = new Complex(10, 6);
-		Complex z2 = new Complex(3, 5);
-
-		assertEquals(new Complex(30.0 / 17.0, -16.0 / 17.0), z1.divide(z2));
+	void testDivision() {
+		Complex c1 = new Complex(15, 5);
+		Complex c2 = new Complex(5, 1);
+		assertEquals(new Complex(40.0 / 13.0, 5.0 / 13.0), c1.divide(c2));
 
 	}
 
 	@Test
 	void testPower() {
-		Complex z = new Complex(3, 5);
-
-		assertEquals(new Complex(-16, 30), z.power(2));
+		assertEquals(new Complex(200, 150), new Complex(15, 5).power(2));
 
 	}
 
 	@Test
-	void testRoot() {
-		Complex z = new Complex(0, 81);
-		assertEquals(new Complex(2.77163859753386, 1.14805029709527), z.root(4).get(0));
+	void testRoots() {
+		assertEquals(new Complex(2.77163859753386, 1.14805029709527), new Complex(0, 81).root(4).get(0));
 	}
 
 	@Test
-	public void parserTest() {
-		String[] validInput = new String[] { "3.51", "-3.17", "-i2.71", "i", "1", "-2.71-i3.15", "i351", "-i317",
-				"i3.51", "-i3.17", "i", "-i", "2.71", "2.71+i3.15", "i" };
-		String[] invalidInput = new String[] { "351i", "-317i", "3.51i", "-3.17i", "-+2.71", "--2.71", "-2.71+-i3.15",
+	public void testParseValidInputs() {
+		String[] actualInputs = new String[] { "3.51", "-3.17", "-i2.71", "i", "1", "-2.71-i3.15", "i351", "-i317",
+				"i3.51", "-i3.17", "i", "-i", "2.71", "2.71+i3.15", "i", "0", "i0", "0+i0", "0-i0" };
+
+		Complex[] expectedOutputs = new Complex[] { new Complex(3.51, 0), new Complex(-3.17, 0), new Complex(0, -2.71),
+				Complex.IM, Complex.ONE, new Complex(-2.71, -3.15), new Complex(0, 351), new Complex(0, -317),
+				new Complex(0, 3.51), new Complex(0, -3.17), Complex.IM, Complex.IM_NEG, new Complex(2.71, 0),
+				new Complex(2.71, 3.15), Complex.IM, Complex.ZERO, Complex.ZERO, Complex.ZERO, Complex.ZERO };
+
+		for (int i = 0; i < expectedOutputs.length; i++) {
+			Complex actual = Complex.parse(actualInputs[i]);
+			Complex expected = expectedOutputs[i];
+			assertEquals(expected, actual);
+		}
+	}
+
+	@Test
+	public void testParseInvalidInputs() {
+		String[] inputs = new String[] { "351i", "-317i", "3.51i", "-3.17i", "-+2.71", "--2.71", "-2.71+-i3.15",
 				"+2.71-+i3.15", "-+2.71", "3.15E-2" };
 
-		Complex[] expected = new Complex[] { new Complex(3.51, 0), new Complex(-3.17, 0), new Complex(0, -2.71),
-				new Complex(0, 1), new Complex(1, 0), new Complex(-2.71, -3.15), new Complex(0, 351),
-				new Complex(0, -317), new Complex(0, 3.51), new Complex(0, -3.17), new Complex(0, 1),
-				new Complex(0, -1), new Complex(2.71, 0), new Complex(2.71, 3.15), new Complex(0, 1) };
-
-		for (int i = 0; i < expected.length; i++) {
-			Complex actual = Complex.parse(validInput[i]);
-			assertEquals(expected[i], actual);
-		}
-
-		for (String string : invalidInput) {
+		for (String input : inputs) {
 			assertThrows(IllegalArgumentException.class, () -> {
-				Complex.parse(string);
+				Complex.parse(input);
 			});
 		}
 	}
 
 	@Test
 	void testEquals() {
-		Complex z1 = new Complex(3, 5);
-		Complex z2 = new Complex(3, 5);
+		Complex c1 = new Complex(15, 15);
+		Complex c2 = new Complex(15, 15);
 
-		assertTrue(z1.equals(z2));
+		assertTrue(c1.equals(c2));
 
 	}
 
 	@Test
 	void testEquals2() {
-		Complex z1 = new Complex(2.0, 3.0);
-		Complex z3 = new Complex(4.001, 4.0001);
+		Complex c1 = new Complex(15.0002, 15);
+		Complex c2 = new Complex(15.0002, 15);
 
-		assertFalse(z1.equals(z3));
+		assertTrue(c1.equals(c2));
+
 	}
 
 	@Test
-	void testParseNotValid() {
-		assertThrows(IllegalArgumentException.class, () -> {
-			Complex.parse("+2.71+-i3.15");
-		});
+	void testEquals3() {
+		Complex c1 = new Complex(1, 1);
+		Complex c2 = new Complex(5, 5);
 
-		assertThrows(IllegalArgumentException.class, () -> {
-			Complex.parse("+2.71-+i3.15");
-		});
+		assertFalse(c1.equals(c2));
+	}
 
-		assertThrows(IllegalArgumentException.class, () -> {
-			Complex.parse("++2.71+i3.15");
-		});
-
-		Complex actual = Complex.parse("-i");
-		assertEquals(new Complex(0, -1), actual);
+	@Test
+	void testNegate() {
+		assertEquals(new Complex(-1, 2), new Complex(1, -2).negate());
 	}
 
 }

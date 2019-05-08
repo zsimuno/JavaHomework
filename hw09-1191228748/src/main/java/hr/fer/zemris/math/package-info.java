@@ -1,5 +1,5 @@
 /**
- * Classes for mathematical calculations.
+ * Classes for mathematical objects.
  * 
  * @author Zvonimir Šimunović
  *

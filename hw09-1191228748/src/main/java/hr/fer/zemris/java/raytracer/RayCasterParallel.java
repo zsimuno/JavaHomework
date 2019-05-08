@@ -12,6 +12,8 @@ import hr.fer.zemris.java.raytracer.model.Scene;
 import hr.fer.zemris.java.raytracer.viewer.RayTracerViewer;
 
 /**
+ * RayCaster program that renders a predefined scene using threads.
+ * 
  * @author Zvonimir Šimunović
  *
  */
