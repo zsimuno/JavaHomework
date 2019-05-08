@@ -22,8 +22,11 @@ public class RayCasterParallel {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		RayTracerViewer.show(getIRayTracerProducer(), new Point3D(10, 0, 0), new Point3D(0, 0, 0),
-				new Point3D(0, 0, 10), 20, 20);
+		RayTracerViewer.show(getIRayTracerProducer(), 
+				new Point3D(10, 0, 0), 
+				new Point3D(0, 0, 0),
+				new Point3D(0, 0, 10), 
+				20, 20);
 	}
 
 	/**

@@ -86,7 +86,7 @@ public class RayCaster {
 				System.out.println("Dojava gotova...");
 			}
 		};
-		
+
 	}
 
 	/**
@@ -154,19 +154,35 @@ public class RayCaster {
 			Ray ray = Ray.fromPoints(ls.getPoint(), intersection.getPoint());
 			RayIntersection closest = findClosestIntersection(scene, ray);
 
-			if (closest != null
-					&& closest.getDistance() + comparisonPrecision < ls.getPoint().sub(intersection.getPoint()).norm())
+			if (closest == null)
+				continue;
+
+			Point3D lightToInter = ls.getPoint().sub(intersection.getPoint());
+			double distance = lightToInter.norm();
+			if (closest.getDistance() + comparisonPrecision < distance)
+				continue;
+
+			// Add diffuse
+			Point3D l = lightToInter.normalize();
+			double ln = Math.max(l.scalarProduct(n), 0.0);
+
+			rgb[0] += ls.getR() * intersection.getKdr() * ln;
+			rgb[1] += ls.getG() * intersection.getKdg() * ln;
+			rgb[2] += ls.getB() * intersection.getKdb() * ln;
+
+			// Add reflective
+			Point3D r = n.normalize().scalarMultiply(2 * l.scalarProduct(n) / n.norm()).sub(l).normalize();
+			double scalarProduct = r.scalarProduct(v);
+			
+			if(scalarProduct < 0)
 				continue;
 			
-			Point3D l = ls.getPoint().sub(intersection.getPoint()).normalize();
-			Point3D r = n.normalize().scalarMultiply(2 * l.scalarProduct(n) / n.norm()).sub(l).normalize();
+			double rv = Math.pow(scalarProduct, intersection.getKrn());
 
-			double ln = Math.max(l.scalarProduct(n), 0);
-			double rv = Math.pow(r.scalarProduct(v), intersection.getKrn());
 			
-			rgb[0] += ls.getR() * (intersection.getKdr() * ln + intersection.getKrr() * rv);
-			rgb[1] += ls.getG() * (intersection.getKdg() * ln + intersection.getKrg() * rv);
-			rgb[2] += ls.getB() * (intersection.getKdb() * ln + intersection.getKrb() * rv);
+			rgb[0] += ls.getR() * intersection.getKrr() * rv;
+			rgb[1] += ls.getG() * intersection.getKrg() * rv;
+			rgb[2] += ls.getB() * intersection.getKrb() * rv;
 
 		}
 

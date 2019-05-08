@@ -45,13 +45,14 @@ public class RayCasterDemo {
 					int width, int height, long requestNo, IRayTracerResultObserver observer, AtomicBoolean cancel) {
 				System.out.println("Parametri koje je dobila metoda");
 				System.out.println("===============================");
-				System.out.println("eye: " + pointToString(eye));
-				System.out.println("view:  " + pointToString(view));
-				System.out.println("viewUp:  " + pointToString(viewUp));
-				System.out.println("width:  " + width);
+				System.out.println("eye:" + pointToString(eye));
+				System.out.println("view: " + pointToString(view));
+				System.out.println("viewUp: " + pointToString(viewUp));
+				System.out.println("width: " + width);
 				System.out.println("height: " + +height);
 				System.out.println("horizontal: " + +horizontal);
 				System.out.println("vertical: " + vertical);
+				System.out.println();
 
 				Point3D vUp = viewUp.normalize();
 
@@ -64,10 +65,10 @@ public class RayCasterDemo {
 
 				System.out.println("Izračunato");
 				System.out.println("===============================");
-				System.out.println("X-vektor:: " + pointToString(xAxis));
-				System.out.println("Y-vektor::  " + pointToString(yAxis));
-				System.out.println("Z-vektor::  " + pointToString(zAxis));
-				System.out.println("Screen-corner:  " + pointToString(screenCorner));
+				System.out.println("X-vektor: " + pointToString(xAxis));
+				System.out.println("Y-vektor: " + pointToString(yAxis));
+				System.out.println("Z-vektor: " + pointToString(zAxis));
+				System.out.println("Screen-corner: " + pointToString(screenCorner));
 
 				Scene scene = RayTracerViewer.createPredefinedScene();
 
@@ -86,11 +87,10 @@ public class RayCasterDemo {
 
 						System.out.println();
 						System.out.println("Informacije za točku x=" + x + ", y=" + y);
-						System.out.println("Screen-point:" + pointToString(screenPoint));
+						System.out.println("Screen-point: " + pointToString(screenPoint));
 						System.out.printf("Ray: start=" + pointToString(ray.start));
-						System.out.println(",direction=" + pointToString(ray.direction));
+						System.out.println(", direction=" + pointToString(ray.direction));
 						System.out.println("RGB =" + Arrays.toString(rgb));
-						System.out.println();
 
 					}
 				}
