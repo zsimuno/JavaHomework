@@ -58,7 +58,7 @@ public class Sphere extends GraphicalObject {
 		Point3D originCenter = ray.start.sub(center);
 		double b = originCenter.scalarProduct(ray.direction);
 		double c = originCenter.scalarProduct(originCenter) - radius * radius;
-		double discriminant = b * b - 2 * c;
+		double discriminant = b * b - c;
 
 		double distance;
 
@@ -73,7 +73,7 @@ public class Sphere extends GraphicalObject {
 				return null;
 			}
 
-			if (distance1 > 0.0 && distance1 > distance2) {
+			if (distance1 > 0.0 && distance1 < distance2) {
 				distance = distance1;
 			} else {
 				distance = distance2;

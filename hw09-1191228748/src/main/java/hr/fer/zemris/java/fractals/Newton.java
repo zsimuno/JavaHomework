@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import hr.fer.zemris.java.fractals.viewer.FractalViewer;
 import hr.fer.zemris.java.fractals.viewer.IFractalProducer;
@@ -69,7 +70,6 @@ public class Newton {
 			ArrayList<Complex> roots = new ArrayList<>();
 			while (true) {
 				System.out.println("Please enter at least two roots, one root per line. Enter 'done' when done.");
-				
 
 				for (int i = 0;; i++) {
 					System.out.printf("Root %d> ", i + 1);
@@ -104,8 +104,7 @@ public class Newton {
 
 		@Override
 		public void produce(double reMin, double reMax, double imMin, double imMax, int width, int height,
-				long requestNo, IFractalResultObserver observer) {
-
+				long requestNo, IFractalResultObserver observer, AtomicBoolean cancel) {
 			int availableProcessors = Runtime.getRuntime().availableProcessors();
 			int trackNumber = (8 * availableProcessors);
 			int range = height / trackNumber;
@@ -123,7 +122,7 @@ public class Newton {
 					yMax = height - 1;
 				}
 				CalculatingJob job = new CalculatingJob(reMin, reMax, imMin, imMax, width, height, yMin, yMax, data,
-						rootedPolynomial, derived);
+						rootedPolynomial, derived, cancel);
 				results.add(pool.submit(job));
 			}
 
@@ -137,6 +136,7 @@ public class Newton {
 			pool.shutdown();
 
 			observer.acceptResult(data, (short) (polynomial.order() + 1), requestNo);
+
 		}
 
 	}
@@ -148,63 +148,35 @@ public class Newton {
 	 *
 	 */
 	public static class CalculatingJob implements Callable<Void> {
-		/**
-		 * Minimal real.
-		 */
+		/** Minimal real. */
 		double reMin;
-		/**
-		 * Maximum real.
-		 */
+		/** Maximum real. */
 		double reMax;
-		/**
-		 * Minimal Imaginary.
-		 */
+		/** Minimal Imaginary. */
 		double imMin;
-		/**
-		 * Maximum Imaginary.
-		 */
+		/** Maximum Imaginary. */
 		double imMax;
-		/**
-		 * Width of the screen.
-		 */
+		/** Width of the screen. */
 		int width;
-		/**
-		 * Height of the screen.
-		 */
+		/** Height of the screen. */
 		int height;
-		/**
-		 * Minimal y value.
-		 */
+		/** Minimal y value. */
 		int yMin;
-		/**
-		 * Maximal y value.
-		 */
+		/** Maximal y value. */
 		int yMax;
-		/**
-		 * Data to be written in.
-		 */
+		/** Data to be written in. */
 		short[] data;
-		/**
-		 * Rooted polynomial we approximate zeros of.
-		 */
+		/** Rooted polynomial we approximate zeros of. */
 		private ComplexRootedPolynomial rootedPolynomial;
-		/**
-		 * Derivation of the given rooted polynomial.
-		 */
+		/** Derivation of the given rooted polynomial. */
 		private ComplexPolynomial derived;
-		/**
-		 * Max number of iterations.
-		 */
-		private static final int numberOfIterations = 60; // TODO koliko?
-
-		/**
-		 * Threshold for convergence.
-		 */
+		/** If we need to cancel the drawing. */
+		private AtomicBoolean cancel;
+		/** Max number of iterations. */
+		private static final int numberOfIterations = 60;
+		/** Threshold for convergence. */
 		private static final double convergenceThreshold = 1e-3;
-
-		/**
-		 * Threshold for closest root.
-		 */
+		/** Threshold for closest root. */
 		private static final double rootThreshold = 2e-3;
 
 		/**
@@ -225,7 +197,8 @@ public class Newton {
 		 * @param rootedPolynomial Rooted polynomial we approximate zeros of.
 		 */
 		public CalculatingJob(double reMin, double reMax, double imMin, double imMax, int width, int height, int yMin,
-				int yMax, short[] data, ComplexRootedPolynomial rootedPolynomial, ComplexPolynomial derived) {
+				int yMax, short[] data, ComplexRootedPolynomial rootedPolynomial, ComplexPolynomial derived,
+				AtomicBoolean cancel) {
 			super();
 			this.reMin = reMin;
 			this.reMax = reMax;
@@ -238,6 +211,7 @@ public class Newton {
 			this.data = data;
 			this.rootedPolynomial = rootedPolynomial;
 			this.derived = derived;
+			this.cancel = cancel;
 		}
 
 		@Override
@@ -245,6 +219,8 @@ public class Newton {
 			int xMin = 0, xMax = width; // TODO zasto nam treba min?
 			int offset = yMin * xMax;
 			for (int y = yMin; y < yMax; y++) {
+				if (cancel.get())
+					break;
 				for (int x = xMin; x < xMax; x++) {
 					Complex zn = mapToComplexPlain(x, y, 0, width, xMin, xMax, reMin, reMax, imMin, imMax);
 					int iter = 0;

@@ -107,7 +107,10 @@ public class RayCasterDemo {
 			rgb[2] = 0;
 			return;
 		}
-		rgb = RayCaster.determineColorFor(closest.getPoint(), scene);
+		short[] newRgb = RayCaster.determineColorFor(closest, scene, ray);
+		rgb[0] = newRgb[0];
+		rgb[1] = newRgb[1];
+		rgb[2] = newRgb[2];
 
 	}
 

@@ -21,6 +21,9 @@ import hr.fer.zemris.java.raytracer.viewer.RayTracerViewer;
  */
 public class RayCaster {
 
+	/** Comparison precision for comparing double values. */
+	private final static double comparisonPrecision = 1e-9;
+
 	/**
 	 * @param args
 	 */
@@ -48,7 +51,7 @@ public class RayCaster {
 
 				Point3D screenCorner = view.sub(xAxis.scalarMultiply(horizontal / 2))
 						.add(yAxis.scalarMultiply(vertical / 2));
-				
+
 				Scene scene = RayTracerViewer.createPredefinedScene();
 
 				short[] rgb = new short[3];
@@ -86,16 +89,18 @@ public class RayCaster {
 	 * @param rgb
 	 */
 	protected static void tracer(Scene scene, Ray ray, short[] rgb) {
-		rgb[0] = 0;
-		rgb[1] = 0;
-		rgb[2] = 0;
-		RayIntersection closest = findClosestIntersection(scene, ray);
+		RayIntersection closest = RayCaster.findClosestIntersection(scene, ray);
 		if (closest == null) {
+			rgb[0] = 0;
+			rgb[1] = 0;
+			rgb[2] = 0;
 			return;
 		}
-		rgb[0] = 255;
-		rgb[1] = 255;
-		rgb[2] = 255;
+		short[] newRgb = RayCaster.determineColorFor(closest, scene, ray);
+		rgb[0] = newRgb[0];
+		rgb[1] = newRgb[1];
+		rgb[2] = newRgb[2];
+
 	}
 
 	/**
@@ -126,22 +131,33 @@ public class RayCaster {
 	/**
 	 * Determines color for a given {@code point} in the given {@code scene}.
 	 * 
-	 * @param point point we determine color from.
-	 * @param scene scene in which the point is positioned in.
+	 * @param point  point we determine color from.
+	 * @param scene  scene in which the point is positioned in.
+	 * @param eyeRay Ray who's starting point is the eye of the viewer.
 	 * @return rgb color of the point.
 	 */
-	public static short[] determineColorFor(Point3D point, Scene scene) {
+	public static short[] determineColorFor(RayIntersection intersection, Scene scene, Ray eyeRay) {
 		short[] rgb = new short[] { 15, 15, 15 };
+		Point3D v = eyeRay.start.sub(intersection.getPoint()).normalize();
+		Point3D n = intersection.getNormal();
+
 		for (LightSource ls : scene.getLights()) {
-			Ray ray = Ray.fromPoints(ls.getPoint(), point);
+			Ray ray = Ray.fromPoints(ls.getPoint(), intersection.getPoint());
 			RayIntersection closest = findClosestIntersection(scene, ray);
 
-			if (closest != null && closest.getDistance() < ls.getPoint().sub(point).norm())
+			if (closest != null && 
+					closest.getDistance() + comparisonPrecision < ls.getPoint().sub(intersection.getPoint()).norm())
 				continue;
+//			 closest.getDistance() + comparisonPrecision < ls.getPoint().sub(intersection.getPoint()).norm()
+			Point3D l = ls.getPoint().sub(intersection.getPoint()).normalize();
+			Point3D r = n.normalize().scalarMultiply(2 * l.scalarProduct(n) / n.norm()).sub(l).normalize();
 
-			rgb[0] += closest.getKdr() + closest.getKrr();
-			rgb[1] += closest.getKdg() + closest.getKrg();
-			rgb[2] += closest.getKdb() + closest.getKrb();
+			double ln = Math.max(l.scalarProduct(n), 0);
+			double rv = Math.pow(r.scalarProduct(v), intersection.getKrn());
+			rgb[0] += ls.getR() * (intersection.getKdr() * ln + intersection.getKrr() * rv);
+			rgb[1] += ls.getG() * (intersection.getKdg() * ln + intersection.getKrg() * rv);
+			rgb[2] += ls.getB() * (intersection.getKdb() * ln + intersection.getKrb() * rv);
+
 		}
 
 		return rgb;
