@@ -1,7 +1,7 @@
 /**
+ * Classes that model incrementally generated list of primes and shows the list
+ * on a GUI (swing).
  * 
- */
-/**TODO
  * @author Zvonimir Šimunović
  *
  */
