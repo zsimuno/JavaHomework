@@ -62,9 +62,6 @@ public class CalcModelImpl implements CalcModel {
 		this.value = value;
 		positiveValue = value >= 0;
 		input = Double.toString(Math.abs(value));
-		if (input.endsWith(".0")) {
-			input = input.substring(0, input.length() - 2);
-		}
 		editable = false;
 		notifyListeners();
 

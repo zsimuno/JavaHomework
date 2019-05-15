@@ -2,6 +2,7 @@ package hr.fer.zemris.java.gui.charts;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -26,6 +27,49 @@ public class BarChartComponent extends JComponent {
 
 	/** BarChart to draw. */
 	private BarChart chart;
+	/** Width of the container. */
+	int width;
+	/** Height of the container. */
+	int height;
+	/** Y value for the end of the y axis. */
+	int yGraphEnd = 10;
+	/** X value for the end of the x axis. */
+	int xGraphEnd;
+	/** Length of the line that is drawn to indicate steps. */
+	int lineLength = 5;
+	/** Distance of the text from the axes. */
+	int textDistance = lineLength + 5;
+	/**
+	 * Point that represents the starting point of the axes (i.e. (0,0) on the
+	 * graph).
+	 */
+	Point graphStart;
+	/** Maximum value of y. */
+	int maxY;
+	/** Minimal value of y. */
+	int minY;
+	/** Distance between values on graph from chart. */
+	int elementDistance;
+	/** Color of the grid. */
+	Color gridColor = new Color(239, 224, 198);
+	/** Color of the bars. */
+	Color barColor = new Color(245, 134, 99);
+	/** Color of the shadow of the bars. */
+	Color shadowColor = Color.lightGray;
+	/** Padding for shadow bars. */
+	int shadowPadding = 5;
+	/** Color of the axes. */
+	Color axisColor = Color.gray;
+	/** Color of the text. */
+	Color textColor = Color.black;
+	/** Color of the line that is drawn to indicate steps. */
+	Color lineColor = Color.gray;
+	/** List of values on the graph. */
+	List<XYValue> list;
+	/** padding of bars. */
+	int padding = 1;
+	/** Dimensions of arrows at the end of axes. */
+	Dimension arrowDim = new Dimension(5, 7);
 
 	/**
 	 * Constructor.
@@ -34,78 +78,62 @@ public class BarChartComponent extends JComponent {
 	 */
 	public BarChartComponent(BarChart chart) {
 		this.chart = chart;
+		maxY = chart.getMaxY();
+		minY = chart.getMinY();
+		elementDistance = chart.getDistance();
+		while ((maxY - minY) % elementDistance != 0) {
+			maxY++;
+		}
+		list = chart.getList();
+
 	}
 
 	@Override
 	protected void paintComponent(Graphics graphics) {
 		Graphics2D g = (Graphics2D) graphics;
 
-		int width = getWidth();
-		int height = getHeight();
-		int yGraphEnd = 10, xGraphEnd = width - yGraphEnd;
-		int lineLength = 5, textDistance = lineLength + 5;
-		Point graphStart = new Point(60, height - 60);
-
-		int maxY = chart.getMaxY(), minY = chart.getMinY();
-		int elementDistance = chart.getDistance();
-
-		if ((maxY - minY) % elementDistance != 0) {
-			// TODO Sto tocno napraviti?
-		}
-		int distanceY = (graphStart.y - yGraphEnd) / ((maxY - minY) / elementDistance);
+		width = getWidth();
+		height = getHeight();
+		xGraphEnd = width - yGraphEnd;
 
 		g.setFont(new Font("SansSerif", Font.BOLD, 15));
 		FontMetrics fm = g.getFontMetrics();
+		graphStart = new Point(40 + fm.stringWidth(Integer.toString(maxY)), height - 60);
 
-		Color gridColor = new Color(239, 224, 198);
-		Color barColor = new Color(245, 134, 99);
-		g.setStroke(new BasicStroke(2));
+		drawValuesAndBars(g);
 
-		// Draw Y values
-		for (int i = minY, j = 0; i <= maxY; i += elementDistance, j++) {
-			String number = Integer.toString(i);
-			int yPosition = graphStart.y - j * distanceY;
-			g.setColor(Color.black);
-			g.drawString(number, graphStart.x - textDistance - fm.stringWidth(number), yPosition + fm.getAscent() / 3);
-			g.setColor(Color.gray);
-			g.drawLine(graphStart.x - lineLength, yPosition, graphStart.x, yPosition);
-			g.setColor(gridColor);
-			g.drawLine(graphStart.x, yPosition, width, yPosition);
-		}
+		drawDescriptions(g);
 
-		// Draw X values and draw bars
-		List<XYValue> list = chart.getList();
-		int distanceX = (xGraphEnd - graphStart.x) / list.size();
-		int padding = 1;
-		int i = 0;
-		for (XYValue val : list) {
-			String number = Integer.toString(val.getX());
-			int xPosition = graphStart.x + i * distanceX;
-			int nextXPosition = graphStart.x + (i + 1) * distanceX;
+		// Draw x and y axes
+		g.setColor(axisColor);
+		g.drawLine(graphStart.x, graphStart.y, width, graphStart.y);
+		g.drawLine(graphStart.x, graphStart.y + lineLength, graphStart.x, 0);
 
-			// Draw lines and values
-			g.setColor(Color.black);
-			g.drawString(number, (xPosition + nextXPosition) / 2, graphStart.y + fm.getAscent() + textDistance / 2);
-			g.setColor(Color.gray);
-			g.drawLine(nextXPosition, graphStart.y + lineLength, nextXPosition, graphStart.y);
-			g.setColor(gridColor);
-			g.drawLine(nextXPosition, graphStart.y, nextXPosition, 0);
+		// Draw arrows
+		Polygon p = new Polygon();
+		p.addPoint(graphStart.x, 0);
+		p.addPoint(graphStart.x - arrowDim.width, arrowDim.height);
+		p.addPoint(graphStart.x + arrowDim.width, arrowDim.height);
+		g.fillPolygon(p);
+		Polygon q = new Polygon();
+		q.addPoint(width, graphStart.y);
+		q.addPoint(width - arrowDim.height, graphStart.y - arrowDim.width);
+		q.addPoint(width - arrowDim.height, graphStart.y + arrowDim.width);
+		g.fillPolygon(q);
+	}
 
-			// Draw the bar
-			Rectangle rec = new Rectangle();
-			rec.width = distanceX - padding;
-			rec.height = (val.getY() / elementDistance) * distanceY;
-			rec.x = xPosition + padding;
-			rec.y = graphStart.y - (val.getY() / elementDistance) * distanceY;
-			g.setColor(barColor);
-			g.fill(rec);
-			i++;
-		}
-
+	/**
+	 * Draw descriptions for x and y values.
+	 * 
+	 * @param g graphics we draw with.
+	 */
+	private void drawDescriptions(Graphics2D g) {
+		FontMetrics fm = g.getFontMetrics();
 		// Draw descriptions
 		g.setFont(new Font("SansSerif", Font.PLAIN, 15));
 		fm = g.getFontMetrics();
-		g.setColor(Color.black);
+
+		g.setColor(textColor);
 		String xDescript = chart.getxDescript();
 		g.drawString(xDescript, ((graphStart.x + xGraphEnd) / 2) - fm.stringWidth(xDescript) / 2,
 				height - fm.getHeight());
@@ -118,23 +146,68 @@ public class BarChartComponent extends JComponent {
 				0 + fm.getHeight());
 		g.setTransform(saved);
 
-		g.setColor(Color.gray);
-		// Draw x and y
-		g.drawLine(graphStart.x, graphStart.y, width, graphStart.y);
-		g.drawLine(graphStart.x, graphStart.y + lineLength, graphStart.x, 0);
+	}
 
-		// Draw arrows
-		int arrowWidth = 5, arrowLength = 7;
-		Polygon p = new Polygon();
-		p.addPoint(graphStart.x, 0);
-		p.addPoint(graphStart.x - arrowWidth, arrowLength);
-		p.addPoint(graphStart.x + arrowWidth, arrowLength);
-		g.fillPolygon(p);
-		Polygon q = new Polygon();
-		q.addPoint(width, graphStart.y);
-		q.addPoint(width - arrowLength, graphStart.y - arrowWidth);
-		q.addPoint(width - arrowLength, graphStart.y + arrowWidth);
-		g.fillPolygon(q);
+	/**
+	 * Drawing values of x and y and drawing bars.
+	 * 
+	 * @param g graphics we draw with.
+	 */
+	private void drawValuesAndBars(Graphics2D g) {
+		g.setStroke(new BasicStroke(2));
+
+		FontMetrics fm = g.getFontMetrics();
+
+		// Draw Y values
+		int distanceY = (graphStart.y - yGraphEnd) / ((maxY - minY) / elementDistance);
+		for (int i = minY, j = 0; i <= maxY; i += elementDistance, j++) {
+			String number = Integer.toString(i);
+			int yPosition = graphStart.y - j * distanceY;
+			g.setColor(textColor);
+			g.drawString(number, graphStart.x - textDistance - fm.stringWidth(number), yPosition + fm.getAscent() / 3);
+			g.setColor(lineColor);
+			g.drawLine(graphStart.x - lineLength, yPosition, graphStart.x, yPosition);
+			g.setColor(gridColor);
+			g.drawLine(graphStart.x, yPosition, width, yPosition);
+		}
+
+		// Draw X values and draw bars
+		int distanceX = (xGraphEnd - graphStart.x) / list.size();
+		int i = 0;
+		for (XYValue val : list) {
+			String number = Integer.toString(val.getX());
+			int xPosition = graphStart.x + i * distanceX;
+			int nextXPosition = graphStart.x + (i + 1) * distanceX;
+
+			// Draw lines and values
+			g.setColor(textColor);
+			g.drawString(number, (xPosition + nextXPosition) / 2, graphStart.y + fm.getAscent() + textDistance / 2);
+			g.setColor(lineColor);
+			g.drawLine(nextXPosition, graphStart.y + lineLength, nextXPosition, graphStart.y);
+			g.setColor(gridColor);
+			g.drawLine(nextXPosition, graphStart.y, nextXPosition, 0);
+
+			// Draw the bar
+			Rectangle bar = new Rectangle();
+			bar.width = distanceX - padding;
+			bar.height = (val.getY() - minY) * distanceY / elementDistance;
+			bar.x = xPosition + padding;
+			bar.y = graphStart.y - (val.getY() - minY) * distanceY / elementDistance;
+			g.setColor(barColor);
+			g.fill(bar);
+
+			// Draw shadow.
+			Rectangle shadow = new Rectangle();
+			shadow.width = shadowPadding;
+			shadow.height = bar.height - shadowPadding;
+			shadow.x = bar.x + bar.width;
+			shadow.y = bar.y + shadowPadding;
+			g.setColor(shadowColor);
+			g.fill(shadow);
+
+			i++;
+		}
+
 	}
 
 }

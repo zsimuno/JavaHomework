@@ -21,7 +21,6 @@ import hr.fer.zemris.java.gui.calc.model.CalcValueListener;
 import hr.fer.zemris.java.gui.layouts.CalcLayout;
 import hr.fer.zemris.java.gui.layouts.RCPosition;
 
-
 // TODO +/- on non editable?
 // TODO what to do on exceptions?
 /**
@@ -143,8 +142,7 @@ public class Calculator extends JFrame {
 		cp.add(binaryOp((a, b) -> a - b, "-", binary), new RCPosition(4, 6));
 		cp.add(binaryOp((a, b) -> a + b, "+", binary), new RCPosition(5, 6));
 
-		cp.add(binaryOp((a, b) -> Math.pow(a, b), (a, b) -> Math.pow(b, 1.0 / a), "x^n", binary), new RCPosition(5, 1));
-		// TODO jel kada je invert za x^n onda drugi operand u korijenu ili prvi
+		cp.add(binaryOp((a, b) -> Math.pow(a, b), (a, b) -> Math.pow(a, 1.0 / b), "x^n", binary), new RCPosition(5, 1));
 
 	}
 

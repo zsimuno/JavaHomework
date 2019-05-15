@@ -52,7 +52,7 @@ public class CalcLayout implements LayoutManager2 {
 	}
 
 	@Override
-	public void addLayoutComponent(Component comp, Object constraints) {
+	public void addLayoutComponent(Component comp, Object constraints) { // TODO prima li string?
 		if (!(constraints instanceof RCPosition || constraints instanceof String)) {
 			throw new UnsupportedOperationException("Invalid constraint!");
 		}
@@ -64,7 +64,7 @@ public class CalcLayout implements LayoutManager2 {
 			try {
 				position = new RCPosition(Integer.parseInt(pos[0]), Integer.parseInt(pos[1]));
 			} catch (Exception e) {
-				throw new UnsupportedOperationException("Invalid constraint!");
+				throw new CalcLayoutException("Invalid constraint!");
 			}
 		}
 		// TODO check constraints
@@ -72,13 +72,13 @@ public class CalcLayout implements LayoutManager2 {
 
 		RCPosition pos = components.get(comp);
 		if (pos != null && pos.equals(position))
-			throw new UnsupportedOperationException("Element already exists with same bounds!");
+			throw new CalcLayoutException("Element already exists with same bounds!");
 
 		if (!between(row, 1, rows) && !between(column, 1, columns))
-			throw new UnsupportedOperationException("Invalid constraint number!");
+			throw new CalcLayoutException("Invalid constraint number!");
 
 		if (row == 1 && (column > 1 && column < columns - 1))
-			throw new UnsupportedOperationException("Invalid constraint number!");
+			throw new CalcLayoutException("Invalid constraint number!");
 
 		components.put(comp, position);
 	}
@@ -165,8 +165,8 @@ public class CalcLayout implements LayoutManager2 {
 
 		int x, y;
 		int padding = spaceBetween / 2;
-//		System.out.println(parent.getWidth() / columns); // TODO
-//		System.out.println(parent.getWidth() + " " + columns); // TODO
+//		System.out.println(parent.getWidth() / columns); // TODO column width
+//		System.out.println(parent.getWidth() + " " + columns); // TODO column width
 		int w = parent.getWidth() / columns - padding;
 		int h = parent.getHeight() / rows - padding;
 		int parentWidth = parent.getWidth();
@@ -193,7 +193,7 @@ public class CalcLayout implements LayoutManager2 {
 				} else {
 					x = ((column - 1) * parentWidth / columns) + padding;
 				}
-//				System.out.println(w); // TODO
+//				System.out.println(w); // TODO width of one element
 				comp.setBounds(x, y, w, h);
 			}
 		}

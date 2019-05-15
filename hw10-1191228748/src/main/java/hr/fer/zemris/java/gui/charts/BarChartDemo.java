@@ -74,7 +74,7 @@ public class BarChartDemo extends JFrame {
 			return;
 		}
 
-		if (lines.size() < 5) {
+		if (lines.size() < 6) {
 			System.out.println("Invalid number of lines in the file!");
 			return;
 		}
@@ -94,7 +94,15 @@ public class BarChartDemo extends JFrame {
 			return;
 		}
 
-		BarChart chart = new BarChart(values, xDescript, yDescript, minY, maxY, distance);
+		BarChart chart;
+		try {
+			chart = new BarChart(values, xDescript, yDescript, minY, maxY, distance);
+
+		} catch (Exception e) {
+			System.out.println("Invalid input for chart in file!");
+			return;
+		}
+
 		SwingUtilities.invokeLater(() -> {
 			new BarChartDemo(chart, fileName).setVisible(true);
 		});

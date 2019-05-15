@@ -1,8 +1,6 @@
 /**
+ * Classes needed for drawing bar charts on a GUI.
  * 
- */
-/**
- * TODO
  * @author Zvonimir Šimunović
  *
  */

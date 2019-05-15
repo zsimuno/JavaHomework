@@ -33,12 +33,12 @@ public class PrimListModel implements ListModel<Integer> {
 	 */
 	public void next() {
 		int size = primes.size();
-		int previous = primes.get(size - 1);
+		int number = primes.get(size - 1);
 		do {
-			previous++;
-		} while (!isPrime(previous));
+			number++;
+		} while (!isPrime(number));
 
-		primes.add(previous);
+		primes.add(number);
 
 		ListDataEvent event = new ListDataEvent(this, ListDataEvent.INTERVAL_ADDED, size, size);
 		for (ListDataListener l : listListeners) {

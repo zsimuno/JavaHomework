@@ -1,5 +1,5 @@
 /**
- * TODO Package javadoc
+ * Layout for a calculator and classes needed by it.
  * 
  * 
  * @author Zvonimir Šimunović
