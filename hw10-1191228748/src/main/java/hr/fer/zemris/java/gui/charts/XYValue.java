@@ -37,4 +37,11 @@ public class XYValue {
 		return y;
 	}
 
+	@Override
+	public String toString() {
+		return "XYValue(" + x + ", " + y + ")";
+	}
+	
+	
+
 }
