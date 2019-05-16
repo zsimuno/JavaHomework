@@ -134,7 +134,7 @@ public class CalcModelImpl implements CalcModel {
 		if (Double.isInfinite(value))
 			throw new CalculatorInputException("Number too big!");
 
-		if (input.contentEquals("0")) {
+		if (input.equals("0")) {
 			input = "";
 		}
 		input += Integer.toString(digit);
