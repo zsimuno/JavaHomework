@@ -142,6 +142,8 @@ public class CalcLayout implements LayoutManager2 {
 
 		for (int i = 0; i < count; i++) {
 			Component comp = parent.getComponent(i);
+			if(!components.containsKey(comp))
+				continue;
 
 			Dimension dimension;
 			if (type.equals("min")) {
@@ -151,6 +153,9 @@ public class CalcLayout implements LayoutManager2 {
 			} else {
 				dimension = comp.getPreferredSize();
 			}
+			
+			if(dimension == null)
+				continue;
 
 			if (components.get(comp).equals(new RCPosition(1, 1))) {
 				dimension.width = (int) Math.ceil(dimension.width * 1.0 / (columns - 2)) - 2;
@@ -187,6 +192,8 @@ public class CalcLayout implements LayoutManager2 {
 		int x, y;
 		for (int i = 0; i < count; i++) {
 			Component comp = parent.getComponent(i);
+			if(!components.containsKey(comp))
+				continue;
 			RCPosition position = components.get(comp);
 
 			if (position.getRow() == 1 && position.getColumn() == 1) {
