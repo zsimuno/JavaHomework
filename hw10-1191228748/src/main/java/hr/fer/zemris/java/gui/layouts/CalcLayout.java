@@ -17,11 +17,11 @@ import java.util.Map;
 public class CalcLayout implements LayoutManager2 {
 
 	/** Number of rows in the layout. */
-	private static final int rows = 5;
+	private static final double rows = 5.0;
 	/** Number of columns in the layout. */
-	private static final int columns = 7;
+	private static final double columns = 7.0;
 	/** Number of pixels between elements in the layout. */
-	private int spaceBetween;
+	private int spacing;
 	/** Map of all components in this layout and their positions. */
 	private Map<Component, RCPosition> components = new HashMap<>();
 
@@ -32,10 +32,10 @@ public class CalcLayout implements LayoutManager2 {
 	 * @param spaceBetween space between the elements of the layout.
 	 * @throws CalcLayoutException if {@code spaceBetween} is not greater than zero.
 	 */
-	public CalcLayout(int spaceBetween) {
-		if (spaceBetween < 0)
+	public CalcLayout(int spacing) {
+		if (spacing < 0)
 			throw new CalcLayoutException("Space between elements must be greater than zero!");
-		this.spaceBetween = spaceBetween;
+		this.spacing = spacing;
 	}
 
 	/**
@@ -52,7 +52,7 @@ public class CalcLayout implements LayoutManager2 {
 	}
 
 	@Override
-	public void addLayoutComponent(Component comp, Object constraints) { // TODO prima li string?
+	public void addLayoutComponent(Component comp, Object constraints) {
 		if (!(constraints instanceof RCPosition || constraints instanceof String)) {
 			throw new UnsupportedOperationException("Invalid constraint!");
 		}
@@ -67,32 +67,42 @@ public class CalcLayout implements LayoutManager2 {
 				throw new CalcLayoutException("Invalid constraint!");
 			}
 		}
-		// TODO check constraints
 		int row = position.getRow(), column = position.getColumn();
 
-		RCPosition pos = components.get(comp);
-		if (pos != null && pos.equals(position))
-			throw new CalcLayoutException("Element already exists with same bounds!");
+		if (components.containsValue(position))
+			throw new CalcLayoutException("Element already exists with those bounds!");
 
-		if (!between(row, 1, rows) && !between(column, 1, columns))
-			throw new CalcLayoutException("Invalid constraint number!");
-
-		if (row == 1 && (column > 1 && column < columns - 1))
+		if (!areConstraintsValid(row, column))
 			throw new CalcLayoutException("Invalid constraint number!");
 
 		components.put(comp, position);
 	}
 
 	/**
+	 * Checks if the given constraints are valid.
+	 * 
+	 * @param row    row number.
+	 * @param column column number.
+	 * @return {@code true} if the given constraints are valid, {@code false}
+	 *         otherwise.
+	 */
+	private boolean areConstraintsValid(int row, int column) {
+		if ((row == 1 && (column > 1 && column < columns - 1)))
+			return false;
+
+		return between(row, 1, rows) && between(column, 1, columns);
+	}
+
+	/**
 	 * Checks if the given {@code number} is between given {@code i} and {@code j}
-	 * parameters. (Both bounds are inclusive, i.e. i <= number <= j)
+	 * parameters. (both are inclusive, i.e. i <= number <= j)
 	 * 
 	 * @param number number to be checked.
 	 * @param i      lower bound.
 	 * @param j      upper bound.
 	 * @return {@code true} if i <= number <= j and {@code false} otherwise.
 	 */
-	private boolean between(int number, int i, int j) {
+	private boolean between(int number, int i, double j) {
 		return number >= i && number <= j;
 	}
 
@@ -143,8 +153,7 @@ public class CalcLayout implements LayoutManager2 {
 			}
 
 			if (components.get(comp).equals(new RCPosition(1, 1))) {
-				dimension.width /= columns;
-				dimension.height /= rows;
+				dimension.width = (int) Math.ceil(dimension.width * 1.0 / (columns - 2)) - 2;
 			}
 
 			size.width = Math.max(size.width, dimension.width);
@@ -154,8 +163,8 @@ public class CalcLayout implements LayoutManager2 {
 		size.width *= columns;
 		size.height *= rows;
 		Insets insets = parent.getInsets();
-		size.width += insets.left + insets.right + spaceBetween * columns;
-		size.height += insets.top + insets.bottom + spaceBetween * rows;
+		size.width += insets.left + insets.right + spacing * (columns - 1);
+		size.height += insets.top + insets.bottom + spacing * (rows - 1);
 		return size;
 	}
 
@@ -163,39 +172,45 @@ public class CalcLayout implements LayoutManager2 {
 	public void layoutContainer(Container parent) {
 		int count = parent.getComponentCount();
 
+		Insets insets = parent.getInsets();
+
+		int width = parent.getWidth() - (insets.left + insets.right);
+		int height = parent.getHeight() - (insets.top + insets.bottom);
+		double elWidth = (width - spacing * (columns - 1)) / columns;
+		double elHeight = (height - spacing * (rows - 1)) / rows;
+		int wFloor = (int) Math.floor(elWidth);
+		int wCeil = (int) Math.ceil(elWidth);
+
+		int hFloor = (int) Math.floor(elHeight);
+		int hCeil = (int) Math.ceil(elHeight);
+
 		int x, y;
-		int padding = spaceBetween / 2;
-//		System.out.println(parent.getWidth() / columns); // TODO column width
-//		System.out.println(parent.getWidth() + " " + columns); // TODO column width
-		int w = parent.getWidth() / columns - padding;
-		int h = parent.getHeight() / rows - padding;
-		int parentWidth = parent.getWidth();
-		int parentHeight = parent.getHeight();
 		for (int i = 0; i < count; i++) {
 			Component comp = parent.getComponent(i);
 			RCPosition position = components.get(comp);
+
 			if (position.getRow() == 1 && position.getColumn() == 1) {
-				comp.setBounds(0, 0, parent.getWidth() * 5 / 7 - padding, parent.getHeight() * 1 / 5 - padding);
+				comp.setBounds(0, 0, wFloor * 2 + wCeil * 3 + spacing * 4, hCeil);
+
 			} else {
 				int row = position.getRow(), column = position.getColumn();
-				if (row == 1) {
-					y = 0;
-				} else if (row == rows) {
-					y = parentHeight - h;
-				} else {
-					y = ((row - 1) * parentHeight / rows) + padding;
+				int w = ((column % 2 == 0) ? wFloor : wCeil);
+				int h = ((row % 2 == 0) ? hFloor : hCeil);
+
+				y = 0;
+				for (int j = 1; j < row; j++) {
+					y += ((j % 2 == 0) ? hFloor : hCeil) + spacing;
 				}
 
-				if (column == 1) {
-					x = 0;
-				} else if (column == columns) {
-					x = parentWidth - w;
-				} else {
-					x = ((column - 1) * parentWidth / columns) + padding;
+				x = 0;
+				for (int j = 1; j < column; j++) {
+					x += ((j % 2 == 0) ? wFloor : wCeil) + spacing;
 				}
-//				System.out.println(w); // TODO width of one element
+
 				comp.setBounds(x, y, w, h);
+
 			}
+
 		}
 
 	}
@@ -212,13 +227,11 @@ public class CalcLayout implements LayoutManager2 {
 
 	@Override
 	public void invalidateLayout(Container target) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public String toString() {
-		return "CalcLayout [spaceBetween=" + spaceBetween + "]";
+		return "CalcLayout [spaceBetween=" + spacing + "]";
 	}
 
 }
