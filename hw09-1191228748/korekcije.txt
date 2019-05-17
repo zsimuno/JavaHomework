@@ -1,0 +1,65 @@
+Primjedbe recenzenata (dvije su jer jedna recenzija nije imala primjedbi):
+
+Ocjena za ovu zadaću je 4, uz par grešaka koje su dolje navedene sve ostalo je korektno riješeno.
+
+Zadatak 1-----------------------------------
+
+Complex
+
+kada imaš neku potenciju na prirodni broj bolje to izvrti i u while petlji nego pozivati Math.pow zato što ona u svojoj implementaciji puno više operacija nego što bi bio tvoj izračun.
+Ali eto ima kao posebni slučaj navedeno y == 2 return x*x; pa te to ništa nije koštalo
+
+Zadatak2-------------------------------------
+
+Newton
+
+Ispis i konvertiranje kompleksnih brojeva je logičnije staviti u main, a ne u razred čija je ideja samo obraditi zadane parametre
+
+citiram uputu: "Do not create new ExecutorService for each call of method produce. Instead, create it in producer's constructor"
+
+linija 224 za yMax si slao width što onda pri resizeanju crta krivu sliku
+
+najniža linija u prozoru ti se nikad neće obojati, pogledaj malo zašto
+
+
+Zadatak 3------------------------------------
+Ne koristiš nigdje AtomicBoolean cancel koji ti je predan u funkciji produce
+
+Pozdrav :) !
+
+Dajem konačnu ocjenu 1 zbog toga što parlelizacija nije napravljena kako treba u 2. zadatku jer
+kada rastegnem ekran slika se "raspada" odnosno nema izgled onoga što bi treabo biti Newtonov fractal
+a ovo je naime minimalni uvjet (pitao sam prof. Čupića poslije subotnjeg predavanja jer nisam bio siguran).
+
+Krenimo redom,
+1.
+- svi razredi prisutni, kod bih rekao u redu
+
+2. zadatak: 
+- fraktal ti se "ruši" kad rastegnem ekran, nisam bio siguran je li minimalni uvjet i izgleda da jeste :(,
+inače ti je jako lijepo sve i čitko tako da mi je žao što je ovo ocjena 1
+- demonicThreadFactory komotno lambda je mogao biti
+- također je u  uputi pisalo da executor service stvaramo samo jednom u konstruktoru a ne svaki puta u metodi
+produce tako da i to
+- zamjerke što ti producer obavlja interakciju s korisnikom mislim da ti to čini većinu načela
+oblikovanja u objektnoj paradigmi, takve stvari barem bi trebalo odvojiti
+
+
+3. zadatak
+- sve dobro crta i kod je također na razini
+
+
+Sretno u nastavku vještine! :)
+
+
+Korekcije:
+
+2. Zadatak
+"linija 224 za yMax si slao width što onda pri resizeanju crta krivu sliku" je bila greška zbog koje nije dobro crtalo i tu je trebalo biti height pa bi bilo sve u redu i to je promijenjeno. (sada je 226 linija)
+Popravio sam gresku za executor service ("Do not create new ExecutorService for each call of method produce. Instead, create it in producer's constructor") a ja nisam stavio u konstruktor pa sam sada prebacio.
+Najniza linija se sada crta. Na jednom mjestu je bilo height - 1 gdje nije trebalo bit -1.
+
+Pise u zadaći "Implement a DaemonicThreadFactory" pa sam pretpostavio da je ispravno napraviti novi razred.
+Izbacio sam upis podataka iz konstruktora i stavio u main.
+
+Pow sam ostavio isto jer, kao što je i kolega sam rekao, je to također ispravno u ovoj situaciji.

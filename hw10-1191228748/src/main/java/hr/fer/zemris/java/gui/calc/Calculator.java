@@ -313,11 +313,13 @@ public class Calculator extends JFrame {
 
 		JButton dot = new JButton(".");
 		dot.addActionListener(a -> {
-			if (!calculator.isEditable()) {
-				calculator.clear();
+			if (calculator.isEditable()) {
+				try {
+					calculator.insertDecimalPoint();
+				} catch (Exception e) {
+				}
 			}
-			calculator.setValue(0);
-			calculator.insertDecimalPoint();
+			
 		});
 		cp.add(dot, new RCPosition(5, 5));
 

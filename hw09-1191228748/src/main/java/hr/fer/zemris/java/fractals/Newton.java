@@ -33,8 +33,39 @@ public class Newton {
 	 * @param args Command line arguments. (Not used here)
 	 */
 	public static void main(String[] args) {
+		System.out.println("Welcome to Newton-Raphson iteration-based fractal viewer");
+		Scanner sc = new Scanner(System.in);
+		ArrayList<Complex> roots = new ArrayList<>();
+		while (true) {
+			System.out.println("Please enter at least two roots, one root per line. Enter 'done' when done.");
 
-		FractalViewer.show(new MyProducer());
+			for (int i = 0;; i++) {
+				System.out.printf("Root %d> ", i + 1);
+				String input = sc.nextLine();
+				if (input.equals("done"))
+					break;
+
+				try {
+					roots.add(Complex.parse(input));
+				} catch (IllegalArgumentException e) {
+					System.out.println(e.getMessage());
+					System.out.println("Input again:");
+					i--;
+				}
+			}
+
+			if (roots.size() < 2) {
+				System.out.println("At least two roots must be entered!");
+				roots.clear();
+				continue;
+			}
+			System.out.println("Image of fractal will appear shortly. Thank you.");
+			break;
+		}
+
+		sc.close();
+
+		FractalViewer.show(new MyProducer(roots));
 
 	}
 
@@ -60,46 +91,21 @@ public class Newton {
 		 */
 		private ComplexPolynomial derived;
 
+		/** Thread pool. */
+		private ExecutorService pool;
+
 		/**
 		 * Constructs a new producer based on roots of the polynomial that user inputs.
 		 * 
+		 * @param roots List of roots provided by the user.
+		 * 
 		 */
-		public MyProducer() {
-			System.out.println("Welcome to Newton-Raphson iteration-based fractal viewer");
-			Scanner sc = new Scanner(System.in);
-			ArrayList<Complex> roots = new ArrayList<>();
-			while (true) {
-				System.out.println("Please enter at least two roots, one root per line. Enter 'done' when done.");
-
-				for (int i = 0;; i++) {
-					System.out.printf("Root %d> ", i + 1);
-					String input = sc.nextLine();
-					if (input.equals("done"))
-						break;
-
-					try {
-						roots.add(Complex.parse(input));
-					} catch (IllegalArgumentException e) {
-						System.out.println(e.getMessage());
-						System.out.println("Input again:");
-						i--;
-					}
-				}
-
-				if (roots.size() < 2) {
-					System.out.println("At least two roots must be entered!");
-					roots.clear();
-					continue;
-				}
-				System.out.println("Image of fractal will appear shortly. Thank you.");
-				break;
-			}
-
-			sc.close();
-
+		public MyProducer(ArrayList<Complex> roots) {
 			rootedPolynomial = new ComplexRootedPolynomial(Complex.ONE, roots.toArray(new Complex[roots.size()]));
 			polynomial = rootedPolynomial.toComplexPolynom();
 			derived = polynomial.derive();
+			pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
+					new DaemonicThreadFactory());
 		}
 
 		@Override
@@ -109,8 +115,6 @@ public class Newton {
 			int trackNumber = (8 * availableProcessors);
 			int range = height / trackNumber;
 
-			ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
-					new DaemonicThreadFactory());
 			List<Future<Void>> results = new ArrayList<>();
 
 			short[] data = new short[width * height];
@@ -119,7 +123,7 @@ public class Newton {
 				int yMin = i * range;
 				int yMax = (i + 1) * range;
 				if (i == trackNumber - 1) {
-					yMax = height - 1;
+					yMax = height;
 				}
 				CalculatingJob job = new CalculatingJob(reMin, reMax, imMin, imMax, width, height, yMin, yMax, data,
 						rootedPolynomial, derived, cancel);
@@ -132,8 +136,6 @@ public class Newton {
 				} catch (InterruptedException | ExecutionException e) {
 				}
 			}
-
-			pool.shutdown();
 
 			observer.acceptResult(data, (short) (polynomial.order() + 1), requestNo);
 
@@ -221,7 +223,7 @@ public class Newton {
 				if (cancel.get())
 					break;
 				for (int x = 0; x < width; x++) {
-					Complex zn = mapToComplexPlain(x, y, 0, width, 0, width, reMin, reMax, imMin, imMax);
+					Complex zn = mapToComplexPlain(x, y, 0, height, 0, width, reMin, reMax, imMin, imMax);
 					int iter = 0;
 					double module;
 					do {
