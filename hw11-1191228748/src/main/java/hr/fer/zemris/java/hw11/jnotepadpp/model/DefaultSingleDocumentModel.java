@@ -1,8 +1,9 @@
 package hr.fer.zemris.java.hw11.jnotepadpp.model;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.swing.JTextArea;
 import javax.swing.event.DocumentEvent;
@@ -26,7 +27,7 @@ public class DefaultSingleDocumentModel implements SingleDocumentModel {
 	/** Is the document modified or not. */
 	private boolean isModified = false;
 
-	private ArrayList<SingleDocumentListener> listeners = new ArrayList<>();
+	private Set<SingleDocumentListener> listeners = new HashSet<>();
 
 	/**
 	 * Constructor.

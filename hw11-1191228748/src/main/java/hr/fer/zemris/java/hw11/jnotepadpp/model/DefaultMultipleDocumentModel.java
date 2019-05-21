@@ -4,12 +4,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
-import javax.swing.Icon;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+
+import hr.fer.zemris.java.hw11.jnotepadpp.Util;
 
 /**
  * Implementation of {@link MultipleDocumentModel} that stores documents in
@@ -26,16 +29,43 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 	private List<SingleDocumentModel> documents = new ArrayList<>();
 
 	/** Listeners for this model. */
-	List<MultipleDocumentListener> listeners = new ArrayList<>();
+	private Set<MultipleDocumentListener> listeners = new HashSet<>();
 
+	/**
+	 * Creates an empty <code>TabbedPane</code> with a default tab placement of
+	 * <code>JTabbedPane.TOP</code>.
+	 * 
+	 * @see #addTab
+	 */
 	public DefaultMultipleDocumentModel() {
 		super();
 	}
 
+	/**
+	 * Creates an empty <code>TabbedPane</code> with the specified tab placement of
+	 * either: <code>JTabbedPane.TOP</code>, <code>JTabbedPane.BOTTOM</code>,
+	 * <code>JTabbedPane.LEFT</code>, or <code>JTabbedPane.RIGHT</code>.
+	 *
+	 * @param tabPlacement the placement for the tabs relative to the content
+	 */
 	public DefaultMultipleDocumentModel(int tabPlacement) {
 		super(tabPlacement);
 	}
 
+	/**
+	 * Creates an empty <code>TabbedPane</code> with the specified tab placement and
+	 * tab layout policy. Tab placement may be either: <code>JTabbedPane.TOP</code>,
+	 * <code>JTabbedPane.BOTTOM</code>, <code>JTabbedPane.LEFT</code>, or
+	 * <code>JTabbedPane.RIGHT</code>. Tab layout policy may be either:
+	 * <code>JTabbedPane.WRAP_TAB_LAYOUT</code> or
+	 * <code>JTabbedPane.SCROLL_TAB_LAYOUT</code>.
+	 *
+	 * @param tabPlacement    the placement for the tabs relative to the content
+	 * @param tabLayoutPolicy the policy for laying out tabs when all tabs will not
+	 *                        fit on one run
+	 * @exception IllegalArgumentException if tab placement or tab layout policy are
+	 *                                     not one of the above supported values
+	 */
 	public DefaultMultipleDocumentModel(int tabPlacement, int tabLayoutPolicy) {
 		super(tabPlacement, tabLayoutPolicy);
 	}
@@ -49,8 +79,12 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 	public SingleDocumentModel createNewDocument() {
 		SingleDocumentModel doc = new DefaultSingleDocumentModel(null, "");
 		documents.add(doc);
-		this.addTab("(unnamed)", new JScrollPane(doc.getTextComponent()));
+		addTab("(unnamed)", Util.getIcon("saved.png", getTopLevelAncestor()), new JScrollPane(doc.getTextComponent()),
+				"(unnamed)");
 		doc.addSingleDocumentListener(docListener);
+		for (MultipleDocumentListener l : listeners) {
+			l.documentAdded(doc);
+		}
 		return doc;
 	}
 
@@ -73,6 +107,9 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 
 		for (int i = 0; i < documents.size(); i++) {
 			SingleDocumentModel doc = documents.get(i);
+			if (doc.getFilePath() == null)
+				continue;
+
 			if (doc.getFilePath().equals(path)) {
 				setSelectedIndex(i);
 				return doc;
@@ -91,7 +128,12 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		}
 		SingleDocumentModel document = new DefaultSingleDocumentModel(path, text);
 		documents.add(document);
-		this.addTab(path.getFileName().toString(), new JScrollPane(document.getTextComponent()));
+		SingleDocumentModel old = getCurrentDocument();
+		for (MultipleDocumentListener l : listeners) {
+			l.currentDocumentChanged(old, document);
+		}
+		addTab(path.getFileName().toString(), Util.getIcon("saved.png", getTopLevelAncestor()),
+				new JScrollPane(document.getTextComponent()), path.toString());
 		document.addSingleDocumentListener(docListener);
 		return document;
 	}
@@ -104,8 +146,8 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 	 */
 	@Override
 	public void saveDocument(SingleDocumentModel model, Path newPath) {
-		
-		if(newPath == null) {
+
+		if (newPath == null) {
 			newPath = model.getFilePath();
 		}
 		for (SingleDocumentModel doc : documents) {
@@ -114,14 +156,15 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 				throw new IllegalArgumentException("Given path already exists.");
 
 		}
-		SingleDocumentModel current = documents.get(getSelectedIndex());
+		SingleDocumentModel current = getCurrentDocument();
 		try {
 			Files.writeString(newPath, current.getTextComponent().getText());
 		} catch (IOException e1) {
 			throw new IllegalArgumentException("Error with saving.");
 		}
-
+		setIconAt(getSelectedIndex(), Util.getIcon("saved.png", getTopLevelAncestor()));
 		current.setFilePath(newPath);
+		current.setModified(false);
 
 	}
 
@@ -129,6 +172,9 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 	public void closeDocument(SingleDocumentModel model) {
 		removeTabAt(documents.indexOf(model));
 		documents.remove(model);
+		for (MultipleDocumentListener l : listeners) {
+			l.documentRemoved(model);
+		}
 	}
 
 	@Override
@@ -155,23 +201,24 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 
 		@Override
 		public void documentModifyStatusUpdated(SingleDocumentModel model) {
-			Icon icon = null;
 			if (model.isModified()) {
-				// TODO modified or not icons
+				setIconAt(getSelectedIndex(), Util.getIcon("unsaved.png", getTopLevelAncestor()));
 			} else {
-
+				setIconAt(getSelectedIndex(), Util.getIcon("saved.png", getTopLevelAncestor()));
 			}
-			setIconAt(getSelectedIndex(), icon);
 
 		}
 
 		@Override
 		public void documentFilePathUpdated(SingleDocumentModel model) {
 			Path path = model.getFilePath();
+			int index = getSelectedIndex();
 			if (path == null) {
-				setTitleAt(getSelectedIndex(), "(unnamed)");
+				setTitleAt(index, "(unnamed)");
+				setToolTipTextAt(index, "(unnamed)");
 			} else {
 				setTitleAt(getSelectedIndex(), path.getFileName().toString());
+				setToolTipTextAt(index, path.toString());
 			}
 		}
 	};

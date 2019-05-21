@@ -1,8 +1,11 @@
 package hr.fer.zemris.java.hw11.jnotepadpp.elements;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.nio.file.Path;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -15,6 +18,7 @@ import javax.swing.text.Caret;
 import javax.swing.text.Document;
 
 import hr.fer.zemris.java.hw11.jnotepadpp.JNotepadPP;
+import hr.fer.zemris.java.hw11.jnotepadpp.Util;
 import hr.fer.zemris.java.hw11.jnotepadpp.model.MultipleDocumentModel;
 import hr.fer.zemris.java.hw11.jnotepadpp.model.SingleDocumentModel;
 
@@ -32,8 +36,8 @@ public class NotepadActions {
 	/** Multiple document model used in the application. */
 	private MultipleDocumentModel model;
 
-	/** Represents a clipboard for cut/copy/paste. */
-	private String clipboard = "";
+	/** System clipboard. */
+	private Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 
 	/**
 	 * Constructs actions that have the given {@code notepad} application as a
@@ -52,56 +56,65 @@ public class NotepadActions {
 	 * Configures actions created in this class.
 	 */
 	private void configureActions() {
-		// TODO check action configurations.
 		newDocument.putValue(Action.NAME, "New");
 		newDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control N"));
 		newDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_N);
 		newDocument.putValue(Action.SHORT_DESCRIPTION, "Opens a new blank file");
+		newDocument.putValue(Action.LARGE_ICON_KEY, Util.getIcon("newFile.png", notepad));
 
 		openDocument.putValue(Action.NAME, "Open");
 		openDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control O"));
 		openDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
 		openDocument.putValue(Action.SHORT_DESCRIPTION, "Open file from disk");
+		openDocument.putValue(Action.LARGE_ICON_KEY, Util.getIcon("openFile.png", notepad));
 
 		saveDocument.putValue(Action.NAME, "Save");
 		saveDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control S"));
 		saveDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_S);
 		saveDocument.putValue(Action.SHORT_DESCRIPTION, "Save file to disk");
+		saveDocument.putValue(Action.LARGE_ICON_KEY, Util.getIcon("saveFile.png", notepad));
 
 		saveAsDocument.putValue(Action.NAME, "Save As...");
-		saveAsDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control S")); // TODO
+		saveAsDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift S"));
 		saveAsDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_A);
 		saveAsDocument.putValue(Action.SHORT_DESCRIPTION, "Save file to disk with given name");
+		saveAsDocument.putValue(Action.LARGE_ICON_KEY, Util.getIcon("saveAs.png", notepad));
 
 		closeDocument.putValue(Action.NAME, "Close");
 		closeDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control W"));
 		closeDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_C);
 		closeDocument.putValue(Action.SHORT_DESCRIPTION, "Closes current file");
+		closeDocument.putValue(Action.LARGE_ICON_KEY, Util.getIcon("closeFile.png", notepad));
 
 		cutSelectedPart.putValue(Action.NAME, "Cut");
 		cutSelectedPart.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control X"));
 		cutSelectedPart.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_T);
 		cutSelectedPart.putValue(Action.SHORT_DESCRIPTION, "Cut selected part");
+		cutSelectedPart.putValue(Action.LARGE_ICON_KEY, Util.getIcon("cut.png", notepad));
 
 		copySelectedPart.putValue(Action.NAME, "Copy");
 		copySelectedPart.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control C"));
 		copySelectedPart.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_C);
 		copySelectedPart.putValue(Action.SHORT_DESCRIPTION, "Copy selected part");
+		copySelectedPart.putValue(Action.LARGE_ICON_KEY, Util.getIcon("copy.png", notepad));
 
 		pasteFromClipboard.putValue(Action.NAME, "Paste");
 		pasteFromClipboard.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control V"));
 		pasteFromClipboard.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_P);
 		pasteFromClipboard.putValue(Action.SHORT_DESCRIPTION, "Paste to selected position");
+		pasteFromClipboard.putValue(Action.LARGE_ICON_KEY, Util.getIcon("paste.png", notepad));
 
 		statisticalInfo.putValue(Action.NAME, "Stats");
-		statisticalInfo.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control F"));
+		statisticalInfo.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control T"));
 		statisticalInfo.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_S);
 		statisticalInfo.putValue(Action.SHORT_DESCRIPTION, "Statistical info");
+		statisticalInfo.putValue(Action.LARGE_ICON_KEY, Util.getIcon("stats.png", notepad));
 
 		exitApplication.putValue(Action.NAME, "Exit");
 		exitApplication.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control Q"));
 		exitApplication.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_X);
 		exitApplication.putValue(Action.SHORT_DESCRIPTION, "Terminates application");
+		exitApplication.putValue(Action.LARGE_ICON_KEY, Util.getIcon("exit.png", notepad));
 
 	}
 
@@ -140,8 +153,11 @@ public class NotepadActions {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			SingleDocumentModel doc = model.getCurrentDocument();
-			// TODO unnamed document
-			model.saveDocument(doc, null);
+			if (doc.getFilePath() == null) {
+				Util.saveAs(notepad, doc, model);
+			} else {
+				model.saveDocument(doc, null);
+			}
 		}
 	};
 
@@ -151,16 +167,7 @@ public class NotepadActions {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			JFileChooser jfc = new JFileChooser();
-			jfc.setDialogTitle("Save file as...");
-			if (jfc.showSaveDialog(notepad) != JFileChooser.APPROVE_OPTION) {
-				JOptionPane.showMessageDialog(notepad, "File is not saved.", "Info", JOptionPane.INFORMATION_MESSAGE);
-				return;
-			}
-			Path newPath = jfc.getSelectedFile().toPath();
-
-			model.saveDocument(model.getCurrentDocument(), newPath);
-			JOptionPane.showMessageDialog(notepad, "Document saved", "Info", JOptionPane.INFORMATION_MESSAGE);
+			Util.saveAs(notepad, model.getCurrentDocument(), model);
 		}
 	};
 
@@ -171,7 +178,7 @@ public class NotepadActions {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			SingleDocumentModel document = model.getCurrentDocument();
-			if (notepad.checkDocumentToSave(document)) {
+			if (Util.checkDocumentToSave(notepad, document, model)) {
 				model.closeDocument(document);
 			}
 		}
@@ -183,7 +190,6 @@ public class NotepadActions {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			// TODO cut
 			setClipboard(true);
 		}
 	};
@@ -194,11 +200,17 @@ public class NotepadActions {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			// TODO copy
 			setClipboard(false);
 		}
 	};
 
+	/**
+	 * Sets the content on the clipboard to the selected text and removes the text
+	 * if necessary.
+	 * 
+	 * @param remove boolean that determines whether to remove the selected text
+	 *               from the document or not.
+	 */
 	private void setClipboard(boolean remove) {
 		JTextArea textArea = model.getCurrentDocument().getTextComponent();
 		Document doc = textArea.getDocument();
@@ -208,7 +220,7 @@ public class NotepadActions {
 			if (length == 0)
 				return;
 			int offset = Math.min(caret.getDot(), caret.getMark());
-			clipboard = doc.getText(offset, length);
+			clipboard.setContents(new StringSelection(doc.getText(offset, length)), null);
 			if (remove) {
 				doc.remove(offset, length);
 			}
@@ -222,12 +234,21 @@ public class NotepadActions {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			// TODO paste (clipboard as local var or?)
+
+			if (!clipboard.isDataFlavorAvailable(DataFlavor.stringFlavor))
+				return;
+
+			String text;
+			try {
+				text = (String) clipboard.getData(DataFlavor.stringFlavor);
+			} catch (Exception exc) {
+				return;
+			}
 			JTextArea textArea = model.getCurrentDocument().getTextComponent();
 			Document doc = textArea.getDocument();
 			Caret caret = textArea.getCaret();
 			try {
-				doc.insertString(caret.getDot(), clipboard, null);
+				doc.insertString(caret.getDot(), text, null);
 			} catch (BadLocationException ignorable) {
 			}
 		}
@@ -248,7 +269,19 @@ public class NotepadActions {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			// TODO stats
+			JTextArea text = model.getCurrentDocument().getTextComponent();
+			char[] textArray = text.getText().toCharArray();
+			int charCount = textArray.length;
+			int nonBlankCount = 0;
+			for (int i = 0; i < charCount; i++) {
+				if (!Character.isWhitespace(textArray[i])) {
+					nonBlankCount++;
+				}
+			}
+			int lineCount = text.getLineCount();
+			String outputText = "Your document has " + charCount + " characters, " + nonBlankCount
+					+ " non-blank characters and " + lineCount + " lines.";
+			JOptionPane.showMessageDialog(notepad, outputText, "Stats", JOptionPane.INFORMATION_MESSAGE);
 		}
 	};
 
@@ -258,7 +291,78 @@ public class NotepadActions {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			notepad.closeApplication();
+			Util.closeApplication(notepad, model);
+
 		}
 	};
+
+	/** Sets the selection to uppercase. */
+	public final Action toUppercase = new AbstractAction() {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO upperCase
+		}
+	};
+
+	/** Sets the selection to lowercase. */
+	public final Action toLowercase = new AbstractAction() {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO lower
+		}
+	};
+
+	/** Inverts the case of the selection. */
+	public final Action invertCase = new AbstractAction() {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO invert
+		}
+	};
+
+	/**
+	 * Applies ascending sort only on the selected lines of text using rules of
+	 * currently defined language.
+	 */
+	public final Action ascendingSort = new AbstractAction() {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO ascendingSort
+		}
+	};
+
+	/**
+	 * Applies descending sort only on the selected lines of text using rules of
+	 * currently defined language.
+	 */
+	public final Action descendingSort = new AbstractAction() {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO descendingSort
+		}
+	};
+
+	/**
+	 * Removes from selection all lines which are duplicates (only the first
+	 * occurrence is retained).
+	 */
+	public final Action removeDuplicates = new AbstractAction() {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO removeDuplicates
+		}
+	};
+
 }
