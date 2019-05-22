@@ -9,6 +9,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
+import hr.fer.zemris.java.hw11.jnotepadpp.local.ILocalizationProvider;
 import hr.fer.zemris.java.hw11.jnotepadpp.model.MultipleDocumentModel;
 import hr.fer.zemris.java.hw11.jnotepadpp.model.SingleDocumentModel;
 
@@ -28,16 +29,13 @@ public class Util {
 	 * @param notepad notepad in which the documents are open.
 	 * @param model   model that contains documents that are open in the notepad.
 	 */
-	public static void closeApplication(JNotepadPP notepad, MultipleDocumentModel model) {
+	public static void closeApplication(JNotepadPP notepad, MultipleDocumentModel model, ILocalizationProvider lp) {
 		for (SingleDocumentModel document : model) {
-			if (!checkDocumentToSave(notepad, document, model))
+			if (!checkDocumentToSave(notepad, document, model, lp))
 				return;
 		}
 		notepad.dispose();
 	}
-
-	/** Options for the dialog if the files have been unsaved. */
-	private static Object[] options = { "Yes", "No", "Abort" };
 
 	/**
 	 * Checks if document is modified and prompts user to save it.
@@ -49,19 +47,21 @@ public class Util {
 	 *         if user aborted.
 	 */
 	public static boolean checkDocumentToSave(JNotepadPP notepad, SingleDocumentModel document,
-			MultipleDocumentModel model) {
+			MultipleDocumentModel model, ILocalizationProvider lp) {
 		if (document.isModified()) {
+			Object[] options = { lp.getString("saveoptionyes"), lp.getString("saveoptionno"),
+					lp.getString("saveoptionabort") };
 			Path path = document.getFilePath();
 
 			String fileName = path == null ? "(unnamed) " : path.getFileName().toString();
-			int result = JOptionPane.showOptionDialog(notepad, fileName + " has been modified. Would you like to save?",
-					"File modified", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options,
-					options[0]);
+			int result = JOptionPane.showOptionDialog(notepad, String.format(lp.getString("modified"), fileName),
+					lp.getString("modifiedtitle"), JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+					options, options[0]);
 
 			switch (result) {
 			case JOptionPane.YES_OPTION:
 				if (path == null) {
-					saveAs(notepad, document, model);
+					saveAs(notepad, document, model, lp);
 				} else {
 					model.saveDocument(document, path);
 				}
@@ -81,21 +81,23 @@ public class Util {
 	 * @param document document to save.
 	 * @param model    model that contains documents that are open in the notepad.
 	 */
-	public static void saveAs(JNotepadPP notepad, SingleDocumentModel document, MultipleDocumentModel model) {
+	public static void saveAs(JNotepadPP notepad, SingleDocumentModel document, MultipleDocumentModel model,
+			ILocalizationProvider lp) {
 		JFileChooser jfc = new JFileChooser();
 		jfc.setDialogTitle("Save file as...");
 		if (jfc.showSaveDialog(notepad) != JFileChooser.APPROVE_OPTION) {
-			JOptionPane.showMessageDialog(notepad, "File is not saved.", "Info", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(notepad, lp.getString("filenotsaved"), "Info",
+					JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		Path newPath = jfc.getSelectedFile().toPath();
 		if (Files.exists(newPath)) {
-			JOptionPane.showMessageDialog(notepad, "File already exists!", "Info", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(notepad, lp.getString("fileexists"), "Info", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		model.saveDocument(document, newPath);
 
-		JOptionPane.showMessageDialog(notepad, "Document saved", "Info", JOptionPane.INFORMATION_MESSAGE);
+		JOptionPane.showMessageDialog(notepad, lp.getString("filesaved"), "Info", JOptionPane.INFORMATION_MESSAGE);
 
 	}
 

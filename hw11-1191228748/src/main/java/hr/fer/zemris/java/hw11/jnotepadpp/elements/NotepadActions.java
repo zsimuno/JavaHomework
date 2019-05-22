@@ -6,20 +6,34 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
-import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
 import javax.swing.text.Document;
+import javax.swing.text.Element;
+import javax.swing.text.JTextComponent;
 
 import hr.fer.zemris.java.hw11.jnotepadpp.JNotepadPP;
 import hr.fer.zemris.java.hw11.jnotepadpp.Util;
+import hr.fer.zemris.java.hw11.jnotepadpp.local.FormLocalizationProvider;
+import hr.fer.zemris.java.hw11.jnotepadpp.local.LocalizableAction;
+import hr.fer.zemris.java.hw11.jnotepadpp.local.LocalizationProvider;
+import hr.fer.zemris.java.hw11.jnotepadpp.model.MultipleDocumentListener;
 import hr.fer.zemris.java.hw11.jnotepadpp.model.MultipleDocumentModel;
 import hr.fer.zemris.java.hw11.jnotepadpp.model.SingleDocumentModel;
 
@@ -40,72 +54,446 @@ public class NotepadActions {
 	/** System clipboard. */
 	private Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 
+	/** Localization provider for this application. */
+	private FormLocalizationProvider flp;
+
+	/**
+	 * List of actions that are dependent on whether there are open files or not.
+	 */
+	private List<Action> dependentActions = new ArrayList<>();
+
 	/**
 	 * Constructs actions that have the given {@code notepad} application as a
 	 * context and uses given document model.
 	 * 
 	 * @param notepad       application that will use actions in this object.
 	 * @param documentModel multiple document model used in the application.
+	 * @param flp           provider for localization.
 	 */
-	public NotepadActions(JNotepadPP notepad, MultipleDocumentModel documentModel) {
+	public NotepadActions(JNotepadPP notepad, MultipleDocumentModel documentModel, FormLocalizationProvider flp) {
 		this.notepad = notepad;
 		this.model = documentModel;
+		this.flp = flp;
+		constructActions();
 		configureActions();
+
+		dependentActions.addAll(Arrays.asList(saveDocument, saveAsDocument, closeDocument, cutSelectedPart,
+				copySelectedPart, pasteFromClipboard, toUppercase, toLowercase, invertCase, ascendingSort,
+				descendingSort, unique));
+
+		for (Action action : dependentActions) {
+			action.setEnabled(false);
+		}
+
+		documentModel.addMultipleDocumentListener(new MultipleDocumentListener() {
+
+			@Override
+			public void documentRemoved(SingleDocumentModel model) {
+				if (documentModel.getNumberOfDocuments() == 0) {
+					for (Action action : dependentActions) {
+						action.setEnabled(false);
+					}
+				}
+
+			}
+
+			@Override
+			public void documentAdded(SingleDocumentModel model) {
+				if (documentModel.getNumberOfDocuments() == 1) {
+					for (Action action : dependentActions) {
+						action.setEnabled(true);
+					}
+				}
+
+			}
+
+			@Override
+			public void currentDocumentChanged(SingleDocumentModel previousModel, SingleDocumentModel currentModel) {
+			}
+		});
+	}
+
+	/**
+	 * Constructs all actions used in the application.
+	 */
+	private void constructActions() {
+		constructFileActions();
+		constructEditActions();
+		constructStatsActions();
+		constructToolsActions();
+		constructLanguageActions();
+	}
+
+	/**
+	 * Constructs file actions.
+	 */
+	private void constructFileActions() {
+		newDocument = new LocalizableAction("new", flp) {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				model.createNewDocument();
+			}
+		};
+
+		openDocument = new LocalizableAction("open", flp) {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser jfc = new JFileChooser();
+				jfc.setDialogTitle("Open file");
+				if (jfc.showOpenDialog(notepad) != JFileChooser.APPROVE_OPTION)
+					return;
+
+				model.loadDocument(jfc.getSelectedFile().toPath());
+
+			}
+		};
+
+		saveDocument = new LocalizableAction("save", flp) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SingleDocumentModel doc = model.getCurrentDocument();
+				if (doc.getFilePath() == null) {
+					Util.saveAs(notepad, doc, model, flp);
+				} else {
+					model.saveDocument(doc, null);
+				}
+			}
+		};
+
+		saveAsDocument = new LocalizableAction("saveas", flp) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Util.saveAs(notepad, model.getCurrentDocument(), model, flp);
+			}
+		};
+		closeDocument = new LocalizableAction("close", flp) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SingleDocumentModel document = model.getCurrentDocument();
+				if (Util.checkDocumentToSave(notepad, document, model, flp)) {
+					model.closeDocument(document);
+				}
+			}
+		};
+
+		exitApplication = new LocalizableAction("exit", flp) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Util.closeApplication(notepad, model, flp);
+
+			}
+		};
+
+	}
+
+	/**
+	 * Constructs edit actions.
+	 */
+	private void constructEditActions() {
+		cutSelectedPart = new LocalizableAction("cut", flp) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				setClipboard(true);
+			}
+		};
+
+		copySelectedPart = new LocalizableAction("copy", flp) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				setClipboard(false);
+			}
+		};
+
+		pasteFromClipboard = new LocalizableAction("paste", flp) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				if (!clipboard.isDataFlavorAvailable(DataFlavor.stringFlavor))
+					return;
+
+				String text;
+				try {
+					text = (String) clipboard.getData(DataFlavor.stringFlavor);
+				} catch (Exception exc) {
+					return;
+				}
+				JTextArea textArea = model.getCurrentDocument().getTextComponent();
+				Document doc = textArea.getDocument();
+				Caret caret = textArea.getCaret();
+				try {
+					doc.insertString(caret.getDot(), text, null);
+				} catch (BadLocationException ignorable) {
+				}
+			}
+		};
+
+	}
+
+	/**
+	 * Constructs stats actions.
+	 */
+	private void constructStatsActions() {
+		statisticalInfo = new LocalizableAction("stats", flp) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (model.getNumberOfDocuments() == 0) {
+					JOptionPane.showMessageDialog(notepad, flp.getString("statsnofile"), flp.getString("stats"),
+							JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
+				JTextArea text = model.getCurrentDocument().getTextComponent();
+				char[] textArray = text.getText().toCharArray();
+				int charCount = textArray.length;
+				int nonBlankCount = 0;
+				for (int i = 0; i < charCount; i++) {
+					if (!Character.isWhitespace(textArray[i])) {
+						nonBlankCount++;
+					}
+				}
+				int lineCount = text.getLineCount();
+				String outputText = String.format(flp.getString("statsoutput"), charCount, nonBlankCount, lineCount);
+				JOptionPane.showMessageDialog(notepad, outputText, flp.getString("stats"),
+						JOptionPane.INFORMATION_MESSAGE);
+			}
+		};
+
+	}
+
+	/**
+	 * Constructs tools actions.
+	 */
+	private void constructToolsActions() {
+		constructCaseActions();
+
+		ascendingSort = new LocalizableAction("ascending", flp) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Locale locale = new Locale(flp.getCurrentLanguage());
+				Collator collator = Collator.getInstance(locale);
+				sortLines(collator::compare);
+			}
+		};
+
+		descendingSort = new LocalizableAction("descending", flp) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Locale locale = new Locale(flp.getCurrentLanguage());
+				Collator collator = Collator.getInstance(locale);
+				sortLines((a, b) -> collator.compare(b, a));
+			}
+		};
+
+		unique = new LocalizableAction("unique", flp) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				changeSelectedLines(new NotepadActions.LineChanger() {
+
+					@Override
+					public List<String> changeLines(List<String> list, int startingLine, int endingLine) {
+						List<String> previousLines = new ArrayList<>();
+						for (int i = startingLine; i <= endingLine; i++) {
+							if (previousLines.contains(list.get(i))) {
+								list.remove(i);
+								i--;
+								endingLine--;
+							} else {
+								previousLines.add(list.get(i));
+							}
+						}
+						return list;
+					}
+				});
+
+			}
+		};
+
+	}
+
+	/**
+	 * Constructs actions that change casing.
+	 */
+	private void constructCaseActions() {
+		toUppercase = new LocalizableAction("upper", flp) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				toggleSelectedText(Character::toUpperCase);
+			}
+		};
+
+		toLowercase = new LocalizableAction("lower", flp) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				toggleSelectedText(Character::toLowerCase);
+			}
+		};
+
+		invertCase = new LocalizableAction("invertcase", flp) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				toggleSelectedText((c) -> {
+					if (Character.isUpperCase(c)) {
+						return Character.toLowerCase(c);
+					} else if (Character.isLowerCase(c)) {
+						return Character.toUpperCase(c);
+					}
+					return c;
+
+				});
+			}
+		};
+
+		CaretListener listener = new CaretListener() {
+
+			@Override
+			public void caretUpdate(CaretEvent e) {
+				if (e.getDot() == e.getMark()) {
+					setCaseEnabled(false);
+				} else {
+					setCaseEnabled(true);
+				}
+
+			}
+
+			/**
+			 * Sets "enabled" properties of actions that change casing.
+			 * 
+			 * @param enabled enable ({@code true}) or not ({@code false}).
+			 */
+			private void setCaseEnabled(boolean enabled) {
+				toUppercase.setEnabled(enabled);
+				toLowercase.setEnabled(enabled);
+				invertCase.setEnabled(enabled);
+			}
+		};
+
+		model.addMultipleDocumentListener(new MultipleDocumentListener() {
+
+			@Override
+			public void documentRemoved(SingleDocumentModel model) {
+				model.getTextComponent().removeCaretListener(listener);
+
+			}
+
+			@Override
+			public void documentAdded(SingleDocumentModel model) {
+				model.getTextComponent().addCaretListener(listener);
+
+			}
+
+			@Override
+			public void currentDocumentChanged(SingleDocumentModel previousModel, SingleDocumentModel currentModel) {
+				previousModel.getTextComponent().removeCaretListener(listener);
+				currentModel.getTextComponent().addCaretListener(listener);
+
+			}
+		});
+
+	}
+
+	/**
+	 * Constructs actions that change the language.
+	 */
+	private void constructLanguageActions() {
+		hr = new LocalizableAction("hr", flp) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				LocalizationProvider.getInstance().setLanguage("hr");
+			}
+		};
+
+		en = new LocalizableAction("en", flp) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				LocalizationProvider.getInstance().setLanguage("en");
+			}
+		};
+
+		de = new LocalizableAction("de", flp) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				LocalizationProvider.getInstance().setLanguage("de");
+			}
+		};
+
 	}
 
 	/**
 	 * Configures actions created in this class.
 	 */
 	private void configureActions() {
-
 		configureFileActions();
-
 		configureEditActions();
-
 		configureStatsActions();
-
 		configureToolsActions();
-
+		configureLanguageActions();
 	}
 
 	/**
 	 * Configures actions that are in the "File" menu.
 	 */
 	private void configureFileActions() {
-		newDocument.putValue(Action.NAME, "New");
 		newDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control N"));
 		newDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_N);
-		newDocument.putValue(Action.SHORT_DESCRIPTION, "Opens a new blank file");
 		newDocument.putValue(Action.LARGE_ICON_KEY, Util.getIcon("newFile.png", notepad));
 
-		openDocument.putValue(Action.NAME, "Open");
 		openDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control O"));
 		openDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
-		openDocument.putValue(Action.SHORT_DESCRIPTION, "Open file from disk");
 		openDocument.putValue(Action.LARGE_ICON_KEY, Util.getIcon("openFile.png", notepad));
 
-		saveDocument.putValue(Action.NAME, "Save");
 		saveDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control S"));
 		saveDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_S);
-		saveDocument.putValue(Action.SHORT_DESCRIPTION, "Save file to disk");
 		saveDocument.putValue(Action.LARGE_ICON_KEY, Util.getIcon("saveFile.png", notepad));
 
-		saveAsDocument.putValue(Action.NAME, "Save As...");
 		saveAsDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift S"));
 		saveAsDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_A);
-		saveAsDocument.putValue(Action.SHORT_DESCRIPTION, "Save file to disk with given name");
 		saveAsDocument.putValue(Action.LARGE_ICON_KEY, Util.getIcon("saveAs.png", notepad));
 
-		closeDocument.putValue(Action.NAME, "Close");
 		closeDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control W"));
 		closeDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_C);
-		closeDocument.putValue(Action.SHORT_DESCRIPTION, "Closes current file");
 		closeDocument.putValue(Action.LARGE_ICON_KEY, Util.getIcon("closeFile.png", notepad));
 
-		exitApplication.putValue(Action.NAME, "Exit");
 		exitApplication.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control Q"));
 		exitApplication.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_X);
-		exitApplication.putValue(Action.SHORT_DESCRIPTION, "Terminates application");
 		exitApplication.putValue(Action.LARGE_ICON_KEY, Util.getIcon("exit.png", notepad));
 	}
 
@@ -113,22 +501,18 @@ public class NotepadActions {
 	 * Configures actions that are in the "Edit" menu.
 	 */
 	private void configureEditActions() {
-		cutSelectedPart.putValue(Action.NAME, "Cut");
 		cutSelectedPart.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control X"));
 		cutSelectedPart.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_T);
 		cutSelectedPart.putValue(Action.SHORT_DESCRIPTION, "Cut selected part");
 		cutSelectedPart.putValue(Action.LARGE_ICON_KEY, Util.getIcon("cut.png", notepad));
 
-		copySelectedPart.putValue(Action.NAME, "Copy");
 		copySelectedPart.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control C"));
 		copySelectedPart.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_C);
-		copySelectedPart.putValue(Action.SHORT_DESCRIPTION, "Copy selected part");
 		copySelectedPart.putValue(Action.LARGE_ICON_KEY, Util.getIcon("copy.png", notepad));
 
 		pasteFromClipboard.putValue(Action.NAME, "Paste");
 		pasteFromClipboard.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control V"));
 		pasteFromClipboard.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_P);
-		pasteFromClipboard.putValue(Action.SHORT_DESCRIPTION, "Paste to selected position");
 		pasteFromClipboard.putValue(Action.LARGE_ICON_KEY, Util.getIcon("paste.png", notepad));
 	}
 
@@ -136,10 +520,8 @@ public class NotepadActions {
 	 * Configures actions that are in the "Stats" menu.
 	 */
 	private void configureStatsActions() {
-		statisticalInfo.putValue(Action.NAME, "Stats");
 		statisticalInfo.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control T"));
 		statisticalInfo.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_S);
-		statisticalInfo.putValue(Action.SHORT_DESCRIPTION, "Statistical info");
 		statisticalInfo.putValue(Action.LARGE_ICON_KEY, Util.getIcon("stats.png", notepad));
 	}
 
@@ -147,125 +529,35 @@ public class NotepadActions {
 	 * Configures actions that are in the "Tools" menu.
 	 */
 	private void configureToolsActions() {
-
-		// TODO configure descriptions and acc key
-		toUppercase.putValue(Action.NAME, "To Uppercase");
 		toUppercase.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control U"));
 		toUppercase.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_U);
-		toUppercase.putValue(Action.SHORT_DESCRIPTION, "Sets the selection to uppercase");
 
-		toLowercase.putValue(Action.NAME, "To Lowercase");
 		toLowercase.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control L"));
 		toLowercase.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_L);
-		toLowercase.putValue(Action.SHORT_DESCRIPTION, "Sets the selection to lowercase");
 
-		invertCase.putValue(Action.NAME, "Invert Case");
 		invertCase.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control I"));
 		invertCase.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_I);
-		invertCase.putValue(Action.SHORT_DESCRIPTION, "Inverts the case of the selection");
 
-		ascendingSort.putValue(Action.NAME, "Ascending");
 		ascendingSort.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift A"));
 		ascendingSort.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_A);
-		ascendingSort.putValue(Action.SHORT_DESCRIPTION, "Applies ascending sort on the selected lines");
 
-		descendingSort.putValue(Action.NAME, "Descending");
 		descendingSort.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift D"));
 		descendingSort.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_D);
-		descendingSort.putValue(Action.SHORT_DESCRIPTION, "Applies descending sort on the selected lines");
 
-		removeDuplicates.putValue(Action.NAME, "Unique");
-		removeDuplicates.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control U"));
-		removeDuplicates.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_U);
-		removeDuplicates.putValue(Action.SHORT_DESCRIPTION, "Removes from selection all lines which are duplicates");
+		unique.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control U"));
+		unique.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_U);
 
 	}
 
-	/** Opens a new blank document. */
-	public final Action newDocument = new AbstractAction() {
+	/**
+	 * Configures actions that are in the "Language" menu.
+	 */
+	private void configureLanguageActions() {
+		hr.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_E);
+		en.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_R);
+		de.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_N);
 
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			model.createNewDocument();
-		}
-	};
-
-	/** Opens a new document from the path that user chooses. */
-	public final Action openDocument = new AbstractAction() {
-
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			JFileChooser jfc = new JFileChooser();
-			jfc.setDialogTitle("Open file");
-			if (jfc.showOpenDialog(notepad) != JFileChooser.APPROVE_OPTION)
-				return;
-
-			model.loadDocument(jfc.getSelectedFile().toPath());
-
-		}
-	};
-
-	/** Saves the currently open document. */
-	public final Action saveDocument = new AbstractAction() {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			SingleDocumentModel doc = model.getCurrentDocument();
-			if (doc.getFilePath() == null) {
-				Util.saveAs(notepad, doc, model);
-			} else {
-				model.saveDocument(doc, null);
-			}
-		}
-	};
-
-	/** Saves document with the given file name. */
-	public final Action saveAsDocument = new AbstractAction() {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			Util.saveAs(notepad, model.getCurrentDocument(), model);
-		}
-	};
-
-	/** Closes current document. */
-	public final Action closeDocument = new AbstractAction() {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			SingleDocumentModel document = model.getCurrentDocument();
-			if (Util.checkDocumentToSave(notepad, document, model)) {
-				model.closeDocument(document);
-			}
-		}
-	};
-
-	/** Cut selected part of text. */
-	public final Action cutSelectedPart = new AbstractAction() {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			setClipboard(true);
-		}
-	};
-
-	/** Copy selected part of text. */
-	public final Action copySelectedPart = new AbstractAction() {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			setClipboard(false);
-		}
-	};
+	}
 
 	/**
 	 * Sets the content on the clipboard to the selected text and removes the text
@@ -275,7 +567,7 @@ public class NotepadActions {
 	 *               from the document or not.
 	 */
 	private void setClipboard(boolean remove) {
-		JTextArea textArea = model.getCurrentDocument().getTextComponent();
+		JTextComponent textArea = model.getCurrentDocument().getTextComponent();
 		Document doc = textArea.getDocument();
 		Caret caret = textArea.getCaret();
 		try {
@@ -291,119 +583,13 @@ public class NotepadActions {
 		}
 	}
 
-	/** Paste to text. */
-	public final Action pasteFromClipboard = new AbstractAction() {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-
-			if (!clipboard.isDataFlavorAvailable(DataFlavor.stringFlavor))
-				return;
-
-			String text;
-			try {
-				text = (String) clipboard.getData(DataFlavor.stringFlavor);
-			} catch (Exception exc) {
-				return;
-			}
-			JTextArea textArea = model.getCurrentDocument().getTextComponent();
-			Document doc = textArea.getDocument();
-			Caret caret = textArea.getCaret();
-			try {
-				doc.insertString(caret.getDot(), text, null);
-			} catch (BadLocationException ignorable) {
-			}
-		}
-	};
-
-	/**
-	 * Show statistical info. <br>
-	 * Shows:
-	 * <ul>
-	 * <li>a number of characters found in document (everything counts)</li>
-	 * <li>a number of non-blank characters found in document (you don't count
-	 * spaces, enters and tabs)</li>
-	 * <li>a number of lines that the document contains</li>
-	 * </ul>
-	 */
-	public final Action statisticalInfo = new AbstractAction() {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			JTextArea text = model.getCurrentDocument().getTextComponent();
-			char[] textArray = text.getText().toCharArray();
-			int charCount = textArray.length;
-			int nonBlankCount = 0;
-			for (int i = 0; i < charCount; i++) {
-				if (!Character.isWhitespace(textArray[i])) {
-					nonBlankCount++;
-				}
-			}
-			int lineCount = text.getLineCount();
-			String outputText = "Your document has " + charCount + " characters, " + nonBlankCount
-					+ " non-blank characters and " + lineCount + " lines.";
-			JOptionPane.showMessageDialog(notepad, outputText, "Stats", JOptionPane.INFORMATION_MESSAGE);
-		}
-	};
-
-	/** Exits the application. */
-	public final Action exitApplication = new AbstractAction() {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			Util.closeApplication(notepad, model);
-
-		}
-	};
-
-	/** Sets the selection to uppercase. */
-	public final Action toUppercase = new AbstractAction() {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			toggleSelectedText(Character::toUpperCase);
-		}
-	};
-
-	/** Sets the selection to lowercase. */
-	public final Action toLowercase = new AbstractAction() {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			toggleSelectedText(Character::toLowerCase);
-		}
-	};
-
-	/** Inverts the case of the selection. */
-	public final Action invertCase = new AbstractAction() {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			toggleSelectedText((c) -> {
-				if (Character.isUpperCase(c)) {
-					return Character.toLowerCase(c);
-				} else if (Character.isLowerCase(c)) {
-					return Character.toUpperCase(c);
-				}
-				return c;
-
-			});
-		}
-	};
-
 	/**
 	 * Toggles the currently selected text in the editor with the given operator.
 	 * 
 	 * @param operator operator that changes characters in the selected text.
 	 */
 	private void toggleSelectedText(UnaryOperator<Character> operator) {
-		JTextArea editor = model.getCurrentDocument().getTextComponent();
+		JTextComponent editor = model.getCurrentDocument().getTextComponent();
 		Document document = editor.getDocument();
 		Caret caret = editor.getCaret();
 
@@ -430,42 +616,145 @@ public class NotepadActions {
 	}
 
 	/**
+	 * Interface used by actions that change line of given text (sorting and such).
+	 * 
+	 * @author Zvonimir Šimunović
+	 *
+	 */
+	private interface LineChanger {
+
+		/**
+		 * Change the lines.
+		 * 
+		 * @param list         list of line.
+		 * @param startingLine first line we change.
+		 * @param endingLine   last line we change.
+		 * @return changed list of lines.
+		 */
+		List<String> changeLines(List<String> list, int startingLine, int endingLine);
+	}
+
+	/**
+	 * Changes selected lines of the text based on the given line changer.
+	 * 
+	 * @param changer says how we change the given lines.
+	 */
+	private void changeSelectedLines(LineChanger changer) {
+		JTextComponent c = model.getCurrentDocument().getTextComponent();
+		Document document = c.getDocument();
+		Element root = document.getDefaultRootElement();
+		Caret caret = c.getCaret();
+		int startPos = Math.min(caret.getDot(), caret.getMark());
+		int endPos = Math.max(caret.getDot(), caret.getMark());
+
+		int startLine = root.getElementIndex(startPos);
+		int endLine = root.getElementIndex(endPos);
+
+		List<String> lines = new ArrayList<>(Arrays.asList(c.getText().split("\\r?\\n")));
+
+		List<String> result = changer.changeLines(lines, startLine, endLine);
+
+		String text = String.join("\n", result);
+
+		c.setText(text);
+
+	}
+
+	/**
+	 * Sort the selected lines with the given comparator.
+	 * 
+	 * @param comparator comparator with which we compare lines with.
+	 */
+	private void sortLines(Comparator<String> comparator) {
+		changeSelectedLines(new NotepadActions.LineChanger() {
+
+			@Override
+			public List<String> changeLines(List<String> list, int startingLine, int endingLine) {
+				List<String> sort = new ArrayList<>();
+				for (; startingLine <= endingLine; endingLine--) {
+					sort.add(list.get(startingLine));
+					list.remove(startingLine);
+				}
+
+				list.addAll(startingLine, sort.stream().sorted(comparator).collect(Collectors.toList()));
+				return list;
+			}
+		});
+	}
+
+	/** Opens a new blank document. */
+	public Action newDocument;
+
+	/** Opens a new document from the path that user chooses. */
+	public Action openDocument;
+
+	/** Saves the currently open document. */
+	public Action saveDocument;
+
+	/** Saves document with the given file name. */
+	public Action saveAsDocument;
+
+	/** Closes current document. */
+	public Action closeDocument;
+
+	/** Cut selected part of text. */
+	public Action cutSelectedPart;
+
+	/** Copy selected part of text. */
+	public Action copySelectedPart;
+
+	/** Paste to text. */
+	public Action pasteFromClipboard;
+
+	/**
+	 * Show statistical info. <br>
+	 * Shows:
+	 * <ul>
+	 * <li>a number of characters found in document (everything counts)</li>
+	 * <li>a number of non-blank characters found in document (you don't count
+	 * spaces, enters and tabs)</li>
+	 * <li>a number of lines that the document contains</li>
+	 * </ul>
+	 */
+	public Action statisticalInfo;
+
+	/** Exits the application. */
+	public Action exitApplication;
+
+	/** Sets the selection to uppercase. */
+	public Action toUppercase;
+
+	/** Sets the selection to lowercase. */
+	public Action toLowercase;
+
+	/** Inverts the case of the selection. */
+	public Action invertCase;
+
+	/**
 	 * Applies ascending sort only on the selected lines of text using rules of
 	 * currently defined language.
 	 */
-	public final Action ascendingSort = new AbstractAction() {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			// TODO ascendingSort
-		}
-	};
+	public Action ascendingSort;
 
 	/**
 	 * Applies descending sort only on the selected lines of text using rules of
 	 * currently defined language.
 	 */
-	public final Action descendingSort = new AbstractAction() {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			// TODO descendingSort
-		}
-	};
+	public Action descendingSort;
 
 	/**
 	 * Removes from selection all lines which are duplicates (only the first
 	 * occurrence is retained).
 	 */
-	public final Action removeDuplicates = new AbstractAction() {
-		private static final long serialVersionUID = 1L;
+	public Action unique;
 
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			// TODO removeDuplicates
-		}
-	};
+	/** Changes language to Croatian. */
+	public Action hr;
+
+	/** Changes language to English. */
+	public Action en;
+
+	/** Changes language to German. */
+	public Action de;
 
 }

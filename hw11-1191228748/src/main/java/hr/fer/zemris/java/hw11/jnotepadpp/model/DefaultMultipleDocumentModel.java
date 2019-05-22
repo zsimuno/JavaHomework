@@ -11,6 +11,8 @@ import java.util.Set;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import hr.fer.zemris.java.hw11.jnotepadpp.Util;
 
@@ -30,6 +32,36 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 
 	/** Listeners for this model. */
 	private Set<MultipleDocumentListener> listeners = new HashSet<>();
+
+	/** Currently open document */
+	private SingleDocumentModel currentDocument;
+
+	// Set a listener that notifies document listeners when tab changes.
+	{
+		this.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				// No tabs
+				if (getSelectedIndex() < 0) {
+					currentDocument = null;
+					return;
+				}
+
+				// Only tab
+				if (currentDocument == null) {
+					currentDocument = documents.get(getSelectedIndex());
+					return;
+				}
+
+				// Multiple tabs
+				SingleDocumentModel old = currentDocument;
+				currentDocument = documents.get(getSelectedIndex());
+				notifyChangeDocument(old, currentDocument);
+
+			}
+		});
+	}
 
 	/**
 	 * Creates an empty <code>TabbedPane</code> with a default tab placement of
@@ -81,16 +113,15 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		documents.add(doc);
 		addTab("(unnamed)", Util.getIcon("saved.png", getTopLevelAncestor()), new JScrollPane(doc.getTextComponent()),
 				"(unnamed)");
+		currentDocument = doc;
 		doc.addSingleDocumentListener(docListener);
-		for (MultipleDocumentListener l : listeners) {
-			l.documentAdded(doc);
-		}
+		notifyAddDocument(doc);
 		return doc;
 	}
 
 	@Override
 	public SingleDocumentModel getCurrentDocument() {
-		return documents.get(getSelectedIndex());
+		return currentDocument;
 	}
 
 	/**
@@ -128,12 +159,16 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		}
 		SingleDocumentModel document = new DefaultSingleDocumentModel(path, text);
 		documents.add(document);
-		SingleDocumentModel old = getCurrentDocument();
-		for (MultipleDocumentListener l : listeners) {
-			l.currentDocumentChanged(old, document);
+		if (getSelectedIndex() < 0) {
+			notifyAddDocument(document);
+		} else {
+			SingleDocumentModel old = getCurrentDocument();
+			notifyChangeDocument(old, document);
 		}
+
 		addTab(path.getFileName().toString(), Util.getIcon("saved.png", getTopLevelAncestor()),
 				new JScrollPane(document.getTextComponent()), path.toString());
+		currentDocument = document;
 		document.addSingleDocumentListener(docListener);
 		return document;
 	}
@@ -151,30 +186,31 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 			newPath = model.getFilePath();
 		}
 		for (SingleDocumentModel doc : documents) {
+			if (doc.equals(model))
+				continue;
+
 			Path path = doc.getFilePath();
 			if (path != null && doc.getFilePath().equals(newPath))
 				throw new IllegalArgumentException("Given path already exists.");
 
 		}
-		SingleDocumentModel current = getCurrentDocument();
 		try {
-			Files.writeString(newPath, current.getTextComponent().getText());
+			Files.writeString(newPath, model.getTextComponent().getText());
 		} catch (IOException e1) {
 			throw new IllegalArgumentException("Error with saving.");
 		}
 		setIconAt(getSelectedIndex(), Util.getIcon("saved.png", getTopLevelAncestor()));
-		current.setFilePath(newPath);
-		current.setModified(false);
+		model.setFilePath(newPath);
+		model.setModified(false);
 
 	}
 
 	@Override
 	public void closeDocument(SingleDocumentModel model) {
-		removeTabAt(documents.indexOf(model));
-		documents.remove(model);
-		for (MultipleDocumentListener l : listeners) {
-			l.documentRemoved(model);
-		}
+		int index = getSelectedIndex();
+		removeTabAt(index);
+		documents.remove(index);
+		notifyRemoveDocument(model);
 	}
 
 	@Override
@@ -222,5 +258,39 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 			}
 		}
 	};
+
+	/**
+	 * Notify listeners that a document has been added.
+	 * 
+	 * @param model document that was added.
+	 */
+	private void notifyAddDocument(SingleDocumentModel model) {
+		for (MultipleDocumentListener l : listeners) {
+			l.documentAdded(model);
+		}
+	}
+
+	/**
+	 * Notify listeners that a document has been removed.
+	 * 
+	 * @param model document that was removed.
+	 */
+	private void notifyRemoveDocument(SingleDocumentModel model) {
+		for (MultipleDocumentListener l : listeners) {
+			l.documentRemoved(model);
+		}
+	}
+
+	/**
+	 * Notify listeners that current document has been changed.
+	 * 
+	 * @param oldModel old document.
+	 * @param newModel new document.
+	 */
+	private void notifyChangeDocument(SingleDocumentModel oldModel, SingleDocumentModel newModel) {
+		for (MultipleDocumentListener l : listeners) {
+			l.currentDocumentChanged(oldModel, newModel);
+		}
+	}
 
 }

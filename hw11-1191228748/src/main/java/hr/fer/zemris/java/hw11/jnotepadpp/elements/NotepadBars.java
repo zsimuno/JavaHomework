@@ -2,21 +2,28 @@ package hr.fer.zemris.java.hw11.jnotepadpp.elements;
 
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.JToolBar;
+import javax.swing.Timer;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
-import javax.swing.text.BadLocationException;
+import javax.swing.text.Element;
+import javax.swing.text.JTextComponent;
 
 import hr.fer.zemris.java.hw11.jnotepadpp.JNotepadPP;
+import hr.fer.zemris.java.hw11.jnotepadpp.local.FormLocalizationProvider;
+import hr.fer.zemris.java.hw11.jnotepadpp.local.LJMenu;
 import hr.fer.zemris.java.hw11.jnotepadpp.model.MultipleDocumentListener;
 import hr.fer.zemris.java.hw11.jnotepadpp.model.MultipleDocumentModel;
 import hr.fer.zemris.java.hw11.jnotepadpp.model.SingleDocumentModel;
@@ -29,24 +36,26 @@ import hr.fer.zemris.java.hw11.jnotepadpp.model.SingleDocumentModel;
  */
 public class NotepadBars {
 
-	/** Application in which we set the bars. */
-	private JNotepadPP notepad;
-
 	/** Actions that are used in bars constructed in this class. */
 	private NotepadActions actions;
 
 	/** Model that contains multiple documents open in this application. */
 	private MultipleDocumentModel documentModel;
 
+	/** Localization provider for this application. */
+	private FormLocalizationProvider flp;
+
 	/**
 	 * Constructor.
 	 * 
-	 * @param notepad Application in which we set the bars.
+	 * @param notepad       Application in which we set the bars.
+	 * @param documentModel Document model in which the files are stored.
 	 */
-	public NotepadBars(JNotepadPP notepad, MultipleDocumentModel documentModel) {
-		this.notepad = notepad;
+	public NotepadBars(JNotepadPP notepad, MultipleDocumentModel documentModel, FormLocalizationProvider flp) {
 		this.documentModel = documentModel;
-		actions = new NotepadActions(notepad, documentModel);
+		this.flp = flp;
+		actions = new NotepadActions(notepad, documentModel, flp);
+
 	}
 
 	/**
@@ -57,7 +66,7 @@ public class NotepadBars {
 	public JMenuBar createMenus() {
 		JMenuBar mb = new JMenuBar();
 
-		JMenu file = new JMenu("File");
+		LJMenu file = new LJMenu("file", flp);
 		mb.add(file);
 		file.add(new JMenuItem(actions.newDocument));
 		file.add(new JMenuItem(actions.openDocument));
@@ -68,28 +77,34 @@ public class NotepadBars {
 		file.addSeparator();
 		file.add(new JMenuItem(actions.exitApplication));
 
-		JMenu edit = new JMenu("Edit");
+		LJMenu edit = new LJMenu("edit", flp);
 		mb.add(edit);
 		edit.add(new JMenuItem(actions.cutSelectedPart));
 		edit.add(new JMenuItem(actions.copySelectedPart));
 		edit.add(new JMenuItem(actions.pasteFromClipboard));
 
-		JMenu info = new JMenu("Info");
+		LJMenu info = new LJMenu("info", flp);
 		mb.add(info);
 		info.add(new JMenuItem(actions.statisticalInfo));
 
-		JMenu tools = new JMenu("Tools");
+		LJMenu tools = new LJMenu("tools", flp);
 		mb.add(tools);
-		JMenu changeCase = new JMenu("Change case");
+		LJMenu changeCase = new LJMenu("changecase", flp);
 		tools.add(changeCase);
 		changeCase.add(new JMenuItem(actions.toUppercase));
 		changeCase.add(new JMenuItem(actions.toLowercase));
 		changeCase.add(new JMenuItem(actions.invertCase));
-		JMenu sort = new JMenu("Sort");
+		LJMenu sort = new LJMenu("sort", flp);
 		tools.add(sort);
 		sort.add(new JMenuItem(actions.ascendingSort));
 		sort.add(new JMenuItem(actions.descendingSort));
-		tools.add(new JMenuItem(actions.removeDuplicates));
+		tools.add(new JMenuItem(actions.unique));
+
+		LJMenu lan = new LJMenu("language", flp);
+		mb.add(lan);
+		lan.add(new JMenuItem(actions.hr));
+		lan.add(new JMenuItem(actions.en));
+		lan.add(new JMenuItem(actions.de));
 
 		return mb;
 
@@ -132,8 +147,22 @@ public class NotepadBars {
 		JLabel length = new JLabel("  length: 0");
 		JLabel other = new JLabel("  Ln: 0    Col:0    Sel:0");
 		other.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 1, Color.lightGray));
-		JLabel time = new JLabel("Now ");// TODO time on status
+		JLabel time = new JLabel(DateFormat.getDateTimeInstance().format(new Date()));
 		time.setHorizontalAlignment(JLabel.RIGHT);
+
+		final DateFormat timeFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		Timer timer = new Timer(1000, new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				time.setText(timeFormat.format(new Date()));
+
+			}
+		});
+
+		timer.setInitialDelay(0);
+		timer.start();
+
 		statusBar.add(length);
 		statusBar.add(other);
 		statusBar.add(time);
@@ -142,19 +171,17 @@ public class NotepadBars {
 
 			@Override
 			public void caretUpdate(CaretEvent e) {
-				JTextArea textArea = (JTextArea) e.getSource();
+				JTextComponent textComp = (JTextComponent) e.getSource();
+				Element root = textComp.getDocument().getDefaultRootElement();
 
-				int len = textArea.getText().length();
+				int len = textComp.getText().length();
 				int sel = Math.abs(e.getDot() - e.getMark());
 
-				int position = textArea.getCaretPosition();
+				int position = textComp.getCaretPosition();
 				int ln = 0;
 				int col = 0;
-				try {
-					ln = textArea.getLineOfOffset(position);
-					col = position - textArea.getLineStartOffset(ln);
-				} catch (BadLocationException ignorable) {
-				}
+				ln = root.getElementIndex(position);
+				col = position - root.getElement(ln).getStartOffset();
 
 				col++;
 				ln++;
