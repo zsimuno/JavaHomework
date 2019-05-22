@@ -132,7 +132,7 @@ public class NotepadBars {
 		JLabel length = new JLabel("  length: 0");
 		JLabel other = new JLabel("  Ln: 0    Col:0    Sel:0");
 		other.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 1, Color.lightGray));
-		JLabel time = new JLabel("Now ");// TODO napravit
+		JLabel time = new JLabel("Now ");// TODO time on status
 		time.setHorizontalAlignment(JLabel.RIGHT);
 		statusBar.add(length);
 		statusBar.add(other);

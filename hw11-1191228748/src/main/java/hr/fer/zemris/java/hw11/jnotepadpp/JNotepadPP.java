@@ -20,6 +20,7 @@ import hr.fer.zemris.java.hw11.jnotepadpp.model.DefaultMultipleDocumentModel;
 // TODO ne koristim multiple document listener. Bolje ovo sve implementirati.
 // TODO mozda da novi tab koji otvori bude i oni na koji je fokusiran
 // TODO mozda treba paziti da bolje prati current file u modelu
+// TODO akcije ako nema otvorenih tabova (npr close ili stats)
 /**
  * JNotepad++ application is a notepad application that supports various
  * features such as multiple tabs.

@@ -6,6 +6,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.util.function.UnaryOperator;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -56,6 +57,21 @@ public class NotepadActions {
 	 * Configures actions created in this class.
 	 */
 	private void configureActions() {
+
+		configureFileActions();
+
+		configureEditActions();
+
+		configureStatsActions();
+
+		configureToolsActions();
+
+	}
+
+	/**
+	 * Configures actions that are in the "File" menu.
+	 */
+	private void configureFileActions() {
 		newDocument.putValue(Action.NAME, "New");
 		newDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control N"));
 		newDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_N);
@@ -86,6 +102,17 @@ public class NotepadActions {
 		closeDocument.putValue(Action.SHORT_DESCRIPTION, "Closes current file");
 		closeDocument.putValue(Action.LARGE_ICON_KEY, Util.getIcon("closeFile.png", notepad));
 
+		exitApplication.putValue(Action.NAME, "Exit");
+		exitApplication.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control Q"));
+		exitApplication.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_X);
+		exitApplication.putValue(Action.SHORT_DESCRIPTION, "Terminates application");
+		exitApplication.putValue(Action.LARGE_ICON_KEY, Util.getIcon("exit.png", notepad));
+	}
+
+	/**
+	 * Configures actions that are in the "Edit" menu.
+	 */
+	private void configureEditActions() {
 		cutSelectedPart.putValue(Action.NAME, "Cut");
 		cutSelectedPart.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control X"));
 		cutSelectedPart.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_T);
@@ -103,18 +130,54 @@ public class NotepadActions {
 		pasteFromClipboard.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_P);
 		pasteFromClipboard.putValue(Action.SHORT_DESCRIPTION, "Paste to selected position");
 		pasteFromClipboard.putValue(Action.LARGE_ICON_KEY, Util.getIcon("paste.png", notepad));
+	}
 
+	/**
+	 * Configures actions that are in the "Stats" menu.
+	 */
+	private void configureStatsActions() {
 		statisticalInfo.putValue(Action.NAME, "Stats");
 		statisticalInfo.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control T"));
 		statisticalInfo.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_S);
 		statisticalInfo.putValue(Action.SHORT_DESCRIPTION, "Statistical info");
 		statisticalInfo.putValue(Action.LARGE_ICON_KEY, Util.getIcon("stats.png", notepad));
+	}
 
-		exitApplication.putValue(Action.NAME, "Exit");
-		exitApplication.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control Q"));
-		exitApplication.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_X);
-		exitApplication.putValue(Action.SHORT_DESCRIPTION, "Terminates application");
-		exitApplication.putValue(Action.LARGE_ICON_KEY, Util.getIcon("exit.png", notepad));
+	/**
+	 * Configures actions that are in the "Tools" menu.
+	 */
+	private void configureToolsActions() {
+
+		// TODO configure descriptions and acc key
+		toUppercase.putValue(Action.NAME, "To Uppercase");
+		toUppercase.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control U"));
+		toUppercase.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_U);
+		toUppercase.putValue(Action.SHORT_DESCRIPTION, "Sets the selection to uppercase");
+
+		toLowercase.putValue(Action.NAME, "To Lowercase");
+		toLowercase.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control L"));
+		toLowercase.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_L);
+		toLowercase.putValue(Action.SHORT_DESCRIPTION, "Sets the selection to lowercase");
+
+		invertCase.putValue(Action.NAME, "Invert Case");
+		invertCase.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control I"));
+		invertCase.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_I);
+		invertCase.putValue(Action.SHORT_DESCRIPTION, "Inverts the case of the selection");
+
+		ascendingSort.putValue(Action.NAME, "Ascending");
+		ascendingSort.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift A"));
+		ascendingSort.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_A);
+		ascendingSort.putValue(Action.SHORT_DESCRIPTION, "Applies ascending sort on the selected lines");
+
+		descendingSort.putValue(Action.NAME, "Descending");
+		descendingSort.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift D"));
+		descendingSort.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_D);
+		descendingSort.putValue(Action.SHORT_DESCRIPTION, "Applies descending sort on the selected lines");
+
+		removeDuplicates.putValue(Action.NAME, "Unique");
+		removeDuplicates.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control U"));
+		removeDuplicates.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_U);
+		removeDuplicates.putValue(Action.SHORT_DESCRIPTION, "Removes from selection all lines which are duplicates");
 
 	}
 
@@ -302,7 +365,7 @@ public class NotepadActions {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			// TODO upperCase
+			toggleSelectedText(Character::toUpperCase);
 		}
 	};
 
@@ -312,7 +375,7 @@ public class NotepadActions {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			// TODO lower
+			toggleSelectedText(Character::toLowerCase);
 		}
 	};
 
@@ -322,9 +385,49 @@ public class NotepadActions {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			// TODO invert
+			toggleSelectedText((c) -> {
+				if (Character.isUpperCase(c)) {
+					return Character.toLowerCase(c);
+				} else if (Character.isLowerCase(c)) {
+					return Character.toUpperCase(c);
+				}
+				return c;
+
+			});
 		}
 	};
+
+	/**
+	 * Toggles the currently selected text in the editor with the given operator.
+	 * 
+	 * @param operator operator that changes characters in the selected text.
+	 */
+	private void toggleSelectedText(UnaryOperator<Character> operator) {
+		JTextArea editor = model.getCurrentDocument().getTextComponent();
+		Document document = editor.getDocument();
+		Caret caret = editor.getCaret();
+
+		int start = Math.min(caret.getDot(), caret.getMark());
+		int len = Math.abs(caret.getDot() - caret.getMark());
+
+		if (len == 0)
+			return;
+
+		String text;
+		try {
+			text = document.getText(start, len);
+			char[] chars = text.toCharArray();
+			for (int i = 0; i < chars.length; i++) {
+				chars[i] = operator.apply(chars[i]);
+			}
+			text = new String(chars);
+
+			document.remove(start, len);
+			document.insertString(start, text, null);
+		} catch (BadLocationException ignorable) {
+		}
+
+	}
 
 	/**
 	 * Applies ascending sort only on the selected lines of text using rules of
