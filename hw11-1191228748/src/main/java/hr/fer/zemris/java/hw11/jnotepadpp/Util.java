@@ -2,6 +2,7 @@ package hr.fer.zemris.java.hw11.jnotepadpp;
 
 import java.awt.Container;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import javax.swing.ImageIcon;
@@ -47,11 +48,11 @@ public class Util {
 	 */
 	public static boolean checkDocumentToSave(JNotepadPP notepad, SingleDocumentModel document,
 			MultipleDocumentModel model, ILocalizationProvider lp) {
-		
+
 		if (document.isModified()) {
-			
+
 			model.activateDocument(document);
-			
+
 			Object[] options = { lp.getString("saveoptionyes"), lp.getString("saveoptionno"),
 					lp.getString("saveoptionabort") };
 			Path path = document.getFilePath();
@@ -94,10 +95,22 @@ public class Util {
 			return;
 		}
 		Path newPath = jfc.getSelectedFile().toPath();
+		if (Files.exists(newPath)) {
+			Object[] options = { lp.getString("saveoptionyes"), lp.getString("saveoptionno") };
+
+			int result = JOptionPane.showOptionDialog(notepad, lp.getString("fileexists"),
+					lp.getString("fileexiststitle"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+					options, options[0]);
+
+			if (result != JOptionPane.YES_OPTION) {
+				return;
+			}
+		}
+
 		try {
 			model.saveDocument(document, newPath);
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(notepad, lp.getString("fileexists"), "Info", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(notepad, lp.getString("fileopen"), "Info", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 
