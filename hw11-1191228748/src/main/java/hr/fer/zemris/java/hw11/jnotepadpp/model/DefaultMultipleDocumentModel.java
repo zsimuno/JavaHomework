@@ -1,6 +1,7 @@
 package hr.fer.zemris.java.hw11.jnotepadpp.model;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -36,8 +37,15 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 	/** Currently open document */
 	private SingleDocumentModel currentDocument;
 
-	// Set a listener that notifies document listeners when tab changes.
-	{
+
+	/**
+	 * Creates an empty <code>DefaultMultipleDocumentModel</code> with a default tab
+	 * placement of <code>JTabbedPane.TOP</code>.
+	 * 
+	 */
+	public DefaultMultipleDocumentModel() {
+		super();
+		// Set a listener that notifies document listeners when tab changes.
 		this.addChangeListener(new ChangeListener() {
 
 			@Override
@@ -63,45 +71,6 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		});
 	}
 
-	/**
-	 * Creates an empty <code>TabbedPane</code> with a default tab placement of
-	 * <code>JTabbedPane.TOP</code>.
-	 * 
-	 * @see #addTab
-	 */
-	public DefaultMultipleDocumentModel() {
-		super();
-	}
-
-	/**
-	 * Creates an empty <code>TabbedPane</code> with the specified tab placement of
-	 * either: <code>JTabbedPane.TOP</code>, <code>JTabbedPane.BOTTOM</code>,
-	 * <code>JTabbedPane.LEFT</code>, or <code>JTabbedPane.RIGHT</code>.
-	 *
-	 * @param tabPlacement the placement for the tabs relative to the content
-	 */
-	public DefaultMultipleDocumentModel(int tabPlacement) {
-		super(tabPlacement);
-	}
-
-	/**
-	 * Creates an empty <code>TabbedPane</code> with the specified tab placement and
-	 * tab layout policy. Tab placement may be either: <code>JTabbedPane.TOP</code>,
-	 * <code>JTabbedPane.BOTTOM</code>, <code>JTabbedPane.LEFT</code>, or
-	 * <code>JTabbedPane.RIGHT</code>. Tab layout policy may be either:
-	 * <code>JTabbedPane.WRAP_TAB_LAYOUT</code> or
-	 * <code>JTabbedPane.SCROLL_TAB_LAYOUT</code>.
-	 *
-	 * @param tabPlacement    the placement for the tabs relative to the content
-	 * @param tabLayoutPolicy the policy for laying out tabs when all tabs will not
-	 *                        fit on one run
-	 * @exception IllegalArgumentException if tab placement or tab layout policy are
-	 *                                     not one of the above supported values
-	 */
-	public DefaultMultipleDocumentModel(int tabPlacement, int tabLayoutPolicy) {
-		super(tabPlacement, tabLayoutPolicy);
-	}
-
 	@Override
 	public Iterator<SingleDocumentModel> iterator() {
 		return documents.iterator();
@@ -116,6 +85,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		currentDocument = doc;
 		doc.addSingleDocumentListener(docListener);
 		notifyAddDocument(doc);
+		setSelectedIndex(getTabCount() - 1);
 		return doc;
 	}
 
@@ -136,6 +106,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		if (path == null)
 			throw new NullPointerException("Path cannot be null (load).");
 
+		// Check if file is already opened
 		for (int i = 0; i < documents.size(); i++) {
 			SingleDocumentModel doc = documents.get(i);
 			if (doc.getFilePath() == null)
@@ -151,12 +122,15 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 			throw new IllegalArgumentException("Given path must be readable.");
 		}
 
+		// Read from file
 		String text;
 		try {
-			text = Files.readString(path);
+			text = Files.readString(path, StandardCharsets.UTF_8);
 		} catch (IOException e1) {
 			throw new IllegalArgumentException("Can't read from file.");
 		}
+		
+		// Create document
 		SingleDocumentModel document = new DefaultSingleDocumentModel(path, text);
 		documents.add(document);
 		if (getSelectedIndex() < 0) {
@@ -168,6 +142,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 
 		addTab(path.getFileName().toString(), Util.getIcon("saved.png", getTopLevelAncestor()),
 				new JScrollPane(document.getTextComponent()), path.toString());
+		setSelectedIndex(getTabCount() - 1);
 		currentDocument = document;
 		document.addSingleDocumentListener(docListener);
 		return document;
@@ -185,6 +160,8 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		if (newPath == null) {
 			newPath = model.getFilePath();
 		}
+		
+		// If the document is already opened
 		for (SingleDocumentModel doc : documents) {
 			if (doc.equals(model))
 				continue;
@@ -195,7 +172,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 
 		}
 		try {
-			Files.writeString(newPath, model.getTextComponent().getText());
+			Files.writeString(newPath, model.getTextComponent().getText(), StandardCharsets.UTF_8);
 		} catch (IOException e1) {
 			throw new IllegalArgumentException("Error with saving.");
 		}
@@ -233,6 +210,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		return documents.get(index);
 	}
 
+	/** Listens to documents and changes tab title if the path changes. */
 	private SingleDocumentListener docListener = new SingleDocumentListener() {
 
 		@Override
@@ -291,6 +269,12 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		for (MultipleDocumentListener l : listeners) {
 			l.currentDocumentChanged(oldModel, newModel);
 		}
+	}
+
+	@Override
+	public void activateDocument(SingleDocumentModel model) {
+		setSelectedIndex(documents.indexOf(model));
+		
 	}
 
 }

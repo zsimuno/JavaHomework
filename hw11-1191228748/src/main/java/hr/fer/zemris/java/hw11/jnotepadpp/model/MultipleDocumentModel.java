@@ -84,4 +84,12 @@ public interface MultipleDocumentModel extends Iterable<SingleDocumentModel> {
 	 * @return retrieves the document at the given {@code index}.
 	 */
 	SingleDocumentModel getDocument(int index);
+	
+	/**
+	 * Activates given document.
+	 * 
+	 * @param model document to activate.
+	 * 
+	 */
+	void activateDocument(SingleDocumentModel model);
 }

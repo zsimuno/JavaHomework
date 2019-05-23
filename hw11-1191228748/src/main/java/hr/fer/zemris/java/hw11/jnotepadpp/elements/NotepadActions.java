@@ -77,6 +77,8 @@ public class NotepadActions {
 		constructActions();
 		configureActions();
 
+		
+		// These actions depend if there are any documents open so we set initially to disabled
 		dependentActions.addAll(Arrays.asList(saveDocument, saveAsDocument, closeDocument, cutSelectedPart,
 				copySelectedPart, pasteFromClipboard, toUppercase, toLowercase, invertCase, ascendingSort,
 				descendingSort, unique));
@@ -85,6 +87,7 @@ public class NotepadActions {
 			action.setEnabled(false);
 		}
 
+		// Listen when number of documents change so change the "enabled" property
 		documentModel.addMultipleDocumentListener(new MultipleDocumentListener() {
 
 			@Override
@@ -149,7 +152,12 @@ public class NotepadActions {
 				if (jfc.showOpenDialog(notepad) != JFileChooser.APPROVE_OPTION)
 					return;
 
-				model.loadDocument(jfc.getSelectedFile().toPath());
+				try {
+					model.loadDocument(jfc.getSelectedFile().toPath());
+				} catch (Exception e2) {
+					JOptionPane.showMessageDialog(notepad, "File opening error!", "Error",
+							JOptionPane.INFORMATION_MESSAGE);
+				}
 
 			}
 		};
@@ -176,6 +184,7 @@ public class NotepadActions {
 				Util.saveAs(notepad, model.getCurrentDocument(), model, flp);
 			}
 		};
+		
 		closeDocument = new LocalizableAction("close", flp) {
 			private static final long serialVersionUID = 1L;
 
@@ -380,24 +389,9 @@ public class NotepadActions {
 
 			@Override
 			public void caretUpdate(CaretEvent e) {
-				if (e.getDot() == e.getMark()) {
-					setCaseEnabled(false);
-				} else {
-					setCaseEnabled(true);
-				}
-
+				updateCaseEnabled((JTextComponent) e.getSource());
 			}
 
-			/**
-			 * Sets "enabled" properties of actions that change casing.
-			 * 
-			 * @param enabled enable ({@code true}) or not ({@code false}).
-			 */
-			private void setCaseEnabled(boolean enabled) {
-				toUppercase.setEnabled(enabled);
-				toLowercase.setEnabled(enabled);
-				invertCase.setEnabled(enabled);
-			}
 		};
 
 		model.addMultipleDocumentListener(new MultipleDocumentListener() {
@@ -418,10 +412,36 @@ public class NotepadActions {
 			public void currentDocumentChanged(SingleDocumentModel previousModel, SingleDocumentModel currentModel) {
 				previousModel.getTextComponent().removeCaretListener(listener);
 				currentModel.getTextComponent().addCaretListener(listener);
-
+				updateCaseEnabled(currentModel.getTextComponent());
 			}
 		});
 
+	}
+
+	/**
+	 * Updates the case actions "enabled" property based on the given textual
+	 * component.
+	 * 
+	 * @param textComp textual component.
+	 */
+	private void updateCaseEnabled(JTextComponent textComp) {
+		Caret caret = textComp.getCaret();
+		if (caret.getDot() == caret.getMark()) {
+			setCaseEnabled(false);
+		} else {
+			setCaseEnabled(true);
+		}
+	}
+
+	/**
+	 * Sets "enabled" properties of actions that change casing.
+	 * 
+	 * @param enabled enable ({@code true}) or not ({@code false}).
+	 */
+	private void setCaseEnabled(boolean enabled) {
+		toUppercase.setEnabled(enabled);
+		toLowercase.setEnabled(enabled);
+		invertCase.setEnabled(enabled);
 	}
 
 	/**

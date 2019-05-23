@@ -16,13 +16,16 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.Timer;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+import javax.swing.text.Caret;
 import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
 
 import hr.fer.zemris.java.hw11.jnotepadpp.JNotepadPP;
 import hr.fer.zemris.java.hw11.jnotepadpp.local.FormLocalizationProvider;
+import hr.fer.zemris.java.hw11.jnotepadpp.local.ILocalizationListener;
 import hr.fer.zemris.java.hw11.jnotepadpp.local.LJMenu;
 import hr.fer.zemris.java.hw11.jnotepadpp.model.MultipleDocumentListener;
 import hr.fer.zemris.java.hw11.jnotepadpp.model.MultipleDocumentModel;
@@ -71,9 +74,10 @@ public class NotepadBars {
 		file.add(new JMenuItem(actions.newDocument));
 		file.add(new JMenuItem(actions.openDocument));
 		file.addSeparator();
+		file.add(new JMenuItem(actions.closeDocument));
+		file.addSeparator();
 		file.add(new JMenuItem(actions.saveDocument));
 		file.add(new JMenuItem(actions.saveAsDocument));
-		file.add(new JMenuItem(actions.closeDocument));
 		file.addSeparator();
 		file.add(new JMenuItem(actions.exitApplication));
 
@@ -122,9 +126,10 @@ public class NotepadBars {
 		tb.add(new JButton(actions.newDocument));
 		tb.add(new JButton(actions.openDocument));
 		tb.addSeparator();
+		tb.add(new JButton(actions.closeDocument));
+		tb.addSeparator();
 		tb.add(new JButton(actions.saveDocument));
 		tb.add(new JButton(actions.saveAsDocument));
-		tb.add(new JButton(actions.closeDocument));
 		tb.addSeparator();
 		tb.add(new JButton(actions.cutSelectedPart));
 		tb.add(new JButton(actions.copySelectedPart));
@@ -136,6 +141,11 @@ public class NotepadBars {
 		return tb;
 	}
 
+	/** Label that shows the length of the current file. */
+	private JLabel length;
+	/** Label that shows various values connected to the carot. */
+	private JLabel other;
+
 	/**
 	 * Creates a status bar.
 	 * 
@@ -144,10 +154,15 @@ public class NotepadBars {
 	public JPanel createStatusBar() {
 		JPanel statusBar = new JPanel(new GridLayout(1, 3));
 		statusBar.setBorder(BorderFactory.createMatteBorder(2, 0, 0, 0, Color.gray));
-		JLabel length = new JLabel("  length: 0");
-		JLabel other = new JLabel("  Ln: 0    Col:0    Sel:0");
+
+		length = new JLabel(String.format(flp.getString("statuslength"), 0));
+		length.setBorder(new EmptyBorder(0, 20, 0, 0));
+
+		other = new JLabel(String.format(flp.getString("statusother"), 1, 1, 0));
 		other.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 1, Color.lightGray));
+
 		JLabel time = new JLabel(DateFormat.getDateTimeInstance().format(new Date()));
+		time.setBorder(new EmptyBorder(0, 0, 0, 20));
 		time.setHorizontalAlignment(JLabel.RIGHT);
 
 		final DateFormat timeFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -167,30 +182,32 @@ public class NotepadBars {
 		statusBar.add(other);
 		statusBar.add(time);
 
+		// Change depending on language
+		flp.addLocalizationListener(new ILocalizationListener() {
+
+			@Override
+			public void localizationChanged() {
+				// If no documents
+				if (documentModel.getNumberOfDocuments() == 0) {
+					length.setText(String.format(flp.getString("statuslength"), 0));
+					other.setText(String.format(flp.getString("statusother"), 1, 1, 0));
+					return;
+				}
+
+				setStatusBar(documentModel.getCurrentDocument().getTextComponent());
+			}
+		});
+
 		CaretListener listener = new CaretListener() {
 
 			@Override
 			public void caretUpdate(CaretEvent e) {
 				JTextComponent textComp = (JTextComponent) e.getSource();
-				Element root = textComp.getDocument().getDefaultRootElement();
-
-				int len = textComp.getText().length();
-				int sel = Math.abs(e.getDot() - e.getMark());
-
-				int position = textComp.getCaretPosition();
-				int ln = 0;
-				int col = 0;
-				ln = root.getElementIndex(position);
-				col = position - root.getElement(ln).getStartOffset();
-
-				col++;
-				ln++;
-
-				length.setText("  length:" + len);
-				other.setText("  Ln:" + ln + "    Col:" + col + "   Sel:" + sel);
-
+				setStatusBar(textComp);
 			}
 		};
+
+		// Change depending on current document 
 		documentModel.addMultipleDocumentListener(new MultipleDocumentListener() {
 
 			@Override
@@ -201,17 +218,40 @@ public class NotepadBars {
 			@Override
 			public void documentAdded(SingleDocumentModel model) {
 				model.getTextComponent().addCaretListener(listener);
-
 			}
 
 			@Override
 			public void currentDocumentChanged(SingleDocumentModel previousModel, SingleDocumentModel currentModel) {
 				previousModel.getTextComponent().removeCaretListener(listener);
 				currentModel.getTextComponent().addCaretListener(listener);
-
+				setStatusBar(currentModel.getTextComponent());
 			}
 		});
 		return statusBar;
+	}
+
+	/**
+	 * Sets the first two thirds of the status bar.
+	 * 
+	 * @param textComp text component on which we base the numbers in the bar.
+	 */
+	private void setStatusBar(JTextComponent textComp) {
+		Caret caret = textComp.getCaret();
+		Element root = textComp.getDocument().getDefaultRootElement();
+
+		int len = textComp.getText().length();
+		int sel = Math.abs(caret.getDot() - caret.getMark());
+
+		int position = textComp.getCaretPosition();
+		int ln = root.getElementIndex(position);
+		int col = position - root.getElement(ln).getStartOffset();
+
+		col++;
+		ln++;
+
+		length.setText(String.format(flp.getString("statuslength"), len));
+		other.setText(String.format(flp.getString("statusother"), ln, col, sel));
+
 	}
 
 }

@@ -2,7 +2,6 @@ package hr.fer.zemris.java.hw11.jnotepadpp;
 
 import java.awt.Container;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import javax.swing.ImageIcon;
@@ -48,7 +47,11 @@ public class Util {
 	 */
 	public static boolean checkDocumentToSave(JNotepadPP notepad, SingleDocumentModel document,
 			MultipleDocumentModel model, ILocalizationProvider lp) {
+		
 		if (document.isModified()) {
+			
+			model.activateDocument(document);
+			
 			Object[] options = { lp.getString("saveoptionyes"), lp.getString("saveoptionno"),
 					lp.getString("saveoptionabort") };
 			Path path = document.getFilePath();
@@ -91,11 +94,12 @@ public class Util {
 			return;
 		}
 		Path newPath = jfc.getSelectedFile().toPath();
-		if (Files.exists(newPath)) {
+		try {
+			model.saveDocument(document, newPath);
+		} catch (Exception e) {
 			JOptionPane.showMessageDialog(notepad, lp.getString("fileexists"), "Info", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
-		model.saveDocument(document, newPath);
 
 		JOptionPane.showMessageDialog(notepad, lp.getString("filesaved"), "Info", JOptionPane.INFORMATION_MESSAGE);
 
