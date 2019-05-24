@@ -1,8 +1,8 @@
 package hr.fer.zemris.java.gui.calc;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.DoubleBinaryOperator;
 
 import hr.fer.zemris.java.gui.calc.model.CalcModel;
@@ -31,7 +31,7 @@ public class CalcModelImpl implements CalcModel {
 	private DoubleBinaryOperator pendingOperation = null;
 
 	/** Contains all listeners that observe this model. */
-	private List<CalcValueListener> listeners = new ArrayList<>();
+	private Set<CalcValueListener> listeners = new HashSet<>();
 
 	@Override
 	public void addCalcValueListener(CalcValueListener l) {
@@ -125,15 +125,17 @@ public class CalcModelImpl implements CalcModel {
 		if (input.contentEquals("0") && digit == 0)
 			return;
 
+		double in;
 		try {
-			value = Double.parseDouble((positiveValue ? "" : "-") + input + Integer.toString(digit));
+			in = Double.parseDouble((positiveValue ? "" : "-") + input + Integer.toString(digit));
 		} catch (Exception e) {
 			throw new CalculatorInputException("String does not containa parsable double!");
 		}
 
-		if (Double.isInfinite(value))
+		if (Double.isInfinite(in))
 			throw new CalculatorInputException("Number too big!");
 
+		value = in;
 		if (input.equals("0")) {
 			input = "";
 		}

@@ -1,6 +1,10 @@
 package hr.fer.zemris.java.gui.layouts.demo;
 
 import static hr.fer.zemris.java.gui.layouts.demo.DemoFrame1.l;
+
+import java.awt.Color;
+
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -31,6 +35,7 @@ public class DemoFrame5 extends JFrame {
 	 */
 	private void initGUI() {
 		JPanel p = new JPanel(new CalcLayout(5));
+		((JPanel) p).setBorder(BorderFactory.createLineBorder(Color.RED, 20));
 		p.add(l("1,1"), new RCPosition(1, 1));
 		p.add(l("1,6"), new RCPosition(1, 6));
 		p.add(l("1,7"), new RCPosition(1, 7));

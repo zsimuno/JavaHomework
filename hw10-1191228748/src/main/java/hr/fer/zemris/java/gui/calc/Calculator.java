@@ -45,7 +45,8 @@ public class Calculator extends JFrame {
 		initGUI();
 	}
 
-	JCheckBox inv;
+	/** Checkbox that inverts operations. */
+	JCheckBox invertOperation;
 
 	/**
 	 * Initializes GUI.
@@ -69,8 +70,8 @@ public class Calculator extends JFrame {
 		};
 		calculator.addCalcValueListener(screenListener);
 
-		inv = new JCheckBox("Inv", false);
-		cp.add(inv, new RCPosition(5, 7));
+		invertOperation = new JCheckBox("Inv", false);
+		cp.add(invertOperation, new RCPosition(5, 7));
 
 		addNumberButtons(calculator);
 
@@ -95,53 +96,30 @@ public class Calculator extends JFrame {
 	 */
 	private void addNumberButtons(CalcModelImpl calculator) {
 		Container cp = getContentPane();
-		ActionListener number = a -> {
-			JDigitButton b = (JDigitButton) a.getSource();
-			if (!calculator.isEditable()) {
-				calculator.clear();
-			}
-			calculator.insertDigit(b.getDigit());
-		};
 
 		JDigitButton[] buttons = new JDigitButton[10];
-		for (int i = 0; i < 10; i++) {
-			buttons[i] = new JDigitButton(i);
-			buttons[i].addActionListener(number);
-			buttons[i].setFont(buttons[i].getFont().deriveFont(30f));
+
+		for (int i = 0, j = 5, k = 3; i < 10; i++, k++) {
+			buttons[i] = new JDigitButton(i, calculator);
+			cp.add(buttons[i], new RCPosition(j, k));
+			if (k == 5 || j == 5) {
+				j--;
+				k = 2;
+			}
 		}
-		cp.add(buttons[0], new RCPosition(5, 3));
-		cp.add(buttons[1], new RCPosition(4, 3));
-		cp.add(buttons[2], new RCPosition(4, 4));
-		cp.add(buttons[3], new RCPosition(4, 5));
-		cp.add(buttons[4], new RCPosition(3, 3));
-		cp.add(buttons[5], new RCPosition(3, 4));
-		cp.add(buttons[6], new RCPosition(3, 5));
-		cp.add(buttons[7], new RCPosition(2, 3));
-		cp.add(buttons[8], new RCPosition(2, 4));
-		cp.add(buttons[9], new RCPosition(2, 5));
 
 	}
 
 	/**
 	 * Adds buttons that represent binary operators.
 	 * 
-	 * @param calculator calculator model that we use for calculations.
-	 * @param inv        checkbox that says if we invert operations or not.
+	 * @param calculator      calculator model that we use for calculations.
+	 * @param invertOperation checkbox that says if we invert operations or not.
 	 */
 	private void addBinaryOperatorButtons(CalcModelImpl calculator) {
 
 		ActionListener binary = a -> {
 			JBinaryOperatorButton b = (JBinaryOperatorButton) a.getSource();
-			// If calculator is not editable that means operation has already
-			// been pressed so we change the operation.
-			if (!calculator.isEditable()) {
-				if (!inv.isSelected()) {
-					calculator.setPendingBinaryOperation(b.getOperator());
-				} else {
-					calculator.setPendingBinaryOperation(b.getInvOperator());
-				}
-				return;
-			}
 			Double activeOperand;
 			if (calculator.isActiveOperandSet()) {
 				DoubleBinaryOperator op = calculator.getPendingBinaryOperation();
@@ -152,7 +130,7 @@ public class Calculator extends JFrame {
 				activeOperand = calculator.getValue();
 			}
 			calculator.setActiveOperand(activeOperand);
-			if (!inv.isSelected()) {
+			if (!invertOperation.isSelected()) {
 				calculator.setPendingBinaryOperation(b.getOperator());
 			} else {
 				calculator.setPendingBinaryOperation(b.getInvOperator());
@@ -189,7 +167,7 @@ public class Calculator extends JFrame {
 			String invText, ActionListener listener) {
 		JBinaryOperatorButton op = new JBinaryOperatorButton(operator, invOperator, text);
 		op.addActionListener(listener);
-		inv.addActionListener(a -> {
+		invertOperation.addActionListener(a -> {
 			JCheckBox box = (JCheckBox) a.getSource();
 			if (box.isSelected()) {
 				op.setText(invText);
@@ -218,13 +196,13 @@ public class Calculator extends JFrame {
 	/**
 	 * Adds buttons that represent unary operators.
 	 * 
-	 * @param calculator calculator model that we use for calculations.
-	 * @param inv        checkbox that says if we invert operations or not.
+	 * @param calculator      calculator model that we use for calculations.
+	 * @param invertOperation checkbox that says if we invert operations or not.
 	 */
 	private void addUnaryOperatoButtons(CalcModelImpl calculator) {
 		ActionListener unary = a -> {
 			JUnaryOperatorButton b = (JUnaryOperatorButton) a.getSource();
-			calculator.setValue(b.apply(calculator.getValue(), inv.isSelected()));
+			calculator.setValue(b.apply(calculator.getValue(), invertOperation.isSelected()));
 		};
 
 		Container cp = getContentPane();
@@ -257,7 +235,7 @@ public class Calculator extends JFrame {
 			String invText, ActionListener listener) {
 		JUnaryOperatorButton op = new JUnaryOperatorButton(operator, invOperator, text);
 		op.addActionListener(listener);
-		inv.addActionListener(a -> {
+		invertOperation.addActionListener(a -> {
 			JCheckBox box = (JCheckBox) a.getSource();
 			if (box.isSelected()) {
 				op.setText(invText);
@@ -319,7 +297,7 @@ public class Calculator extends JFrame {
 				} catch (Exception e) {
 				}
 			}
-			
+
 		});
 		cp.add(dot, new RCPosition(5, 5));
 

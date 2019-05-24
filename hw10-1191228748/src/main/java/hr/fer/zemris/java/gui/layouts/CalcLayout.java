@@ -7,6 +7,7 @@ import java.awt.Insets;
 import java.awt.LayoutManager2;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * Layout implementation that is used as a calculator layout.
@@ -17,9 +18,9 @@ import java.util.Map;
 public class CalcLayout implements LayoutManager2 {
 
 	/** Number of rows in the layout. */
-	private static final double rows = 5.0;
+	private static final int rowsCount = 5;
 	/** Number of columns in the layout. */
-	private static final double columns = 7.0;
+	private static final int columnsCount = 7;
 	/** Number of pixels between elements in the layout. */
 	private int spacing;
 	/** Map of all components in this layout and their positions. */
@@ -87,23 +88,10 @@ public class CalcLayout implements LayoutManager2 {
 	 *         otherwise.
 	 */
 	private boolean areConstraintsValid(int row, int column) {
-		if ((row == 1 && (column > 1 && column < columns - 1)))
+		if ((row == 1 && (column > 1 && column < columnsCount - 1)))
 			return false;
 
-		return between(row, 1, rows) && between(column, 1, columns);
-	}
-
-	/**
-	 * Checks if the given {@code number} is between given {@code i} and {@code j}
-	 * parameters. (both are inclusive, i.e. i <= number <= j)
-	 * 
-	 * @param number number to be checked.
-	 * @param i      lower bound.
-	 * @param j      upper bound.
-	 * @return {@code true} if i <= number <= j and {@code false} otherwise.
-	 */
-	private boolean between(int number, int i, double j) {
-		return number >= i && number <= j;
+		return row >= 1 && row <= rowsCount && column >= 1 && column <= columnsCount;
 	}
 
 	@Override
@@ -113,17 +101,17 @@ public class CalcLayout implements LayoutManager2 {
 
 	@Override
 	public Dimension preferredLayoutSize(Container parent) {
-		return getLazyoutSize(parent, "preferred");
+		return getLazyoutSize(parent, Component::getPreferredSize);
 	}
 
 	@Override
 	public Dimension minimumLayoutSize(Container parent) {
-		return getLazyoutSize(parent, "min");
+		return getLazyoutSize(parent, Component::getMinimumSize);
 	}
 
 	@Override
 	public Dimension maximumLayoutSize(Container target) {
-		return getLazyoutSize(target, "max");
+		return getLazyoutSize(target, Component::getMaximumSize);
 	}
 
 	/**
@@ -136,86 +124,72 @@ public class CalcLayout implements LayoutManager2 {
 	 *               size.
 	 * @return preferred, minimum or maximum dimensions of this layout.
 	 */
-	private Dimension getLazyoutSize(Container parent, String type) {
+	private Dimension getLazyoutSize(Container parent, Function<Component, Dimension> function) {
 		int count = parent.getComponentCount();
 		Dimension size = new Dimension(0, 0);
 
+		RCPosition firstPos = new RCPosition(1, 1);
 		for (int i = 0; i < count; i++) {
 			Component comp = parent.getComponent(i);
-			if(!components.containsKey(comp))
+			if (!components.containsKey(comp))
 				continue;
 
-			Dimension dimension;
-			if (type.equals("min")) {
-				dimension = comp.getMinimumSize();
-			} else if (type.equals("max")) {
-				dimension = comp.getMaximumSize();
-			} else {
-				dimension = comp.getPreferredSize();
-			}
-			
-			if(dimension == null)
+			Dimension dimension = function.apply(comp);
+
+			if (dimension == null)
 				continue;
 
-			if (components.get(comp).equals(new RCPosition(1, 1))) {
-				dimension.width = (int) Math.ceil(dimension.width * 1.0 / (columns - 2)) - 2;
+			if (components.get(comp).equals(firstPos)) {
+				dimension.width = (dimension.width - 4 * spacing) / 5;
 			}
 
 			size.width = Math.max(size.width, dimension.width);
 			size.height = Math.max(size.height, dimension.height);
 		}
 
-		size.width *= columns;
-		size.height *= rows;
+		size.width *= columnsCount;
+		size.height *= rowsCount;
 		Insets insets = parent.getInsets();
-		size.width += insets.left + insets.right + spacing * (columns - 1);
-		size.height += insets.top + insets.bottom + spacing * (rows - 1);
+		size.width += insets.left + insets.right + spacing * (columnsCount - 1);
+		size.height += insets.top + insets.bottom + spacing * (rowsCount - 1);
 		return size;
 	}
 
 	@Override
 	public void layoutContainer(Container parent) {
-		int count = parent.getComponentCount();
-
 		Insets insets = parent.getInsets();
 
 		int width = parent.getWidth() - (insets.left + insets.right);
 		int height = parent.getHeight() - (insets.top + insets.bottom);
-		double elWidth = (width - spacing * (columns - 1)) / columns;
-		double elHeight = (height - spacing * (rows - 1)) / rows;
-		int wFloor = (int) Math.floor(elWidth);
-		int wCeil = (int) Math.ceil(elWidth);
+		int startx = insets.left;
+		int starty = insets.top;
+		int elWidth = (int) Math.round((double) (width - spacing * (columnsCount - 1)) / columnsCount);
+		int elHeight = (int) Math.round((double) (height - spacing * (rowsCount - 1)) / rowsCount);
+		int diffw = width - (elWidth * columnsCount + spacing * (columnsCount - 1));
+		int diffh = height - (elHeight * rowsCount + spacing * (rowsCount - 1));
+		int addToWidth = diffw == 0 ? 0 : diffw / Math.abs(diffw);
+		int addToHeight = diffh == 0 ? 0 : diffh / Math.abs(diffh);
+		int pickedColumn = (diffw == 0) ? 1 : columnsCount / Math.abs(diffw);
+		int pickedRow = (diffh == 0) ? 1 : rowsCount / Math.abs(diffh);
 
-		int hFloor = (int) Math.floor(elHeight);
-		int hCeil = (int) Math.ceil(elHeight);
-
-		int x, y;
-		for (int i = 0; i < count; i++) {
-			Component comp = parent.getComponent(i);
-			if(!components.containsKey(comp))
-				continue;
+		for (Component comp : components.keySet()) {
 			RCPosition position = components.get(comp);
+			int row = position.getRow(), column = position.getColumn();
 
-			if (position.getRow() == 1 && position.getColumn() == 1) {
-				comp.setBounds(0, 0, wFloor * 2 + wCeil * 3 + spacing * 4, hCeil);
+			if (row == 1 && column == 1) {
+				int h = elHeight + ((row % pickedRow == 0) ? addToHeight : 0);
+				int w = elWidth * 5 + spacing * 4 + addToWidth * 5 / pickedColumn;
+				comp.setBounds(startx, starty, w, h); // TODO diff
 
 			} else {
-				int row = position.getRow(), column = position.getColumn();
-				int w = ((column % 2 == 0) ? wFloor : wCeil);
-				int h = ((row % 2 == 0) ? hFloor : hCeil);
 
-				y = 0;
-				for (int j = 1; j < row; j++) {
-					y += ((j % 2 == 0) ? hFloor : hCeil) + spacing;
-				}
+				int h = elHeight + ((row % pickedRow == 0) ? addToHeight : 0);
+				int w = elWidth + ((column % pickedColumn == 0) ? addToWidth : 0);
 
-				x = 0;
-				for (int j = 1; j < column; j++) {
-					x += ((j % 2 == 0) ? wFloor : wCeil) + spacing;
-				}
+				int y = starty + (row - 1) * (elHeight + spacing) + addToHeight * ((row - 1) / pickedRow);
+				int x = startx + (column - 1) * (elWidth + spacing) + addToWidth * ((column - 1) / pickedColumn);
 
 				comp.setBounds(x, y, w, h);
-
 			}
 
 		}
@@ -234,11 +208,6 @@ public class CalcLayout implements LayoutManager2 {
 
 	@Override
 	public void invalidateLayout(Container target) {
-	}
-
-	@Override
-	public String toString() {
-		return "CalcLayout [spaceBetween=" + spacing + "]";
 	}
 
 }
