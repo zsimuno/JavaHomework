@@ -12,12 +12,16 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
+ * Class represents one request context for a HTTP request.
+ * 
  * @author Zvonimir Šimunović
  *
  */
 public class RequestContext {
 
 	/**
+	 * Represents a cookie in a {@link RequestContext}.
+	 * 
 	 * @author Zvonimir Šimunović
 	 *
 	 */
@@ -27,19 +31,21 @@ public class RequestContext {
 		private final String name;
 		/** Value of the cookie. */
 		private final String value;
-		/** */
+		/** Domain of the cookie. */
 		private final String domain;
-		/** */
+		/** Path of the cookie. */
 		private final String path;
-		/** */
+		/** Maximal age of this cookie. */
 		private final Integer maxAge;
 
 		/**
-		 * @param name
-		 * @param value
-		 * @param domain
-		 * @param path
-		 * @param maxAge
+		 * Constructor.
+		 * 
+		 * @param name   Name of the cookie.
+		 * @param value  Value of the cookie.
+		 * @param domain Domain of the cookie.
+		 * @param path   Path of the cookie.
+		 * @param maxAge Maximal age of the cookie.
 		 */
 		public RCCookie(String name, String value, Integer maxAge, String domain, String path) {
 			this.name = name;
@@ -50,35 +56,35 @@ public class RequestContext {
 		}
 
 		/**
-		 * @return the name
+		 * @return the name of the cookie
 		 */
 		public String getName() {
 			return name;
 		}
 
 		/**
-		 * @return the value
+		 * @return the value of the cookie
 		 */
 		public String getValue() {
 			return value;
 		}
 
 		/**
-		 * @return the domain
+		 * @return the domain of the cookie
 		 */
 		public String getDomain() {
 			return domain;
 		}
 
 		/**
-		 * @return the path
+		 * @return the path of the cookie
 		 */
 		public String getPath() {
 			return path;
 		}
 
 		/**
-		 * @return the maxAge
+		 * @return the maxAge of the cookie
 		 */
 		public Integer getMaxAge() {
 			return maxAge;
@@ -86,39 +92,41 @@ public class RequestContext {
 
 	}
 
-	/** */
+	/** Output stream to write to. */
 	private OutputStream outputStream;
-	/** */
+	/** Charset used in encoding. */
 	private Charset charset;
-	/** */
+	/** Encoding used to encode characters in this context. */
 	private String encoding = "UTF-8";
-	/** */
+	/** Status code of the request. */
 	private int statusCode = 200;
-	/** */
+	/** Status message of the request. */
 	private String statusText = "OK";
-	/** */
+	/** Mime type of the request. */
 	private String mimeType = "text/html";
-	/** */
+	/** Content length of the request. */
 	private Long contentLength = null;
+	/** Dispatcher of the request. */
+	private IDispatcher dispatcher;
 
-	/** */
+	/** Parameters of the request. */
 	private final Map<String, String> parameters;
-	/** */
+	/** Temporary parameters of the request. */
 	private Map<String, String> temporaryParameters = new HashMap<>();
-	/** */
+	/** Persistent parameters of the request. */
 	private Map<String, String> persistentParameters;
-	/** */
-	private List<RCCookie> outputCookies = new ArrayList<>(); // TODO can't add if header generated
-	/** */
+	/** Cookies of the request. */
+	private List<RCCookie> outputCookies = new ArrayList<>();
+	/** Determines whether the header was already generated. */
 	private boolean headerGenerated = false;
 
 	/**
 	 * Constructor.
 	 * 
-	 * @param outputStream
-	 * @param parameters
-	 * @param persistentParameters
-	 * @param outputCookies
+	 * @param outputStream         Output stream to write to.
+	 * @param parameters           Parameters of the request.
+	 * @param persistentParameters Persistent parameters of the request.
+	 * @param outputCookies        Cookies of the request.
 	 * 
 	 * @throws NullPointerException if given output stream {@code null}.
 	 */
@@ -129,9 +137,34 @@ public class RequestContext {
 
 		this.outputStream = Objects.requireNonNull(outputStream);
 		// TODO if null, treat as empty.
-		this.parameters = parameters;
-		this.persistentParameters = persistentParameters;
-		this.outputCookies = outputCookies;
+		this.parameters = parameters == null ? new HashMap<>() : parameters;
+		this.persistentParameters = persistentParameters == null ? new HashMap<>() : persistentParameters;
+		this.outputCookies = outputCookies == null ? new ArrayList<>() : outputCookies;
+	}
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param outputStream         Output stream to write to.
+	 * @param parameters           Parameters of the request.
+	 * @param persistentParameters Persistent parameters of the request.
+	 * @param outputCookies        Cookies of the request.
+	 * @param temporaryParameters  Temporary parameters of the request.
+	 * @param dispatcher           dispatcher of the request.
+	 * 
+	 * @throws NullPointerException if given output stream {@code null}.
+	 * 
+	 */
+	public RequestContext(OutputStream outputStream, // must not be null!
+			Map<String, String> parameters, // if null, treat as empty
+			Map<String, String> persistentParameters, // if null, treat as empty
+			List<RCCookie> outputCookies, // if null, treat as empty
+			Map<String, String> temporaryParameters, 
+			IDispatcher dispatcher) {
+
+		this(outputStream, parameters, persistentParameters, outputCookies);
+		this.temporaryParameters = temporaryParameters;
+		this.dispatcher = dispatcher;
 	}
 
 	/**
@@ -226,6 +259,13 @@ public class RequestContext {
 	}
 
 	/**
+	 * @return the dispatcher
+	 */
+	public IDispatcher getDispatcher() {
+		return dispatcher;
+	}
+
+	/**
 	 * Method that stores a value to temporary parameters.
 	 * 
 	 * @param name  name of the value.
@@ -245,9 +285,11 @@ public class RequestContext {
 	}
 
 	/**
-	 * @param data
-	 * @return
-	 * @throws IOException
+	 * Write the data to the output stream.
+	 * 
+	 * @param data data to be written.
+	 * @return this context.
+	 * @throws IOException If there was an error while writing.
 	 */
 	public RequestContext write(byte[] data) throws IOException {
 		checkHeaderToGenerate();
@@ -259,11 +301,14 @@ public class RequestContext {
 	}
 
 	/**
-	 * @param data
-	 * @param offset
-	 * @param len
-	 * @return
-	 * @throws IOException
+	 * Write the data to the output stream from the given {@code offset} and with a
+	 * given length.
+	 * 
+	 * @param data   data to be written.
+	 * @param offset offset to start writing from.
+	 * @param len    length of the data.
+	 * @return this context.
+	 * @throws IOException If there was an error while writing.
 	 */
 	public RequestContext write(byte[] data, int offset, int len) throws IOException {
 		checkHeaderToGenerate();
@@ -275,9 +320,11 @@ public class RequestContext {
 	}
 
 	/**
-	 * @param text
-	 * @return
-	 * @throws IOException
+	 * Write the text to the output stream.
+	 * 
+	 * @param text text to be written.
+	 * @return this context.
+	 * @throws IOException If there was an error while writing.
 	 */
 	public RequestContext write(String text) throws IOException {
 		checkHeaderToGenerate();

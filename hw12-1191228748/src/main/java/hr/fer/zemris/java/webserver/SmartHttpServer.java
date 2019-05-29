@@ -21,33 +21,37 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import hr.fer.zemris.java.custom.scripting.exec.SmartScriptEngine;
+import hr.fer.zemris.java.custom.scripting.parser.SmartScriptParser;
 import hr.fer.zemris.java.webserver.RequestContext.RCCookie;
 
 /**
- * TODO SmartHttpServer javadoc
+ * Server for HTTP requests.
  * 
  * @author Zvonimir Šimunović
  *
  */
-public class SmartHttpServer implements IDispatcher {
-	/** */
+public class SmartHttpServer {
+	/** address on which the server listens. */
 	private String address;
-	/** */
+	/** Domain name of the web server, */
 	private String domainName;
-	/** */
+	/** Port on which the server listens. */
 	private int port;
-	/** */
+	/** Number of threads for the thread pool. */
 	private int workerThreads;
-	/** */
+	/** Duration of user session in seconds. */
 	private int sessionTimeout;
-	/** */
+	/** Extensions to mime-type mapping. */
 	private Map<String, String> mimeTypes = new HashMap<String, String>();
-	/** */
+	/** Thread of the server. */
 	private ServerThread serverThread;
-	/** */
+	/** Thread pool of workers. */
 	private ExecutorService threadPool;
-	/** */
+	/** Path to root directory from which we serve files. */
 	private Path documentRoot;
+	/** Map of web workers. */
+	private Map<String, IWebWorker> workersMap = new HashMap<>();
 
 	/**
 	 * Constructor that sets the configuration based on the file with the given
@@ -92,37 +96,64 @@ public class SmartHttpServer implements IDispatcher {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		// TODO sto sa ovim props?
+
+		List<String> paths = new ArrayList<>();
+		workersProps.forEach((path, fqcn) -> {
+			if (paths.contains(fqcn.toString()))
+				throw new IllegalArgumentException();
+
+			paths.add(path.toString());
+
+			workersMap.put(path.toString(), instanceWorker(fqcn));
+		});
 
 	}
 
 	/**
+	 * Creates an instance of a {@link IWebWorker} with the given {@code fqcn}.
 	 * 
+	 * @param fqcn fully qualified class name.
+	 * @return an instance of a {@link IWebWorker} with the given {@code fqcn}.
+	 */
+	@SuppressWarnings("deprecation")
+	private IWebWorker instanceWorker(Object fqcn) {
+		Class<?> referenceToClass;
+		Object newObject = null;
+		try {
+			referenceToClass = this.getClass().getClassLoader().loadClass(fqcn.toString());
+			newObject = referenceToClass.newInstance();
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		IWebWorker iww = (IWebWorker) newObject;
+		return iww;
+	}
+
+	/**
+	 * Start server thread if not already and initialize thread pool.
 	 */
 	protected synchronized void start() {
-		// … start server thread if not already running …
-		// … init threadpool by Executors.newFixedThreadPool(...); …
-
 		if (serverThread == null || !serverThread.isAlive()) {
 			serverThread = new ServerThread();
 			serverThread.start();
-			threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()); // TODO izvan ili
-																									// unutar ifa?
+			threadPool = Executors.newFixedThreadPool(workerThreads);
 		}
 
 	}
 
 	/**
-	 * 
+	 * Stop the server running and shut down the thread pool.
 	 */
 	protected synchronized void stop() {
-		// … signal server thread to stop running …
-		// … shutdown threadpool …
 		serverThread.stopServer(); // TODO dobro?
 		threadPool.shutdown();
 	}
 
 	/**
+	 * Thread that represents the server.
+	 * 
 	 * @author Zvonimir Šimunović
 	 *
 	 */
@@ -133,14 +164,6 @@ public class SmartHttpServer implements IDispatcher {
 
 		@Override
 		public void run() {
-			// given in pesudo-code:
-			// open serverSocket on specified port
-			// while(true) {
-			// Socket client = serverSocket.accept();
-			// ClientWorker cw = new ClientWorker(client);
-			// submit cw to threadpool for execution
-			// }
-			@SuppressWarnings("resource")
 			ServerSocket serverSocket = null;
 			try {
 				serverSocket = new ServerSocket();
@@ -173,36 +196,42 @@ public class SmartHttpServer implements IDispatcher {
 	}
 
 	/**
+	 * Represents a client worker that will respond to client requests.
+	 * 
 	 * @author Zvonimir Šimunović
 	 *
 	 */
-	private class ClientWorker implements Runnable {
+	private class ClientWorker implements Runnable, IDispatcher {
 
-		/** */
+		/** Client scoket. */
 		private Socket csocket;
-		/** */
+		/** Input stream of the data. */
 		private PushbackInputStream istream;
-		/** */
+		/** Output stream of the data. */
 		private OutputStream ostream;
-		/** */
+		/** Version of the request. */
 		private String version;
-		/** */
+		/** Method of the request. */
 		private String method;
-		/** */
+		/** Host of the request. */
 		private String host;
-		/** */
+		/** Parameters of the request. */
 		private Map<String, String> params = new HashMap<String, String>();
-		/** */
+		/** Temporary parameters of the request. */
 		private Map<String, String> tempParams = new HashMap<String, String>();
-		/** */
+		/** Permanent parameters of the request. */
 		private Map<String, String> permPrams = new HashMap<String, String>();
-		/** */
+		/** Cookies of the request. */
 		private List<RCCookie> outputCookies = new ArrayList<RequestContext.RCCookie>();
-		/** */
+		/** Session ID of the request. */
 		private String SID;
+		/** Context of the request. */
+		private RequestContext context;
 
 		/**
-		 * @param csocket
+		 * Constructor.
+		 * 
+		 * @param csocket client socket.
 		 */
 		public ClientWorker(Socket csocket) {
 			super();
@@ -254,38 +283,8 @@ public class SmartHttpServer implements IDispatcher {
 					String paramString = splitReq[1];
 					parseParameters(paramString);
 				}
-				Path reqPath = documentRoot.resolve(path.substring(1));
-				if (!reqPath.startsWith(documentRoot)) {
-					sendError(403, "Forbidden");
-					return;
-				}
 
-				if (!Files.exists(reqPath) || !Files.isRegularFile(reqPath) || !Files.isReadable(reqPath)) {
-					sendError(404, "Not Found");
-					return;
-				}
-				String[] fileNamePath = reqPath.getFileName().toString().split("\\.");
-				String extension = fileNamePath[fileNamePath.length - 1];
-
-				String type = null;
-				for (Map.Entry<String, String> mime : mimeTypes.entrySet()) {
-					if (mime.getKey().equals(extension)) {
-						type = mime.getValue();
-					}
-				}
-				if (type == null) {
-					type = "application/octet-stream";
-				}
-
-				RequestContext rc = new RequestContext(ostream, params, permPrams, outputCookies);
-				rc.setMimeType(type);
-				rc.setStatusCode(200);
-				byte[] input = Files.readAllBytes(reqPath);
-				rc.write(input);
-
-				istream.close();
-				ostream.flush();
-				ostream.close();
+				internalDispatchRequest(path, true);
 
 			} catch (IOException e) {
 				try {
@@ -323,8 +322,10 @@ public class SmartHttpServer implements IDispatcher {
 		}
 
 		/**
-		 * @return
-		 * @throws IOException
+		 * Reads headers from the request.
+		 * 
+		 * @return headers list from the request.
+		 * @throws IOException if there is an error while reading from input stream.
 		 */
 		private List<String> readRequest() throws IOException {
 			byte[] request = readRequest(istream);
@@ -337,6 +338,13 @@ public class SmartHttpServer implements IDispatcher {
 			return headers;
 		}
 
+		/**
+		 * Reads the request from the input stream.
+		 * 
+		 * @param is input stream.
+		 * @return byte array gotten from the input.
+		 * @throws IOException if there is an error while reading from input stream.
+		 */
 		private byte[] readRequest(InputStream is) throws IOException {
 
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -384,8 +392,12 @@ public class SmartHttpServer implements IDispatcher {
 			return bos.toByteArray();
 		}
 
-		// Zaglavlje predstavljeno kao jedan string splita po enterima
-		// pazeći na višeretčane atribute...
+		/**
+		 * Extracts headers from the given string.
+		 * 
+		 * @param requestHeader String that contains the headers.
+		 * @return List of headers.
+		 */
 		private List<String> extractHeaders(String requestHeader) {
 			List<String> headers = new ArrayList<String>();
 			String currentLine = null;
@@ -408,7 +420,13 @@ public class SmartHttpServer implements IDispatcher {
 			return headers;
 		}
 
-		// Pomoćna metoda za slanje odgovora bez tijela...
+		/**
+		 * Helper method for sending error responses without a body.
+		 * 
+		 * @param statusCode status code of the response.
+		 * @param statusText status message of the response.
+		 * @throws IOException if there is an error while writing to the output stream.
+		 */
 		private void sendError(int statusCode, String statusText) throws IOException {
 			ostream.write(("HTTP/1.1 " + statusCode + " " + statusText + "\r\n" + "Server: simple java server\r\n"
 					+ "Content-Type: text/plain;charset=UTF-8\r\n" + "Content-Length: 0\r\n" + "Connection: close\r\n"
@@ -416,10 +434,110 @@ public class SmartHttpServer implements IDispatcher {
 			ostream.flush();
 
 		}
+
+		@Override
+		public void dispatchRequest(String urlPath) throws Exception {
+			internalDispatchRequest(urlPath, false);
+
+		}
+
+		/**
+		 * Internal method to dispatch requests.
+		 * 
+		 * @param urlPath    path to root directory from which we serve files
+		 * @param directCall determines is it a direct call to the method.
+		 * @throws Exception if there is an error while dispatching.
+		 */
+		public void internalDispatchRequest(String urlPath, boolean directCall) throws Exception {
+
+			if (context == null) {
+				context = new RequestContext(ostream, params, permPrams, outputCookies, tempParams, this);
+			}
+
+			if (urlPath.startsWith("/ext")) {
+				instanceWorker("hr.fer.zemris.java.webserver.workers." + urlPath.substring(5)).processRequest(context);
+				closeStreams();
+				return;
+			}
+
+			if (workersMap.containsKey(urlPath)) {
+				workersMap.get(urlPath).processRequest(context);
+				closeStreams();
+				return;
+			}
+
+			String[] fileNamePath = urlPath.split("\\.");
+			String extension = fileNamePath[fileNamePath.length - 1];
+
+			Path reqPath;
+			if (urlPath.startsWith("/private")) {
+				if (directCall) {
+					sendError(404, "Not Found");
+					return;
+				}
+				reqPath = documentRoot.resolve(urlPath.substring(1));
+			} else {
+
+				reqPath = extension.equals("smscr") ? documentRoot.getParent().resolve(urlPath.substring(1))
+						: documentRoot.resolve(urlPath.substring(1));
+			}
+
+			if (!reqPath.startsWith(documentRoot.getParent())) {
+				sendError(403, "Forbidden");
+				return;
+			}
+
+			
+			if (!Files.exists(reqPath) || !Files.isRegularFile(reqPath) || !Files.isReadable(reqPath)) {
+				sendError(404, "Not Found");
+				return;
+			}
+
+			// If it's a script
+			if (extension.equals("smscr")) {
+				byte[] input = Files.readAllBytes(reqPath);
+
+				new SmartScriptEngine(new SmartScriptParser(new String(input)).getDocumentNode(), context).execute();
+
+			} else {
+
+				String type = null;
+				for (Map.Entry<String, String> mime : mimeTypes.entrySet()) {
+					if (mime.getKey().equals(extension)) {
+						type = mime.getValue();
+					}
+				}
+				if (type == null) {
+					type = "application/octet-stream";
+				}
+
+				context.setMimeType(type);
+				context.setStatusCode(200);
+				byte[] input = Files.readAllBytes(reqPath);
+				context.write(input);
+
+			}
+
+			closeStreams();
+		}
+
+		/**
+		 * Closes input and output streams.
+		 * 
+		 * @throws IOException
+		 */
+		private void closeStreams() throws IOException {
+			istream.close();
+			ostream.flush();
+			ostream.close();
+		}
 	}
 
 	/**
-	 * @param args
+	 * Main method that starts the program. Accepts one argument - path to
+	 * properties.
+	 * 
+	 * @param args Command line arguments. One is accepted - path to properties.
 	 */
 	public static void main(String[] args) {
 		if (args.length != 1) {
@@ -430,24 +548,5 @@ public class SmartHttpServer implements IDispatcher {
 		server.start();
 
 	}
-
-	/**
-	 * @param urlPath
-	 * @throws Exception
-	 */
-	@Override
-	public void dispatchRequest(String urlPath) throws Exception {
-		internalDispatchRequest(urlPath, false);
-
-	}
-
-	/**
-	 * @param urlPath
-	 * @param directCall
-	 * @throws Exception
-	 */
-	public void internalDispatchRequest(String urlPath, boolean directCall) throws Exception {
-	}
-
 
 }

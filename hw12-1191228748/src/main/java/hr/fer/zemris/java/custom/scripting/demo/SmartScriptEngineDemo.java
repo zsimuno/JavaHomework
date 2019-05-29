@@ -15,7 +15,8 @@ import hr.fer.zemris.java.webserver.RequestContext;
 import hr.fer.zemris.java.webserver.RequestContext.RCCookie;
 
 /**
- * Demos the engine ( {@link SmartScriptEngine} ) that executes SmartScript programs.
+ * Demos the engine ( {@link SmartScriptEngine} ) that executes SmartScript
+ * programs.
  * 
  * @author Zvonimir Šimunović
  *
@@ -40,8 +41,12 @@ public class SmartScriptEngineDemo {
 		fibonaccih();
 	}
 
-	// TODO add and fix javadoc
-
+	/**
+	 * Read file from disk.
+	 * 
+	 * @param path Path of the file.
+	 * @return content of the file.
+	 */
 	private static String readFromDisk(String path) {
 		try {
 			return new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
@@ -50,6 +55,9 @@ public class SmartScriptEngineDemo {
 		}
 	}
 
+	/**
+	 * Reads and executes "osnovni.smscr".
+	 */
 	private static void osnovni() {
 		String documentBody = readFromDisk("osnovni.smscr");
 		Map<String, String> parameters = new HashMap<String, String>();
@@ -60,6 +68,9 @@ public class SmartScriptEngineDemo {
 				new RequestContext(System.out, parameters, persistentParameters, cookies)).execute();
 	}
 
+	/**
+	 * Reads and executes "zbrajanje.smscr".
+	 */
 	private static void zbrajanje() {
 		String documentBody = readFromDisk("zbrajanje.smscr");
 		Map<String, String> parameters = new HashMap<String, String>();
@@ -72,6 +83,9 @@ public class SmartScriptEngineDemo {
 				new RequestContext(System.out, parameters, persistentParameters, cookies)).execute();
 	}
 
+	/**
+	 * Reads and executes "brojPoziva.smscr".
+	 */
 	private static void brojPoziva() {
 		String documentBody = readFromDisk("brojPoziva.smscr");
 		Map<String, String> parameters = new HashMap<String, String>();
@@ -83,6 +97,9 @@ public class SmartScriptEngineDemo {
 		System.out.println("Vrijednost u mapi: " + rc.getPersistentParameter("brojPoziva"));
 	}
 
+	/**
+	 * Reads and executes "fibonacci.smscr".
+	 */
 	private static void fibonacci() {
 		String documentBody = readFromDisk("fibonacci.smscr");
 		Map<String, String> parameters = new HashMap<String, String>();
@@ -93,6 +110,9 @@ public class SmartScriptEngineDemo {
 				new RequestContext(System.out, parameters, persistentParameters, cookies)).execute();
 	}
 
+	/**
+	 * Reads and executes "fibonacci.smscr".
+	 */
 	private static void fibonaccih() {
 		// TODO Implement to write to file?
 		String documentBody = readFromDisk("fibonacci.smscr");

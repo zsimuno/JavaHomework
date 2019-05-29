@@ -1,4 +1,4 @@
-package hr.fer.zemris.java.webserver;
+package hr.fer.zemris.java.webserver.workers;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -7,9 +7,9 @@ import hr.fer.zemris.java.webserver.IWebWorker;
 import hr.fer.zemris.java.webserver.RequestContext;
 
 /**
- * Class will create a HTML page with current time displayed and it will give a
- * different message depending if a parameter called “name” was provided in URL
- * that started this worker.
+ * Worker that creates a HTML page with current time displayed and it will give
+ * a different message depending if a parameter called “name” was provided in
+ * URL that started this worker.
  * 
  * @author Zvonimir Šimunović
  *

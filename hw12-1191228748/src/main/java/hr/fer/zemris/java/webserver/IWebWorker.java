@@ -1,14 +1,17 @@
 package hr.fer.zemris.java.webserver;
 
 /**
- * TODO javadoc webWorker
+ * Interface of a web worker.
+ * 
  * @author Zvonimir Šimunović
  *
  */
 public interface IWebWorker {
 	/**
-	 * @param context
-	 * @throws Exception
+	 * Process request in the given context.
+	 * 
+	 * @param context context of the request.
+	 * @throws Exception If there's an error while reading/writing.
 	 */
 	public void processRequest(RequestContext context) throws Exception;
 }
