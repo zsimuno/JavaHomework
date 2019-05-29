@@ -314,7 +314,7 @@ public class RequestContext {
 
 		for (RCCookie rcCookie : outputCookies) {
 			header.append("Set-Cookie: ");
-			header.append("name=\"" + rcCookie.getName() + "\"");
+			header.append(rcCookie.getName() + "=\"" + rcCookie.getValue() + "\"");
 			if (rcCookie.getDomain() != null) {
 				header.append("; Domain=" + rcCookie.getDomain());
 			}
