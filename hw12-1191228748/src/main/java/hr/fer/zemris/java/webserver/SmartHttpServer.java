@@ -14,10 +14,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -52,6 +56,14 @@ public class SmartHttpServer {
 	private Path documentRoot;
 	/** Map of web workers. */
 	private Map<String, IWebWorker> workersMap = new HashMap<>();
+	/** Map of sessions. */
+	private Map<String, SessionMapEntry> sessions = new HashMap<String, SmartHttpServer.SessionMapEntry>();
+	/** Random session generator. */
+	private Random sessionRandom = new Random();
+	/** Letters that are used in creating a random ID. */
+	private String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	/** Worker thread that cleans expires sessions from sessions map. */
+	private CleanerWorker cleaner = null;
 
 	/**
 	 * Constructor that sets the configuration based on the file with the given
@@ -126,7 +138,6 @@ public class SmartHttpServer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 		IWebWorker iww = (IWebWorker) newObject;
 		return iww;
 	}
@@ -138,6 +149,8 @@ public class SmartHttpServer {
 		if (serverThread == null || !serverThread.isAlive()) {
 			serverThread = new ServerThread();
 			serverThread.start();
+			cleaner = new CleanerWorker();
+			cleaner.start();
 			threadPool = Executors.newFixedThreadPool(workerThreads);
 		}
 
@@ -182,6 +195,7 @@ public class SmartHttpServer {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+
 				ClientWorker cw = new ClientWorker(client);
 				threadPool.submit(cw);
 			}
@@ -244,14 +258,26 @@ public class SmartHttpServer {
 				istream = new PushbackInputStream(csocket.getInputStream());
 				ostream = csocket.getOutputStream();
 
-				List<String> request = readRequest();
+				List<String> requestHeaders = readRequest();
 
-				if (request.size() < 1) {
+				if (requestHeaders.size() < 1) {
 					sendError(400, "Bad request");
 					return;
 				}
 
-				String[] firstLine = request.get(0).split(" ");
+				for (String header : requestHeaders) {
+					if (header.startsWith("Host:")) {
+						host = header.split(":")[1];
+						break;
+					}
+				}
+				if (host == null) {
+					host = domainName;
+				}
+
+				checkSession(requestHeaders);
+
+				String[] firstLine = requestHeaders.get(0).split(" ");
 
 				method = firstLine[0].toUpperCase();
 				if (!method.equals("GET")) {
@@ -265,16 +291,6 @@ public class SmartHttpServer {
 				if (!version.equals("HTTP/1.1") && !version.equals("HTTP/1.0")) {
 					sendError(400, "HTTP Version Not Supported");
 					return;
-				}
-
-				for (String header : request) {
-					if (header.startsWith("Host:")) {
-						host = header.split(":")[1];
-						break;
-					}
-				}
-				if (host == null) {
-					host = domainName;
 				}
 
 				String[] splitReq = requestedPath.split("\\?");
@@ -304,6 +320,94 @@ public class SmartHttpServer {
 					System.out.println("Cannot close the socket: " + e.getMessage());
 				}
 			}
+		}
+
+		/**
+		 * Checks if there is an open session already.
+		 * 
+		 * @param requestHeaders headers of the request.
+		 */
+		private void checkSession(List<String> requestHeaders) {
+			for (String header : requestHeaders) {
+				if (!header.startsWith("Cookie:"))
+					continue;
+
+				String[] cookies = header.substring(7).split(";");
+				String sidCandidate = null;
+
+				for (int i = 0; i < cookies.length; i++) {
+					String[] cookie = cookies[i].split("=");
+					if (cookie[0].trim().equals("sid")) {
+						sidCandidate = cookie[1].trim().replace("\"", "");
+						break;
+					}
+				}
+				synchronized (SmartHttpServer.this) {
+
+					if (sidCandidate == null) {
+						createNewSID();
+						return;
+					}
+
+					SessionMapEntry entry = null;
+					String key = null;
+					for (Map.Entry<String, SessionMapEntry> el : sessions.entrySet()) {
+						if (el.getKey().equals(sidCandidate)) {
+							key = el.getKey();
+							entry = el.getValue();
+							break;
+						}
+					}
+
+					if (entry == null) {
+						createNewSID();
+						return;
+					}
+
+					if (!entry.host.equals(host)) {
+						createNewSID();
+						return;
+					}
+
+					if (entry.validUntil >= System.currentTimeMillis() / 1000) {
+						sessions.remove(key);
+						createNewSID();
+						return;
+					}
+
+					entry.map.forEach((k, v) -> {
+						System.out.println(k + " " + v);
+					});
+					permPrams.forEach((k, v) -> {
+						System.out.println(k + " " + v);
+					});
+					entry.validUntil = System.currentTimeMillis() / 1000 + sessionTimeout;
+					SID = entry.sid;
+					permPrams = entry.map;
+				}
+				return;
+			}
+
+			synchronized (SmartHttpServer.this) {
+				createNewSID();
+			}
+
+		}
+
+		/**
+		 * Creates new ID for current session.
+		 */
+		private void createNewSID() {
+			StringBuilder id = new StringBuilder();
+			for (int i = 0; i < 20; i++) {
+				id.append(letters.charAt(sessionRandom.nextInt(letters.length())));
+			}
+			long validUntil = System.currentTimeMillis() / 1000 + sessionTimeout;
+			SessionMapEntry entry = new SessionMapEntry(id.toString(), host, validUntil,
+					Collections.synchronizedMap(new HashMap<>()));
+			SID = id.toString();
+			sessions.put(SID, entry);
+			outputCookies.add(new RCCookie("sid", SID, null, host, "/"));
 		}
 
 		/**
@@ -451,7 +555,7 @@ public class SmartHttpServer {
 		public void internalDispatchRequest(String urlPath, boolean directCall) throws Exception {
 
 			if (context == null) {
-				context = new RequestContext(ostream, params, permPrams, outputCookies, tempParams, this);
+				context = new RequestContext(ostream, params, permPrams, outputCookies, tempParams, this, SID);
 			}
 
 			if (urlPath.startsWith("/ext")) {
@@ -487,7 +591,6 @@ public class SmartHttpServer {
 				return;
 			}
 
-			
 			if (!Files.exists(reqPath) || !Files.isRegularFile(reqPath) || !Files.isReadable(reqPath)) {
 				sendError(404, "Not Found");
 				return;
@@ -530,6 +633,77 @@ public class SmartHttpServer {
 			istream.close();
 			ostream.flush();
 			ostream.close();
+		}
+	}
+
+	/**
+	 * One map entry of the session.
+	 * 
+	 * @author Zvonimir Šimunović
+	 *
+	 */
+	private static class SessionMapEntry {
+
+		/** Session ID. */
+		String sid;
+		/** Host of the session. */
+		String host;
+		/** Session is valid until this. */
+		long validUntil;
+		/** Map entry. */
+		Map<String, String> map;
+
+		/**
+		 * Constructor.
+		 * 
+		 * @param sid        Session ID.
+		 * @param host       Host of the session.
+		 * @param validUntil Session is valid until this.
+		 * @param map        Map entry.
+		 */
+		public SessionMapEntry(String sid, String host, long validUntil, Map<String, String> map) {
+			this.sid = sid;
+			this.host = host;
+			this.validUntil = validUntil;
+			this.map = map;
+		}
+
+	}
+
+	/**
+	 * Daemon thread that checks for expired sessions every 5 minutes and cleans
+	 * them if there is any.
+	 * 
+	 * @author Zvonimir Šimunović
+	 *
+	 */
+	public class CleanerWorker extends Thread {
+
+		/**
+		 * Constructor, sets this thread to daemon.
+		 */
+		public CleanerWorker() {
+			this.setDaemon(true);
+		}
+
+		@Override
+		public void run() {
+			while (true) {
+				try {
+					Thread.sleep(300000);
+				} catch (InterruptedException e) {
+				}
+
+				synchronized (SmartHttpServer.this) {
+					Iterator<Entry<String, SessionMapEntry>> it = sessions.entrySet().iterator();
+
+					while (it.hasNext()) {
+						if (it.next().getValue().validUntil >= System.currentTimeMillis() / 1000) {
+							it.remove();
+						}
+					}
+				}
+			}
 		}
 	}
 

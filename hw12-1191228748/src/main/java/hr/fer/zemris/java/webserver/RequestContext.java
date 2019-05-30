@@ -119,6 +119,8 @@ public class RequestContext {
 	private List<RCCookie> outputCookies = new ArrayList<>();
 	/** Determines whether the header was already generated. */
 	private boolean headerGenerated = false;
+	/** Session ID.*/
+	private String sid;
 
 	/**
 	 * Constructor.
@@ -151,6 +153,7 @@ public class RequestContext {
 	 * @param outputCookies        Cookies of the request.
 	 * @param temporaryParameters  Temporary parameters of the request.
 	 * @param dispatcher           dispatcher of the request.
+	 * @param sID 
 	 * 
 	 * @throws NullPointerException if given output stream {@code null}.
 	 * 
@@ -160,11 +163,12 @@ public class RequestContext {
 			Map<String, String> persistentParameters, // if null, treat as empty
 			List<RCCookie> outputCookies, // if null, treat as empty
 			Map<String, String> temporaryParameters, 
-			IDispatcher dispatcher) {
+			IDispatcher dispatcher, String sID) {
 
 		this(outputStream, parameters, persistentParameters, outputCookies);
 		this.temporaryParameters = temporaryParameters;
 		this.dispatcher = dispatcher;
+		this.sid = sID;
 	}
 
 	/**
@@ -255,7 +259,7 @@ public class RequestContext {
 	 * @return identifier which is unique for current user session.
 	 */
 	public String getSessionID() {
-		return "";
+		return sid;
 	}
 
 	/**

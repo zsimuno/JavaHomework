@@ -49,9 +49,9 @@ public class SmartScriptEngineDemo {
 	 */
 	private static String readFromDisk(String path) {
 		try {
-			return new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
+			return new String(Files.readAllBytes(Paths.get("scripts/" + path)), StandardCharsets.UTF_8);
 		} catch (IOException e1) {
-			throw new RuntimeException("Error while opening file");
+			throw new RuntimeException("Error while opening file: " + e1.getMessage());
 		}
 	}
 
@@ -115,7 +115,7 @@ public class SmartScriptEngineDemo {
 	 */
 	private static void fibonaccih() {
 		// TODO Implement to write to file?
-		String documentBody = readFromDisk("fibonacci.smscr");
+		String documentBody = readFromDisk("fibonaccih.smscr");
 		Map<String, String> parameters = new HashMap<String, String>();
 		Map<String, String> persistentParameters = new HashMap<String, String>();
 		List<RCCookie> cookies = new ArrayList<RequestContext.RCCookie>();

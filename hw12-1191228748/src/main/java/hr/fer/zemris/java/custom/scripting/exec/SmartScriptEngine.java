@@ -147,14 +147,15 @@ public class SmartScriptEngine {
 
 			// TODO Provjere instanci?
 			switch (function) {
-			case "sin": {
+			case "sin": { // TODO koji kut?
 				Object x = stack.pop();
+				Double number;
 				if (x instanceof Number) {
-					stack.push(Math.sin(((Number) x).doubleValue()));
+					number = ((Number) x).doubleValue();
 				} else {
-					// SMije li biti string?
-					stack.push(Math.sin(Double.parseDouble(x.toString())));
+					number = Double.parseDouble(x.toString());
 				}
+				stack.push(Math.sin(number * Math.PI / 180.0));
 			}
 				break;
 			case "decfmt": {
