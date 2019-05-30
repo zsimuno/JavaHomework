@@ -36,19 +36,17 @@ public class SmartScriptEngine {
 	private DocumentNode documentNode;
 	/** Context of the request. */
 	private RequestContext requestContext;
-	/** Multistack. */
+	/** Multistack for storing variable names and values. */
 	private ObjectMultistack multistack = new ObjectMultistack();
 
 	/** Visitor that executes the nodes. */
 	private INodeVisitor visitor = new INodeVisitor() {
 
-		// TODO razlikovati Integer, Double i String
 		@Override
 		public void visitTextNode(TextNode node) {
 			try {
 				requestContext.write(node.getText());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -60,8 +58,7 @@ public class SmartScriptEngine {
 					|| !(node.getStartExpression() instanceof ElementConstantInteger)
 					|| !(node.getStepExpression() == null || node.getStepExpression() instanceof ElementConstantInteger)
 					|| !(node.getEndExpression() instanceof ElementConstantInteger)) {
-				// TODO error
-				// TODO moze li biti double?
+				throw new IllegalArgumentException("Invalid for loop argument");
 			}
 
 			String var = ((ElementVariable) node.getVariable()).getName();
@@ -82,7 +79,7 @@ public class SmartScriptEngine {
 					value += step;
 					multistack.push(var, new ValueWrapper(value));
 				}
-			} while (value <= end); // TODO if it is still less than or equal to final
+			} while (value <= end);
 
 			multistack.pop(var);
 
@@ -114,7 +111,7 @@ public class SmartScriptEngine {
 					operator(((ElementOperator) el).getSymbol(), stack);
 
 				} else {
-					// TODO error?
+					throw new IllegalArgumentException("Invalid element in echo node!");
 				}
 			}
 
@@ -130,7 +127,6 @@ public class SmartScriptEngine {
 				try {
 					requestContext.write(list.get(j).toString());
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -138,16 +134,15 @@ public class SmartScriptEngine {
 		}
 
 		/**
-		 * TODO
+		 * Parses a function script. (e.g. "sin", "tParamGet" etc.)
 		 * 
-		 * @param function
-		 * @param stack
+		 * @param function function to call.
+		 * @param stack    stack which we use to store values.
 		 */
 		private void function(String function, Stack<Object> stack) {
 
-			// TODO Provjere instanci?
 			switch (function) {
-			case "sin": { // TODO koji kut?
+			case "sin": {
 				Object x = stack.pop();
 				Double number;
 				if (x instanceof Number) {
@@ -199,9 +194,6 @@ public class SmartScriptEngine {
 			case "tparamDel":
 				paramDelete(requestContext::removeTemporaryParameter, stack);
 				break;
-			default:
-				// TODO error?
-				break;
 			}
 
 		}
@@ -251,54 +243,80 @@ public class SmartScriptEngine {
 		 * @param stack    helper stack that contains constants.
 		 */
 		private void operator(Character operator, Stack<Object> stack) {
-			// TODO provjera instance?
-			double v1 = toNumber(stack.pop());
-			double v2 = toNumber(stack.pop());
+			Object o1 = stack.pop();
+			Object o2 = stack.pop();
+			Double v1 = toNumber(o1);
+			Double v2 = toNumber(o2);
 
-			// TODO implement
 			switch (operator) {
 			case '+':
-				stack.push(v1 + v2);
+				if (objectsAreInteger(o1, o2)) {
+					stack.push(v1.intValue() + v2.intValue());
+				} else {
+					stack.push(v1 + v2);
+				}
 				break;
 			case '-':
-				stack.push(v1 - v2);
-
+				if (objectsAreInteger(o1, o2)) {
+					stack.push(v1.intValue() - v2.intValue());
+				} else {
+					stack.push(v1 - v2);
+				}
 				break;
 			case '*':
-				stack.push(v1 * v2);
-
+				if (objectsAreInteger(o1, o2)) {
+					stack.push(v1.intValue() * v2.intValue());
+				} else {
+					stack.push(v1 * v2);
+				}
 				break;
 			case '/':
-				stack.push(v1 / v2);
 
-				break;
-
-			default:
+				if (objectsAreInteger(o1, o2)) {
+					stack.push(v1.intValue() / v2.intValue());
+				} else {
+					stack.push(v1 / v2);
+				}
 				break;
 			}
-		}
 
-		@Override
-		public void visitDocumentNode(DocumentNode node) {
-			acceptChildren(node);
-			// TODO ima li ovo smisla?
-			try {
-				requestContext.write("\n");
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		}
 
 		/**
-		 * @param object
-		 * @return
+		 * Parses {@code object} to a {@link Double} representation of the number.
+		 * 
+		 * @param object given number.
+		 * @return {@link Double} representation of the number.
 		 */
 		public double toNumber(Object object) {
 			if (object instanceof Number) {
 				return ((Number) object).doubleValue();
 			} else {
 				return Double.parseDouble(object.toString());
+			}
+		}
+
+		/**
+		 * Checks if given objects are Integer representation of a number (int or String
+		 * integer).
+		 * 
+		 * @param o1 first object.
+		 * @param o2 second object.
+		 * @return {@code true} if both object are integer number, {@code false} if they
+		 *         are double numbers.
+		 */
+		private boolean objectsAreInteger(Object o1, Object o2) {
+			return !(o1.toString().contains(".") || o1.toString().contains(","))
+					&& !(o1.toString().contains(".") || o1.toString().contains(","));
+		}
+
+		@Override
+		public void visitDocumentNode(DocumentNode node) {
+			acceptChildren(node);
+			try {
+				requestContext.write("\n");
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 

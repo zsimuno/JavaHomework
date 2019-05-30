@@ -17,7 +17,6 @@ public class Home implements IWebWorker {
 		String color = context.getPersistentParameter("bgcolor");
 
 		context.setTemporaryParameter("background", color == null ? "7F7F7F" : color);
-		System.out.println(color);
 		try {
 			context.getDispatcher().dispatchRequest("/private/pages/home.smscr");
 

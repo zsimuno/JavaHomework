@@ -114,7 +114,6 @@ public class SmartScriptEngineDemo {
 	 * Reads and executes "fibonacci.smscr".
 	 */
 	private static void fibonaccih() {
-		// TODO Implement to write to file?
 		String documentBody = readFromDisk("fibonaccih.smscr");
 		Map<String, String> parameters = new HashMap<String, String>();
 		Map<String, String> persistentParameters = new HashMap<String, String>();

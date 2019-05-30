@@ -26,9 +26,10 @@
 
 	<form action="/setbgcolor" method="get">
 		<select name="bgcolor" id="bgcolor">
+			<option value="FFFFFF">White</option>
+			<option value="DD7E00">Orange</option>
 			<option value="FF0000">Red</option>
 			<option value="00FF00">Green</option>
-			<option value="0000FF">Blue</option>
 		</select>
 		<button type="submit">Promijeni boju!</button>
 	</form>

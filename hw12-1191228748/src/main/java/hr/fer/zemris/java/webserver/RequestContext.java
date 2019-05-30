@@ -138,7 +138,6 @@ public class RequestContext {
 			List<RCCookie> outputCookies) { // if null, treat as empty
 
 		this.outputStream = Objects.requireNonNull(outputStream);
-		// TODO if null, treat as empty.
 		this.parameters = parameters == null ? new HashMap<>() : parameters;
 		this.persistentParameters = persistentParameters == null ? new HashMap<>() : persistentParameters;
 		this.outputCookies = outputCookies == null ? new ArrayList<>() : outputCookies;

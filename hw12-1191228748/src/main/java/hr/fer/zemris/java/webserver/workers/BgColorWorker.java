@@ -15,7 +15,7 @@ import hr.fer.zemris.java.webserver.RequestContext;
 public class BgColorWorker implements IWebWorker {
 
 	/** Patter that checks the validity of a hex code. */
-	private Pattern p = Pattern.compile("^([A-Fa-f0-9]{6}$");
+	private Pattern p = Pattern.compile("^([A-Fa-f0-9]{6})$");
 
 	@Override
 	public void processRequest(RequestContext context) {
