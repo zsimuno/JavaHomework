@@ -8,7 +8,6 @@
 		</style>
 	</head>
 	<body>
-		<img src="images/{$= "imgName" "0" @tparamGet $}">
 		<h1>Zbrajanje</h1>
 			<table>
 				<tbody>
@@ -17,5 +16,6 @@
 					<tr><td>a+b</td><td>{$= "zbroj" "0" @tparamGet $}</td></tr>
 				</tbody>
 		</table>
+		<img src="images/{$= "imgName" "0" @tparamGet $}">
 	</body>
 </html>
