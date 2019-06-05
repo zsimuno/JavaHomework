@@ -3,10 +3,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-<head>
 	<title>Trigonometric values</title>
-</head>
 <style type="text/css">
+<%
+	Object colorAttr = session.getAttribute("pickedBgCol");
+	if (colorAttr != null) {
+		out.print("body {background-color: " + colorAttr.toString() + ";}");
+	} else {
+		out.print("body {background-color: white;}");
+	}
+%>
 table, td {
 	border: 1px solid black;
 	padding: 5px;
@@ -20,13 +26,13 @@ table, td {
     <th>sin(x)</th>
     <th>cos(x)</th>
   </tr>
-  <c:forEach var="val" items="${trigValues}">
-  	<tr>
-  		<td>${val.getAngle()}°</td>
-		<td>${val.getSin()}</td>
-		<td>${val.getCos()}</td>
-	</tr>
-</c:forEach>
+  	<c:forEach var="val" items="${trigValues}">
+	  	<tr>
+	  		<td>${val.getAngle()}°</td>
+			<td>${val.getSin()}</td>
+			<td>${val.getCos()}</td>
+		</tr>
+	</c:forEach>
 </table>
 
 	

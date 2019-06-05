@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Error while getting powers document</title>
+<title>Glasanje</title>
 <style type="text/css">
 <%
 	Object colorAttr = session.getAttribute("pickedBgCol");
@@ -17,8 +17,13 @@
 </style>
 </head>
 <body>
-	<h1>Error while getting powers document!</h1>
-
-	<p><%=request.getAttribute("error")%></p>
+	<h1>Glasanje za omiljeni bend:</h1>
+	<p>Od sljedećih bendova, koji Vam je bend najdraži? Kliknite na
+		link kako biste glasali!</p>
+	<ol>
+		<c:forEach var="band" items="${bands}">
+	  		<li><a href="glasanje-glasaj?id=${band.getID()}">${band.getName()}</a></li>
+		</c:forEach>
+	</ol>
 </body>
 </html>

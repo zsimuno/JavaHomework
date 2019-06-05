@@ -25,6 +25,16 @@ private String getAppTime(Object appStartTime) throws java.io.IOException {
 <html>
 <head>
 	<title>Application uptime</title>
+<style type="text/css">
+<%
+	Object colorAttr = session.getAttribute("pickedBgCol");
+	if (colorAttr != null) {
+		out.print("body {background-color: " + colorAttr.toString() + ";}");
+	} else {
+		out.print("body {background-color: white;}");
+	}
+%>
+</style>
 </head>
 <body>
 	<%=getAppTime(application.getAttribute("appStartTime"))%>

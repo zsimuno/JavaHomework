@@ -3,9 +3,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-<head>
 	<title>OS usage report.</title>
-</head>
+<style type="text/css">
+<%
+	Object colorAttr = session.getAttribute("pickedBgCol");
+	if (colorAttr != null) {
+		out.print("body {background-color: " + colorAttr.toString() + ";}");
+	} else {
+		out.print("body {background-color: white;}");
+	}
+%>
+</style>
 </head>
 <body>
 	<h1>OS usage</h1>

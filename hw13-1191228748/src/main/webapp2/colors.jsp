@@ -3,15 +3,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-<head>
 	<title>Set app color</title>
-</head>
 <style type="text/css">
 <%
-Object colorAttr = session.getAttribute("pickedBgCol");		
-if (colorAttr != null) {
-	out.print("body {background-color: " + colorAttr.toString() + ";}");
-}
+	Object colorAttr = session.getAttribute("pickedBgCol");
+	if (colorAttr != null) {
+		out.print("body {background-color: " + colorAttr.toString() + ";}");
+	} else {
+		out.print("body {background-color: white;}");
+	}
 %>
 </style>
 </head>

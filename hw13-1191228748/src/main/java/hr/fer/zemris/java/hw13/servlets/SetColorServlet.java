@@ -20,11 +20,10 @@ public class SetColorServlet extends HttpServlet {
 			throws ServletException, IOException {
 		String color = request.getParameter("color");
 		if (color == null) {
-			// TODO treba li ovako?
-			request.getRequestDispatcher("index.jsp").forward(request, response);
+			response.sendRedirect(request.getContextPath() + "/index.jsp");
 			return;
 		}
-		
+
 		String colorCode;
 
 		switch (color) {
@@ -41,13 +40,13 @@ public class SetColorServlet extends HttpServlet {
 			colorCode = "#00FFFF";
 			break;
 		default:
-			request.getRequestDispatcher("index.jsp").forward(request, response);
+			response.sendRedirect(request.getContextPath() + "/index.jsp");
 			return;
 		}
-		
+
 		request.getSession().setAttribute("pickedBgCol", colorCode);
-		
-		request.getRequestDispatcher("index.jsp").forward(request, response);
+
+		response.sendRedirect(request.getContextPath() + "/index.jsp");
 	}
 
 }

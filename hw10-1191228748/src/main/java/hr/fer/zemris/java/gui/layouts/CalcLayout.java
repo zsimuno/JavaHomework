@@ -179,7 +179,7 @@ public class CalcLayout implements LayoutManager2 {
 			if (row == 1 && column == 1) {
 				int h = elHeight + ((row % pickedRow == 0) ? addToHeight : 0);
 				int w = elWidth * 5 + spacing * 4 + addToWidth * 5 / pickedColumn;
-				comp.setBounds(startx, starty, w, h); // TODO diff
+				comp.setBounds(startx, starty, w, h); 
 
 			} else {
 
