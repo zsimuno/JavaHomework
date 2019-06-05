@@ -29,8 +29,8 @@
 				value="Reset">
 		</form>
 		<br> <br>
-		<a href="report.jsp">OS usage report.</a> <br>
 		<a href="stories/funny.jsp">Read a funny short story.</a> <br>
+		<a href="report.jsp">OS usage report.</a> <br>
 		<a href="powers?a=1&b=100&n=3">Get excel table.</a> <br>
 		<a href="appinfo.jsp">Show application uptime.</a> <br>
 		<a href="glasanje">Vote on your favorite band.</a> <br>

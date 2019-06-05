@@ -4,7 +4,13 @@
 <html>
 	<head>
 		<style type="text/css">
-		<% 
+		<%
+		Object colorAttr = session.getAttribute("pickedBgCol");
+		if (colorAttr != null) {
+			out.print("body {background-color: " + colorAttr.toString() + ";}");
+		} else {
+			out.print("body {background-color: white;}");
+		}
 		String colorVal = Integer.toString((int)(Math.random() * 1000000));
 		String color = "#" + "0".repeat(6-colorVal.length()) + colorVal;
 		out.print("body {color: " + color + "; font-size: 15px;}");

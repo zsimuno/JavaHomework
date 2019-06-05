@@ -7,8 +7,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -141,8 +143,11 @@ public class Band {
 			resultsWithBands.put(band, results.get(band.getID()));
 		}
 
-		return resultsWithBands.entrySet().stream().sorted(Map.Entry.comparingByValue())
-				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, HashMap::new));
+		Map<Band, Integer> resultsWithBands2 = resultsWithBands.entrySet().stream()
+			    .sorted(Entry.comparingByValue((a, b) -> b.compareTo(a)))
+			    .collect(Collectors.toMap(Entry::getKey, Entry::getValue,
+			                              (e1, e2) -> e1, LinkedHashMap::new));
+		return  resultsWithBands2;
 	}
 
 	@Override

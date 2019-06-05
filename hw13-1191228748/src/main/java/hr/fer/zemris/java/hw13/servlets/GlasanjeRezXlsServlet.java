@@ -30,7 +30,6 @@ public class GlasanjeRezXlsServlet extends HttpServlet {
 			throws ServletException, IOException {
 		response.setContentType("application/octet-stream");
 		response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-		System.out.println(fileName);
 
 		try {
 			HSSFWorkbook hwb = new HSSFWorkbook();
