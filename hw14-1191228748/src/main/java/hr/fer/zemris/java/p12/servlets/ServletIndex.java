@@ -19,8 +19,8 @@ public class ServletIndex extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		request.setAttribute("polls", DAOProvider.getDao().getAllPolls()); // TODO pazit na DaoException?
-		// TODO Ima smisla?
+		request.setAttribute("polls", DAOProvider.getDao().getAllPolls()); 
+		request.getRequestDispatcher("/WEB-INF/pages/index.jsp").forward(request, response);
 	}
 
 }

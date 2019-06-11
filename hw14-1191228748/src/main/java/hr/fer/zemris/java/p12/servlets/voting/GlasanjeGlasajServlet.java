@@ -26,21 +26,20 @@ public class GlasanjeGlasajServlet extends HttpServlet {
 
 		Object voteID = request.getParameter("id");
 		if (voteID == null) {
-			response.sendRedirect(request.getContextPath() + "/index.jsp"); // TODO popravit
+			response.sendRedirect(request.getContextPath() + "/servleti/index.html");
 			return;
 		}
 		Long optionId = null;
 		try {
 			optionId = Long.parseLong(voteID.toString());
 		} catch (Exception e) {
-			// TODO: handle exception
+			response.sendRedirect(request.getContextPath() + "/servleti/index.html");
+			return;
 		}
 
 		DAOProvider.getDao().voteOnOption(optionId);
-
-		// TODO kako poslati id od polla?
-		// Redirect
-		response.sendRedirect(request.getContextPath() + "/glasanje-rezultati");
+		
+		response.sendRedirect(request.getContextPath() + "/servleti/glasanje-rezultati");
 	}
 
 }

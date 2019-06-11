@@ -66,7 +66,7 @@ public class SQLDAO implements DAO {
 		PreparedStatement pst = null;
 		try {
 			pst = con.prepareStatement(
-					"select id, optionTitle, optionLink, pollID, votesCount from PollOptions where pollID = ? order by votesCount DESC");
+					"select id, optionTitle, optionLink, pollID, votesCount from PollOptions where pollID=? order by votesCount DESC");
 			pst.setLong(1, Long.valueOf(pollId));
 			try {
 				ResultSet rs = pst.executeQuery();
@@ -117,6 +117,41 @@ public class SQLDAO implements DAO {
 			throw new DAOException("Error while updating the vote count on the given option.", ex);
 		}
 
+	}
+
+	@Override
+	public Poll getPoll(long pollId) throws DAOException {
+		Poll poll = new Poll();
+		Connection con = SQLConnectionProvider.getConnection();
+		PreparedStatement pst = null;
+		try {
+			pst = con.prepareStatement("select id, title, message from Polls where id=?");
+			pst.setLong(1, Long.valueOf(pollId));
+			try {
+				ResultSet rs = pst.executeQuery();
+				try {
+					rs.next();
+					poll.setId(rs.getLong(1));
+					poll.setTitle(rs.getString(2));
+					poll.setMessage(rs.getString(3));
+
+				} catch (Exception ignorable) {
+				} finally {
+					try {
+						rs.close();
+					} catch (Exception ignorable) {
+					}
+				}
+			} finally {
+				try {
+					pst.close();
+				} catch (Exception ignorable) {
+				}
+			}
+		} catch (Exception ex) {
+			throw new DAOException("Error while retrieveing the list of polls.", ex);
+		}
+		return poll;
 	}
 
 }

@@ -9,7 +9,7 @@
 	<body>
 		<ol>
 			<c:forEach var="poll" items="${polls}">
-		  		<li><a href="servleti/glasanje?pollID=${poll.getID()}">${poll.getTitle()} </a> - ${poll.getMessage()} </li>
+		  		<li><a href="glasanje?pollID=${poll.getId()}">${poll.getTitle()} </a> - ${poll.getMessage()} </li>
 			</c:forEach>
 		</ol>
 	

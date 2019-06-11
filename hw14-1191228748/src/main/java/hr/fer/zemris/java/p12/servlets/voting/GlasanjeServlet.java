@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import hr.fer.zemris.java.p12.dao.DAOProvider;
 
 /**
- * Servlets which reads from the database all poll options of the given poll
+ * Servlet which reads from the database all poll options of the given poll
  * (from parameters) that can be voted on and sets them as an attribute.
  */
 @WebServlet("/servleti/glasanje")
@@ -24,17 +24,20 @@ public class GlasanjeServlet extends HttpServlet {
 
 		Object id = request.getParameter("pollID");
 		if (id == null) {
-			// TODO sto? vjerojatno redirect na listu svih pollova
+			response.sendRedirect(request.getContextPath() + "/servleti/index.html");
+			return;
 		}
 		long pollId = 0;
 		try {
 			pollId = Long.parseLong(id.toString());
 		} catch (Exception e) {
-			// TODO: handle exception
+			response.sendRedirect(request.getContextPath() + "/servleti/index.html");
+			return;
 		}
+		request.getSession().setAttribute("currentPollID", pollId);
 
-		request.setAttribute("pollOptions", DAOProvider.getDao().getAllPollOptions(pollId)); // TODO pazit na
-																								// DaoException?
+		request.setAttribute("pollOptions", DAOProvider.getDao().getAllPollOptions(pollId)); 
+		request.setAttribute("poll", DAOProvider.getDao().getPoll(pollId));
 		request.getRequestDispatcher("/WEB-INF/pages/glasanjeIndex.jsp").forward(request, response);
 	}
 

@@ -49,9 +49,11 @@ public class TableInit {
 				.add(new PollOption("The Mamas And The Papas", "https://www.youtube.com/watch?v=N-aK6JnyFmk", 0));
 
 		initialMoviePollOptions.add(new PollOption("The Revenant", "https://www.youtube.com/watch?v=LoebZZ8K5N0", 0));
-		initialMoviePollOptions.add(new PollOption("Godzilla: King of The Monsters", "https://www.youtube.com/watch?v=QFxN2oDKk0E", 0));
+		initialMoviePollOptions.add(
+				new PollOption("Godzilla: King of The Monsters", "https://www.youtube.com/watch?v=QFxN2oDKk0E", 0));
 		initialMoviePollOptions.add(new PollOption("Birdman", "https://www.youtube.com/watch?v=uJfLoE6hanc", 0));
-		initialMoviePollOptions.add(new PollOption("Pulp Fiction", "https://www.youtube.com/watch?v=s7EdQ4FqbhY&pbjreload=10", 0));
+		initialMoviePollOptions
+				.add(new PollOption("Pulp Fiction", "https://www.youtube.com/watch?v=s7EdQ4FqbhY&pbjreload=10", 0));
 		initialMoviePollOptions
 				.add(new PollOption("The Big Lebowski", "https://www.youtube.com/watch?v=cd-go0oBF4Y", 0));
 		initialMoviePollOptions
@@ -106,21 +108,15 @@ public class TableInit {
 		boolean alreadyExists = false;
 		try {
 			pst = con.prepareStatement(createCommand);
-			ResultSet rset = pst.executeQuery();
-
-			try {
-				rset.close();
-			} catch (SQLException ex) {
-				ex.printStackTrace();
-			}
-
+			pst.executeUpdate();
 		} catch (SQLException ex) {
 			if (ex.getSQLState().equals("X0Y32")) { // Table exists
 				alreadyExists = true;
 			}
 		} finally {
 			try {
-				pst.close();
+				if (pst != null)
+					pst.close();
 			} catch (SQLException ex) {
 				ex.printStackTrace();
 			}
@@ -237,7 +233,7 @@ public class TableInit {
 				if (rset != null && rset.next()) {
 					pollID = rset.getLong(1);
 				}
-			}catch (Exception ex) {
+			} catch (Exception ex) {
 				ex.printStackTrace();
 			} finally {
 				try {
@@ -259,7 +255,7 @@ public class TableInit {
 		// Insert poll options of this poll
 		try {
 			pst = con.prepareStatement(
-					"INSERT INTO PollOptions (optionTitle, optionLink, pollID, votesCount) values (?,?)",
+					"INSERT INTO PollOptions (optionTitle, optionLink, pollID, votesCount) values (?,?,?,?)",
 					Statement.RETURN_GENERATED_KEYS);
 
 			for (PollOption pollOption : initialPollOptions) {

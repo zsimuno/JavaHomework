@@ -1,8 +1,12 @@
 package hr.fer.zemris.java.p12;
 
 import java.beans.PropertyVetoException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.SQLException;
-import java.util.ResourceBundle;
+import java.util.Properties;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -18,16 +22,21 @@ public class Inicijalizacija implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent sce) {
 
 		String fileName = sce.getServletContext().getRealPath("/WEB-INF/dbsettings.properties");
-		ResourceBundle config = ResourceBundle.getBundle(fileName);
+		Properties properties = new Properties();
+		try (InputStream in = Files.newInputStream(Paths.get(fileName))) {
+			properties.load(in);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
-		String host = config.getString("host");
-		String port = config.getString("port");
-		String dbName = config.getString("name");
-		String user = config.getString("user");
-		String pass = config.getString("password");
+		String host = properties.get("host").toString();
+		String port = properties.get("port").toString();
+		String dbName = properties.get("name").toString();
+		String user = properties.get("user").toString();
+		String pass = properties.get("password").toString();
 		String connectionURL = "jdbc:derby://" + host + ":" + port + "/" + dbName + ";user=" + user + ";password="
 				+ pass;
-
+		
 		ComboPooledDataSource cpds = new ComboPooledDataSource();
 		try {
 			cpds.setDriverClass("org.apache.derby.jdbc.ClientDriver");

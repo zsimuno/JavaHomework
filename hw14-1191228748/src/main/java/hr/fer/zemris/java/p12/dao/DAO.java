@@ -39,4 +39,12 @@ public interface DAO {
 	 * @throws DAOException if an error occurs.
 	 */
 	public void voteOnOption(long optionId) throws DAOException;
+	
+	/**
+	 * Retrieves a poll with the given {@code pollId}.
+	 * 
+	 * @param pollId ID of the poll we want retrieved.
+	 * @throws DAOException if an error occurs.
+	 */
+	public Poll getPoll(long pollId) throws DAOException;
 }

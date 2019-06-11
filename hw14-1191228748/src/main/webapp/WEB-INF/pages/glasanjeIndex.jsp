@@ -5,24 +5,13 @@
 <html>
 <head>
 <title>Glasanje</title>
-<style type="text/css">
-<%
-	Object colorAttr = session.getAttribute("pickedBgCol");
-	if (colorAttr != null) {
-		out.print("body {background-color: " + colorAttr.toString() + ";}");
-	} else {
-		out.print("body {background-color: white;}");
-	}
-%>
-</style>
 </head>
 <body>
-	<h1>Glasanje za omiljeni bend:</h1>
-	<p>Od sljedećih bendova, koji Vam je bend najdraži? Kliknite na
-		link kako biste glasali!</p>
+	<h1>${poll.getTitle() }</h1>
+	<p>${poll.getMessage() }</p>
 	<ol>
-		<c:forEach var="band" items="${bands}">
-	  		<li><a href="glasanje-glasaj?id=${band.getID()}">${band.getName()}</a></li>
+		<c:forEach var="option" items="${pollOptions}">
+	  		<li><a href="glasanje-glasaj?id=${option.getId()}">${option.getOptionTitle()}</a></li>
 		</c:forEach>
 	</ol>
 </body>

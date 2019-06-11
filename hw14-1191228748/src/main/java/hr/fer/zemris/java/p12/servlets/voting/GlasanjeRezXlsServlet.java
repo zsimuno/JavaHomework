@@ -15,6 +15,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import hr.fer.zemris.java.p12.dao.DAOProvider;
 import hr.fer.zemris.java.p12.model.PollOption;
+import hr.fer.zemris.java.p12.servlets.util.VotingUtility;
 
 /**
  * Servlet that shows the results of the voting in an excel table.
@@ -32,8 +33,11 @@ public class GlasanjeRezXlsServlet extends HttpServlet {
 		response.setContentType("application/octet-stream");
 		response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 
-		long pollId = 0; // TODO kako primiti?
-		List<PollOption> pollOptions = DAOProvider.getDao().getAllPollOptions(pollId); // TODO exception?
+		long pollId = VotingUtility.getCurrentPollId(request, response);
+		if(pollId == -1) {
+			return;
+		}
+		List<PollOption> pollOptions = DAOProvider.getDao().getAllPollOptions(pollId); 
 
 		try {
 			HSSFWorkbook hwb = new HSSFWorkbook();

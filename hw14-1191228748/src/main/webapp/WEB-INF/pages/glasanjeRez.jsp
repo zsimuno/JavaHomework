@@ -6,14 +6,6 @@
 <head>
 <title>Rezultati</title>
 <style type="text/css">
-<%
-	Object colorAttr = session.getAttribute("pickedBgCol");
-	if (colorAttr != null) {
-		out.print("body {background-color: " + colorAttr.toString() + ";}");
-	} else {
-		out.print("body {background-color: white;}");
-	}
-%>
 table.rez, td {
 	text-align: center;
 	border: 1px solid black;
@@ -26,15 +18,15 @@ table.rez, td {
 	<table class="rez">
 		<thead>
 			<tr>
-				<th>Bend</th>
+				<th>Opcija</th>
 				<th>Broj glasova</th>
 			</tr>
 		</thead>
 		<tbody>
 			<c:forEach var="result" items="${results}">
 				<tr>
-					<td>${result.getKey().getName() }</td>
-					<td>${result.getValue() }</td>
+					<td>${result.getOptionTitle() }</td>
+					<td>${result.getVotesCount() }</td>
 				</tr>
 			</c:forEach>
 		</tbody>
@@ -46,7 +38,7 @@ table.rez, td {
 		Rezultati u XLS formatu dostupni su <a href="glasanje-xls">ovdje</a>
 	</p>
 	<h2>Razno</h2>
-	<p>Primjeri pjesama pobjedničkih bendova:</p>
+	<p>Linkovi pobjedničkih opcija:</p>
 	<ul>
 	<c:forEach var="winner" items="${winners}">
 		<li><a href="${winner.getValue() }"

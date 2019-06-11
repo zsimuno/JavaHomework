@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import hr.fer.zemris.java.p12.dao.DAOProvider;
 import hr.fer.zemris.java.p12.model.PollOption;
+import hr.fer.zemris.java.p12.servlets.util.VotingUtility;
 
 /**
  * Servlet implementation class GlasanjeRezultatiServlet that reads the results
@@ -27,19 +28,23 @@ public class GlasanjeRezultatiServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		long pollId = 0; // TODO kako primiti?
+		long pollId = VotingUtility.getCurrentPollId(request, response);
+		if(pollId == -1) {
+			return;
+		}
+
 		List<PollOption> pollOptions = DAOProvider.getDao().getAllPollOptions(pollId);
 
 		request.setAttribute("results", pollOptions);
 
-		// Option title and vote count
-		Map<String, Long> winners = new HashMap<>();
+		// Option title and link
+		Map<String, String> winners = new HashMap<>();
 
 		long winnerVoteCount = -1;
 		for (PollOption pollOption : pollOptions) {
 			if (winnerVoteCount == -1) {
 				winnerVoteCount = pollOption.getVotesCount();
-				winners.put(pollOption.getOptionTitle(), pollOption.getVotesCount());
+				winners.put(pollOption.getOptionTitle(), pollOption.getOptionLink());
 				continue;
 			}
 
@@ -48,7 +53,7 @@ public class GlasanjeRezultatiServlet extends HttpServlet {
 				break;
 			}
 
-			winners.put(pollOption.getOptionTitle(), pollOption.getVotesCount());
+			winners.put(pollOption.getOptionTitle(), pollOption.getOptionLink());
 		}
 
 		request.setAttribute("winners", winners);

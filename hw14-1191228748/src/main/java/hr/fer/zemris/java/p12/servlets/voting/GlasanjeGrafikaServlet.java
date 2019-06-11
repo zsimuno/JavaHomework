@@ -18,6 +18,7 @@ import org.jfree.data.general.DefaultPieDataset;
 
 import hr.fer.zemris.java.p12.dao.DAOProvider;
 import hr.fer.zemris.java.p12.model.PollOption;
+import hr.fer.zemris.java.p12.servlets.util.VotingUtility;
 
 /**
  * Servlet that shows the pie chart that shows the distribution of votes for the
@@ -32,8 +33,11 @@ public class GlasanjeGrafikaServlet extends HttpServlet {
 			throws ServletException, IOException {
 		response.setContentType("image/png");
 
-		long pollId = 0; // TODO kako primiti?
-		List<PollOption> pollOptions = DAOProvider.getDao().getAllPollOptions(pollId); // TODO Excepiton?
+		long pollId = VotingUtility.getCurrentPollId(request, response);
+		if(pollId == -1) {
+			return;
+		}
+		List<PollOption> pollOptions = DAOProvider.getDao().getAllPollOptions(pollId); 
 
 		DefaultPieDataset dataset = new DefaultPieDataset();
 		for (PollOption pollOption : pollOptions) {
