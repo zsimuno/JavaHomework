@@ -15,6 +15,12 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.sql.DataSource;
 
+/**
+ * Filter that sets the connection to the database.
+ * 
+ * @author Zvonimir Šimunović
+ *
+ */
 @WebFilter(filterName="f1",urlPatterns={"/servleti/*"})
 public class ConnectionSetterFilter implements Filter {
 	

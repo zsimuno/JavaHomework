@@ -6,14 +6,13 @@
 <head>
 <title>Rezultati</title>
 <style type="text/css">
-table.rez, td {
-	text-align: center;
-	border: 1px solid black;
-}
+<%@ include file="/WEB-INF/css/style.css" %>
 </style>
 </head>
 <body>
+	<a href="index.html">HOME</a>
 	<h1>Rezultati glasanja</h1>
+	<hr>
 	<p>Ovo su rezultati glasanja.</p>
 	<table class="rez">
 		<thead>
@@ -25,18 +24,21 @@ table.rez, td {
 		<tbody>
 			<c:forEach var="result" items="${results}">
 				<tr>
-					<td>${result.getOptionTitle() }</td>
-					<td>${result.getVotesCount() }</td>
+					<td class="rez">${result.getOptionTitle() }</td>
+					<td class="rez">${result.getVotesCount() }</td>
 				</tr>
 			</c:forEach>
 		</tbody>
 	</table>
+	<hr>
 	<h2>Grafički prikaz rezultata</h2>
 	<img alt="Pie-chart" src="glasanje-grafika" />
+	<hr>
 	<h2>Rezultati u XLS formatu</h2>
 	<p>
 		Rezultati u XLS formatu dostupni su <a href="glasanje-xls">ovdje</a>
 	</p>
+	<hr>
 	<h2>Razno</h2>
 	<p>Linkovi pobjedničkih opcija:</p>
 	<ul>

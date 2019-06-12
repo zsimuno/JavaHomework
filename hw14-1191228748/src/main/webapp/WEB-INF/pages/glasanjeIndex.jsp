@@ -5,13 +5,16 @@
 <html>
 <head>
 <title>Glasanje</title>
-</head>
+<style type="text/css">
+<%@ include file="/WEB-INF/css/style.css" %>
+</style></head>
 <body>
 	<h1>${poll.getTitle() }</h1>
+	<hr>
 	<p>${poll.getMessage() }</p>
 	<ol>
 		<c:forEach var="option" items="${pollOptions}">
-	  		<li><a href="glasanje-glasaj?id=${option.getId()}">${option.getOptionTitle()}</a></li>
+	  		<li>${option.getOptionTitle()} - <a href="glasanje-glasaj?id=${option.getId()}">VOTE</a></li>
 		</c:forEach>
 	</ol>
 </body>

@@ -15,6 +15,12 @@ import javax.servlet.annotation.WebListener;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mchange.v2.c3p0.DataSources;
 
+/**
+ * Initializes the web page. Prepares data for connecting to the database and
+ * initializes the database data if needed.
+ * 
+ * @author Zvonimir Šimunović
+ */
 @WebListener
 public class Inicijalizacija implements ServletContextListener {
 
@@ -36,7 +42,7 @@ public class Inicijalizacija implements ServletContextListener {
 		String pass = properties.get("password").toString();
 		String connectionURL = "jdbc:derby://" + host + ":" + port + "/" + dbName + ";user=" + user + ";password="
 				+ pass;
-		
+
 		ComboPooledDataSource cpds = new ComboPooledDataSource();
 		try {
 			cpds.setDriverClass("org.apache.derby.jdbc.ClientDriver");
@@ -49,8 +55,6 @@ public class Inicijalizacija implements ServletContextListener {
 
 		sce.getServletContext().setAttribute("hr.fer.zemris.dbpool", cpds);
 	}
-
-	
 
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {

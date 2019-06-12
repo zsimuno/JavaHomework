@@ -88,12 +88,6 @@ public class TableInit {
 			initTableValues(con);
 		}
 
-		try {
-			con.close();
-		} catch (SQLException ex) {
-			ex.printStackTrace();
-		}
-
 	}
 
 	/**
@@ -142,12 +136,16 @@ public class TableInit {
 				try {
 					rs.next();
 					rowCount = rs.getInt(1);
+				} catch (Exception ex) {
+					ex.printStackTrace();
 				} finally {
 					try {
 						rs.close();
 					} catch (Exception ignorable) {
 					}
 				}
+			} catch (Exception ex) {
+				ex.printStackTrace();
 			} finally {
 				try {
 					pst.close();
