@@ -37,14 +37,15 @@ public interface DAO {
 	 */
 	public boolean nickExists(String nick) throws DAOException;
 
+
 	/**
-	 * Logs in the user if it's possible.
+	 * Retrieves the user data of the user with the given {@code nick}.
 	 * 
-	 * @param user user to be logged in.
-	 * @return {@code true} if the data is valid, {@code false} if not.
+	 * @param nick nick of the user.
+	 * @return User with the given nick or {@code null} if no such user exists.
 	 * @throws DAOException if there is an error while working with data.
 	 */
-	public boolean login(BlogUser user) throws DAOException;
+	public BlogUser getUser(String nick) throws DAOException;
 
 	/**
 	 * Registers a new user.

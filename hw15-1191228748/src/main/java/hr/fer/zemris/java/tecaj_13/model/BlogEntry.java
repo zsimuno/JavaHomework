@@ -158,6 +158,8 @@ public class BlogEntry {
 	/**
 	 * @return the creator of the entry.
 	 */
+	@ManyToOne
+	@JoinColumn(nullable = false)
 	public BlogUser getCreator() {
 		return creator;
 	}
@@ -167,8 +169,6 @@ public class BlogEntry {
 	 * 
 	 * @param creator the creator to set
 	 */
-	@ManyToOne
-	@JoinColumn(nullable = false)
 	public void setCreator(BlogUser creator) {
 		this.creator = creator;
 	}

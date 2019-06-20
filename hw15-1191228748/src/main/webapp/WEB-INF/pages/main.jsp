@@ -10,52 +10,39 @@
 	</head>
 
 	<body>
-		<h1>
-		<c:choose>
-		<c:when test="${zapis.id.isEmpty()}">
-		Novi kontakt
-		</c:when>
-		<c:otherwise>
-		Login:
-		</c:otherwise>
-		</c:choose>
-		</h1>
-
-		<form action="author" method="post">
+	<%@ include file="/WEB-INF/pages/header.jsp" %>
+		<c:out value="${loginMessage}" />
 		
-		<div>
-		 <div>
-		  <span class="formLabel">Nick</span><input type="text" name="nick" value='<c:out value="${zapis.prezime}"/>' size="20">
-		 </div>
-		 <c:if test="${zapis.imaPogresku('prezime')}">
-		 <div class="greska"><c:out value="${zapis.dohvatiPogresku('prezime')}"/></div>
-		 </c:if>
-		</div>
+		<c:if test="${sessionScope['current.user.id'] == null}">
+		<h1>Login:</h1>
 		
-		<div>
-		 <div>
-		  <span class="formLabel">Password</span><input type="password" name="password" value='<c:out value="${zapis.prezime}"/>' size="20">
-		 </div>
-		 <c:if test="${zapis.imaPogresku('prezime')}">
-		 <div class="greska"><c:out value="${zapis.dohvatiPogresku('prezime')}"/></div>
-		 </c:if>
-		</div>
-
+		<form action="main" method="post">
+		
+		  <span class="formLabel">Nick</span><input type="text" name="nick" value='<c:out value="${nick}"/>' size="20">
+		  <span class="formLabel">Password</span><input type="password" name="password"  size="20">
+		
 		<div class="formControls">
 		  <span class="formLabel">&nbsp;</span>
 		  <input type="submit" name="metoda" value="Submit">
-		  <input type="Reset" name="metoda" value="Reset">
+		  <input type="reset" name="metoda" value="Reset">
 		</div>
-		
 		</form>
 		
-		<a href="register" >Register</a>
+		<p>
+		Want to register? <a href="register" >Register here</a>
+		</p>
+		
+		</c:if>
+		
+		
 		
 		
 		<h2>List of registered authors:</h2>
 		<ul class="authors">
 		<c:forEach var="author" items="${registeredAuthors}">
-	  		<li class="author">${author.getNick()} (${author.getFirstName()} ${author.getLastName()})</li>
+	  		<li class="author"> 
+	  		<a href="author/${author.getNick()}">${author.getNick()}</a>
+	  		(${author.getFirstName()} ${author.getLastName()})</li>
 		</c:forEach>
 		</ul>
 

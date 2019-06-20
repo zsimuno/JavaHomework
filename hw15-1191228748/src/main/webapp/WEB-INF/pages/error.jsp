@@ -9,6 +9,7 @@
 <%@ include file="/WEB-INF/css/style.css" %>
 </style></head>
 <body>
+	<%@ include file="/WEB-INF/pages/header.jsp" %>
 	<h1>Error!</h1>
 
 	<p><%=request.getAttribute("errorMessage")%></p>

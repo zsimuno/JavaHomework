@@ -10,58 +10,21 @@
 	</head>
 
 	<body>
+		<%@ include file="/WEB-INF/pages/header.jsp" %>
 		<h1>
-		<c:choose>
-		<c:when test="${zapis.id.isEmpty()}">
-		Novi kontakt
-		</c:when>
-		<c:otherwise>
 		Register
-		</c:otherwise>
-		</c:choose>
 		</h1>
 		
-		<c:if test="${registerMessage != null}">
-		<c:out value=""></c:out>
-		</c:if>
-
+		<c:out value="${registerMessage}" />
+		<br />
 		<form action="register" method="post">
 
-		 <div>
-		  <span class="formLabel">First name</span><input type="text" name="firstName" value='<c:out value="${zapis.ime}"/>' size="20">
-		 </div>
-
-		 <div>
-		  <span class="formLabel">Last name</span><input type="text" name="lastName" value='<c:out value="${zapis.prezime}"/>' size="20">
-		</div>
-
-		<div>
-		 <div>
-		  <span class="formLabel">EMail</span><input type="email" name="email" value='<c:out value="${zapis.email}"/>' size="50">
-		 </div>
-		 <c:if test="${zapis.imaPogresku('email')}">
-		 <div class="greska"><c:out value="${zapis.dohvatiPogresku('email')}"/></div>
-		 </c:if>
-		</div>
-		
-		<div>
-		 <div>
-		  <span class="formLabel">Nick</span><input type="text" name="nick" value='<c:out value="${zapis.prezime}"/>' size="20">
-		 </div>
-		 <c:if test="${zapis.imaPogresku('prezime')}">
-		 <div class="greska"><c:out value="${zapis.dohvatiPogresku('prezime')}"/></div>
-		 </c:if>
-		</div>
-		
-		<div>
-		 <div>
-		  <span class="formLabel">Password</span><input type="password" name="password" value='<c:out value="${zapis.prezime}"/>' size="20">
-		 </div>
-		 <c:if test="${zapis.imaPogresku('prezime')}">
-		 <div class="greska"><c:out value="${zapis.dohvatiPogresku('prezime')}"/></div>
-		 </c:if>
-		</div>
-
+		  <span class="formLabel">First name</span><input type="text" name="firstName" value='<c:out value="${user.getFirstName()}"/>'  size="20"> <br />
+		  <span class="formLabel">Last name</span><input type="text" name="lastName" value='<c:out value="${user.getLastName()}"/>'  size="20"> <br />
+		  <span class="formLabel">EMail</span><input type="email" name="email" value='<c:out value="${user.getEmail()}"/>'  size="50"> <br />
+		  <span class="formLabel">Nick</span><input type="text" name="nick" value='<c:out value="${user.getNick()}"/>' size="20"> <br />
+		  <span class="formLabel">Password</span><input type="password" name="password"  size="20"> <br />
+		 
 		<div class="formControls">
 		  <span class="formLabel">&nbsp;</span>
 		  <input type="submit" name="metoda" value="Submit">

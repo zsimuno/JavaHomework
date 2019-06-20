@@ -108,7 +108,7 @@ public class BlogUser {
 	/**
 	 * @return the passwordHash of the user.
 	 */
-	@Column(length = 165, nullable = false)
+	@Column(length = 200, nullable = false)
 	public String getPasswordHash() {
 		return passwordHash;
 	}
