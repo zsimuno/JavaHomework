@@ -16,7 +16,7 @@
 		Novi kontakt
 		</c:when>
 		<c:otherwise>
-		Uređivanje kontakta
+		Login:
 		</c:otherwise>
 		</c:choose>
 		</h1>
@@ -43,8 +43,8 @@
 
 		<div class="formControls">
 		  <span class="formLabel">&nbsp;</span>
-		  <input type="submit" name="metoda" value="Pohrani">
-		  <input type="submit" name="metoda" value="Odustani">
+		  <input type="submit" name="metoda" value="Submit">
+		  <input type="Reset" name="metoda" value="Reset">
 		</div>
 		
 		</form>

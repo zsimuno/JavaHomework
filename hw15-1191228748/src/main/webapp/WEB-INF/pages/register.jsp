@@ -16,38 +16,23 @@
 		Novi kontakt
 		</c:when>
 		<c:otherwise>
-		Uređivanje kontakta
+		Register
 		</c:otherwise>
 		</c:choose>
 		</h1>
+		
+		<c:if test="${registerMessage != null}">
+		<c:out value=""></c:out>
+		</c:if>
 
 		<form action="register" method="post">
-		
-		<div>
-		 <div>
-		  <span class="formLabel">ID</span><input type="text" name="id" value='<c:out value="${zapis.id}"/>' size="5">
-		 </div>
-		 <c:if test="${zapis.imaPogresku('id')}">
-		 <div class="greska"><c:out value="${zapis.dohvatiPogresku('id')}"/></div>
-		 </c:if>
-		</div>
 
-		<div>
 		 <div>
 		  <span class="formLabel">First name</span><input type="text" name="firstName" value='<c:out value="${zapis.ime}"/>' size="20">
 		 </div>
-		 <c:if test="${zapis.imaPogresku('ime')}">
-		 <div class="greska"><c:out value="${zapis.dohvatiPogresku('ime')}"/></div>
-		 </c:if>
-		</div>
 
-		<div>
 		 <div>
 		  <span class="formLabel">Last name</span><input type="text" name="lastName" value='<c:out value="${zapis.prezime}"/>' size="20">
-		 </div>
-		 <c:if test="${zapis.imaPogresku('prezime')}">
-		 <div class="greska"><c:out value="${zapis.dohvatiPogresku('prezime')}"/></div>
-		 </c:if>
 		</div>
 
 		<div>
@@ -79,8 +64,8 @@
 
 		<div class="formControls">
 		  <span class="formLabel">&nbsp;</span>
-		  <input type="submit" name="metoda" value="Pohrani">
-		  <input type="submit" name="metoda" value="Odustani">
+		  <input type="submit" name="metoda" value="Submit">
+		  <input type="reset" name="metoda" value="Reset">
 		</div>
 		
 		</form>
