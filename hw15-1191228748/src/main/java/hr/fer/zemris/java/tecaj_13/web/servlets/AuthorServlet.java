@@ -74,8 +74,8 @@ public class AuthorServlet extends HttpServlet {
 					return;
 				}
 				BlogEntry en = DAOProvider.getDAO().getBlogEntry(idNo);
-
-				if (en == null) {
+				
+				if (en == null || !en.getCreator().equals(user)) {
 					sendError("No such entry", request, response);
 					return;
 				}
