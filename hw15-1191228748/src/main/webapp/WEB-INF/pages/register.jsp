@@ -19,11 +19,11 @@
 		<br />
 		<form action="register" method="post">
 
-		  <span class="formLabel">First name</span><input type="text" name="firstName" value='<c:out value="${user.getFirstName()}"/>'  size="20"> <br />
-		  <span class="formLabel">Last name</span><input type="text" name="lastName" value='<c:out value="${user.getLastName()}"/>'  size="20"> <br />
-		  <span class="formLabel">EMail</span><input type="email" name="email" value='<c:out value="${user.getEmail()}"/>'  size="50"> <br />
-		  <span class="formLabel">Nick</span><input type="text" name="nick" value='<c:out value="${user.getNick()}"/>' size="20"> <br />
-		  <span class="formLabel">Password</span><input type="password" name="password"  size="20"> <br />
+		  <span class="formLabel">First name</span><input type="text" name="firstName" value='<c:out value="${user.getFirstName()}"/>'  size="20" required> <br />
+		  <span class="formLabel">Last name</span><input type="text" name="lastName" value='<c:out value="${user.getLastName()}"/>'  size="20" required> <br />
+		  <span class="formLabel">EMail</span><input type="email" name="email" value='<c:out value="${user.getEmail()}"/>'  size="50" required> <br />
+		  <span class="formLabel">Nick</span><input type="text" name="nick" value='<c:out value="${user.getNick()}"/>' size="20" required> <br />
+		  <span class="formLabel">Password</span><input type="password" name="password"  size="20" required> <br />
 		 
 		<div class="formControls">
 		  <span class="formLabel">&nbsp;</span>

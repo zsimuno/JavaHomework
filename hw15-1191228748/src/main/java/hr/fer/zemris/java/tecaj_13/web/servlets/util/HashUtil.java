@@ -23,7 +23,6 @@ public class HashUtil {
 		try {
 			sha = MessageDigest.getInstance("SHA-1");
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

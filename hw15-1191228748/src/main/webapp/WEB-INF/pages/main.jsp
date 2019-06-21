@@ -18,8 +18,8 @@
 		
 		<form action="main" method="post">
 		
-		  <span class="formLabel">Nick</span><input type="text" name="nick" value='<c:out value="${nick}"/>' size="20">
-		  <span class="formLabel">Password</span><input type="password" name="password"  size="20">
+		  <span class="formLabel">Nick</span><input type="text" name="nick" value='<c:out value="${nick}"/>' required size="20">
+		  <span class="formLabel">Password</span><input type="password" name="password" required size="20">
 		
 		<div class="formControls">
 		  <span class="formLabel">&nbsp;</span>

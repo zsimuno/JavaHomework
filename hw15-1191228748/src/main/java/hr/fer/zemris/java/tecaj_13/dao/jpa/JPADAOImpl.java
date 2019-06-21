@@ -21,7 +21,7 @@ public class JPADAOImpl implements DAO {
 		try {
 			return JPAEMProvider.getEntityManager().find(BlogEntry.class, id);
 		} catch (Exception e) {
-			throw new DAOException("Error while retrieving blog entry.");
+			throw new DAOException("Error while retrieving blog entry.", e);
 		}
 	}
 
@@ -33,7 +33,7 @@ public class JPADAOImpl implements DAO {
 					.setParameter("ni", nick).getSingleResult();
 			return !count.equals(0L);
 		} catch (Exception e) {
-			throw new DAOException("Error while checking if the nick exists.");
+			throw new DAOException("Error while checking if the nick exists.", e);
 		}
 	}
 
@@ -41,11 +41,11 @@ public class JPADAOImpl implements DAO {
 	public BlogUser getUser(String nick) throws DAOException {
 		try {
 			List<BlogUser> users = JPAEMProvider.getEntityManager()
-					.createQuery("select e from BlogUser e where e.nick=:ni", BlogUser.class)
-					.setParameter("ni", nick).getResultList();
-			return users.isEmpty() ? null: users.get(0);
+					.createQuery("select e from BlogUser e where e.nick=:ni", BlogUser.class).setParameter("ni", nick)
+					.getResultList();
+			return users.isEmpty() ? null : users.get(0);
 		} catch (Exception e) {
-			throw new DAOException("Error while trying to login.");
+			throw new DAOException("Error while trying to login.", e);
 		}
 	}
 
@@ -54,7 +54,7 @@ public class JPADAOImpl implements DAO {
 		try {
 			JPAEMProvider.getEntityManager().persist(newUser);
 		} catch (Exception e) {
-			throw new DAOException("Error while registering a new user.");
+			throw new DAOException("Error while registering a new user.", e);
 		}
 	}
 
@@ -64,7 +64,7 @@ public class JPADAOImpl implements DAO {
 			return JPAEMProvider.getEntityManager().createQuery("select u from BlogUser u", BlogUser.class)
 					.getResultList();
 		} catch (Exception e) {
-			throw new DAOException("Error while retrieving all authors.");
+			throw new DAOException("Error while retrieving all authors.", e);
 		}
 	}
 
@@ -72,19 +72,19 @@ public class JPADAOImpl implements DAO {
 	public List<BlogEntry> getUserEntries(BlogUser user) throws DAOException {
 		try {
 			return JPAEMProvider.getEntityManager()
-					.createQuery("select e from BlogEntry as e where e.creator=:cr", BlogEntry.class)
-					.setParameter("cr", user).getResultList();
+					.createQuery("select b from BlogEntry b where b.creator=:cre", BlogEntry.class)
+					.setParameter("cre", user).getResultList();
 		} catch (Exception e) {
-			throw new DAOException("Error while retrieving all authors entries.");
+			throw new DAOException("Error while retrieving all authors entries.", e);
 		}
 	}
 
 	@Override
 	public void editEntry(BlogEntry entry) throws DAOException {
-		// TODO Auto-generated method stub
 		try {
+			JPAEMProvider.getEntityManager().merge(entry); 	
 		} catch (Exception e) {
-			throw new DAOException("Error while editing blog entry.");
+			throw new DAOException("Error while editing blog entry.", e);
 		}
 	}
 
@@ -93,27 +93,17 @@ public class JPADAOImpl implements DAO {
 		try {
 			JPAEMProvider.getEntityManager().persist(entry);
 		} catch (Exception e) {
-			throw new DAOException("Error while adding new blog entry.");
+			throw new DAOException("Error while adding new blog entry.", e);
 		}
 	}
 
-	@Override
-	public List<BlogComment> getEntryComments(BlogEntry entry) throws DAOException {
-		try {
-			return JPAEMProvider.getEntityManager()
-					.createQuery("select b from BlogComment as b where b.blogEntry=:be", BlogComment.class)
-					.setParameter("be", entry).getResultList();
-		} catch (Exception e) {
-			throw new DAOException("Error while retrieving entry comments.");
-		}
-	}
 
 	@Override
 	public void newComment(BlogComment comment) throws DAOException {
 		try {
 			JPAEMProvider.getEntityManager().persist(comment);
 		} catch (Exception e) {
-			throw new DAOException("Error while adding a new comment.");
+			throw new DAOException("Error while adding a new comment.", e);
 		}
 	}
 

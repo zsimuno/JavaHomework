@@ -7,37 +7,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Error</title>
+<title>${blogEntry.getTitle() }</title>
 <style type="text/css">
 <%@ include file="/WEB-INF/css/style.css" %>
 </style></head>
 <body>
 <%@ include file="/WEB-INF/pages/header.jsp" %>
 
-<h1>Blog entry:</h1>
-<h2>${entry.getTitle() }</h2>
-<pre>${entry.getText() }</pre>
-<p> Created at: ${entry.getCreatedAt()} </p>
-<p> Last modified: ${entry.getLastModifiedAt()} </p>
+
+<h1>${blogEntry.getTitle() }</h1>
+<pre>${blogEntry.getText() }</pre>
+<hr>
+<pre> Created at: ${blogEntry.getCreatedAt()} Last modified: ${blogEntry.getLastModifiedAt()} </pre>
 
 
-<c:if test="${sessionScope['current.user.id'] == nick}">		
-		<form action="/edit" method="post">
-		<input type="hidden" name="id" value="${entry.getId() }">
-		<div class="formControls">
-		  <input type="submit" name="metoda" value="Edit">
-		</div>
-		</form>
-		
+<c:if test="${sessionScope['current.user.nick'] == nick}">		
+		<a  href="edit?id=${blogEntry.getId()}"> Edit </a>
+		<br>
 </c:if>
 
 
-<c:if test="${!blogEntry.comments.isEmpty()}">
-      <ul>
+<c:choose>
+   <c:when test="${blogEntry.comments.isEmpty()}">
+     No comments yet.
+   </c:when>
+   <c:otherwise>
+   
+     <ul>
       <c:forEach var="e" items="${blogEntry.comments}">
+      	<hr>
         <li>
 	        <div style="font-weight: bold">
-	        [User=<c:out value="${e.usersEMail}"/>] 
+	        [<c:out value="${e.usersEMail}"/>] 
 	        	<c:out value="${e.postedOn}"/>
 	        </div>
 	        <div style="padding-left: 10px;">
@@ -45,18 +46,29 @@
 	        </div>
         </li>
       </c:forEach>
-      </ul>
+      </ul>	
+   </c:otherwise>
+</c:choose>
+
+
+<c:if test="${!blogEntry.comments.isEmpty()}">
+      
 </c:if>
 
-<c:if test="${sessionScope['current.user.id'] != null}">	
-<c:out value="${commentMessage}" />	
+	
+<c:out value="${commentMessage}" />
+	
 	<form action="" method="post">
-		<textarea name="comment" ></textarea>
+<c:if test="${sessionScope['current.user.id'] == null}">
+	Email:<input type="email" name="email" required/><br>
+</c:if>
+		Comment:<br>
+		<textarea name="comment" rows="5" cols="50" required></textarea>
 		<div class="formControls">
 		  <input type="submit" name="metoda" value="Comment">
 		</div>
 	</form>	
-</c:if>
+
 	
 </body>
 </html>

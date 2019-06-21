@@ -20,7 +20,6 @@ import hr.fer.zemris.java.p12.model.PollOption;
  *
  */
 public class TableInit {
-	// TODO provjerit kada bacat exceptione i kako ih hvatam i slicno.
 
 	/** Poll for choosing favorite band. */
 	private static Poll bandPoll = new Poll("Vote for your favorite band:",

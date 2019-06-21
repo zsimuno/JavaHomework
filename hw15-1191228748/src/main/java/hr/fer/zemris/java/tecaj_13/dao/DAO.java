@@ -26,8 +26,6 @@ public interface DAO {
 	 */
 	public BlogEntry getBlogEntry(Long id) throws DAOException;
 
-//	// TODO insert entry, login and insert comment
-
 	/**
 	 * Check if the given nick already exists.
 	 * 
@@ -36,7 +34,6 @@ public interface DAO {
 	 * @throws DAOException if there is an error while working with data.
 	 */
 	public boolean nickExists(String nick) throws DAOException;
-
 
 	/**
 	 * Retrieves the user data of the user with the given {@code nick}.
@@ -64,10 +61,12 @@ public interface DAO {
 	public List<BlogUser> getAllAuthors() throws DAOException;
 
 	/**
-	 * TODO javadoc i ima li smisla slat sve ili samo ID od usera?
+	 * Retrieves a list of {@link BlogEntry} objects that are made by the given
+	 * {@code user}.
 	 * 
-	 * @param user
-	 * @return
+	 * @param user creator of the blog entries we need.
+	 * @return list of {@link BlogEntry} objects that are made by the given
+	 *         {@code user}.
 	 * @throws DAOException if there is an error while working with data.
 	 */
 	public List<BlogEntry> getUserEntries(BlogUser user) throws DAOException;
@@ -88,17 +87,6 @@ public interface DAO {
 	 */
 	public void newEntry(BlogEntry entry) throws DAOException;
 
-	/**
-	 * TODO uzimamo cijeli ili samo ID? 
-	 * Returns the list of all the comments on the
-	 * given blog {@code entry}.
-	 * 
-	 * @param entry entry for which we retrieve the comments of.
-	 * @return list of all the comments on the given blog {@code entry}.
-	 * @throws DAOException if there is an error while working with data.
-	 */
-	public List<BlogComment> getEntryComments(BlogEntry entry) throws DAOException;
-	
 	/**
 	 * Adds the given comment to the data.
 	 * 
