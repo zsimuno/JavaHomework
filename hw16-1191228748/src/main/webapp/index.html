@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Gallery</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script type="text/javascript">
+	$(document).ready(getTags());
+
+	function getTags() {
+		$(".loader").show();
+		$.ajax({
+			url : "rest/pictures",
+			dataType : "json",
+			success : function(data) {
+				let tagsArr = data.tags;
+				for (let i = 0; i < tagsArr.length; i++) {
+					addButtonTag(tagsArr[i]);
+				}
+				$(".loader").hide();
+			}
+		});
+	}
+
+	function getPicturesWithTag(tag) {
+		$(".content").html("");
+		$(".loader").show();
+		$.ajax({
+			url : "rest/pictures/" + tag,
+			dataType : "json",
+			success : function(data) {
+				let pictureData = data;
+				for (let i = 0; i < pictureData.length; i++) {
+					addThumbnail(pictureData[i]);
+				}
+				$(".loader").hide();
+			}
+		});
+	}
+
+	function getPicture(image) {
+		let name = image.getAttribute("value");
+		$.ajax({
+			url : "rest/pictures/picture/" + name,
+			dataType : "json",
+			success : function(data) {
+				let picture = data;
+				$(".content").html(
+						'<h3>' + picture.description + '</h3>'
+								+ '<img src="servlets/pictures?name='
+								+ picture.name + '" value="'
+								+ picture.name + '" '
+								+ 'alt="' + picture.description + '"> ');
+				$(".loader").hide();
+			}
+		});
+
+	}
+
+	function addButtonTag(tag) {
+		button = '<input type="button" value="'
+				+ tag
+				+ '" onClick="getPicturesWithTag(this.value)" class="tagButton"> ';
+		$(".content").append(button);
+	}
+
+	function addThumbnail(picture) {
+		$(".content").append(
+				'<img class="thumbnail" src="servlets/pictures?name=' + picture.name
+						+ '&thumbnail=yes" value="' + picture.name
+						+ '" onClick="getPicture(this)"' + 'alt="'
+						+ picture.description + '"> ');
+	}
+</script>
+</head>
+
+<body>
+	<div class="loader"></div>
+	<div class="content"></div>
+
+</body>
+
+</html>
