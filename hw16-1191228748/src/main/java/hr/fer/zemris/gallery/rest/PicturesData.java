@@ -49,7 +49,11 @@ public class PicturesData implements ServletContextListener {
 
 		for (int i = 2; i < lines.size(); i += 3) {
 			for (String tag : lines.get(i).split(",")) {
-				tags.add(tag.trim());
+				String trimmed = tag.trim();
+				if(!tags.contains(trimmed)) {
+					tags.add(trimmed);
+				}
+				
 			}
 		}
 
