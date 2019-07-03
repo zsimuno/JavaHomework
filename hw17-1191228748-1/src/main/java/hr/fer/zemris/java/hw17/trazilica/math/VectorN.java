@@ -1,36 +1,41 @@
 package hr.fer.zemris.java.hw17.trazilica.math;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 
 /**
- * Represents a vector.
+ * Represents an n-dimensional vector. Size is changing depending on values
+ * added.
  * 
  * @author Zvonimir Šimunović
  *
  */
-public class VectorN {
+public class VectorN implements Iterable<Double> {
 
-	/** X coordinate value. */
-	private double x;
-	/** Y coordinate value. */
-	private double y;
-	/** Z coordinate value. */
-	private double z;
+	/** Vector coordinates. */
+	List<Double> values = new ArrayList<>();
 
 	/** Precision of the equals method. */
 	private static final double precision = 1e-6;
 
 	/**
-	 * Constructs a new {@code VectorN} object from given coordinates.
+	 * Adds the given {@code value} to this vector.
 	 * 
-	 * @param x x coordinate.
-	 * @param y y coordinate.
-	 * @param z z coordinate.
+	 * @param value value to be added.
 	 */
-	public VectorN(double x, double y, double z) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
+	public void add(Double value) {
+		values.add(value);
+	}
+
+	/**
+	 * Returns size of the vector.
+	 * 
+	 * @return size of the vector.
+	 */
+	public int size() {
+		return values.size();
 	}
 
 	/**
@@ -39,7 +44,11 @@ public class VectorN {
 	 * @return Norm of this vector.
 	 */
 	public double norm() {
-		return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+		double sum = 0;
+		for (Double val : values) {
+			sum += val * val;
+		}
+		return Math.sqrt(sum);
 	}
 
 	/**
@@ -49,29 +58,11 @@ public class VectorN {
 	 */
 	public VectorN normalized() {
 		double norm = norm();
-		return new VectorN(this.x / norm, this.y / norm, this.z / norm);
-	}
-
-	/**
-	 * Creates and returns a new {@link VectorN} object that is
-	 * {@code this + VectorN}.
-	 * 
-	 * @param other {@code VectorN} that is to be added to {@code this}.
-	 * @return {@link VectorN} object that is {@code this + VectorN}.
-	 */
-	public VectorN add(VectorN other) {
-		return new VectorN(this.x + other.x, this.y + other.y, this.z + other.z);
-	}
-
-	/**
-	 * Creates and returns a new {@link VectorN} object that is
-	 * {@code this - VectorN}.
-	 * 
-	 * @param other {@code VectorN} that is to be subtracted from {@code this}.
-	 * @return {@link VectorN} object that is {@code this - VectorN}.
-	 */
-	public VectorN sub(VectorN other) {
-		return new VectorN(this.x - other.x, this.y - other.y, this.z - other.z);
+		VectorN n = new VectorN();
+		for (Double value : values) {
+			n.add(value / norm);
+		}
+		return n;
 	}
 
 	/**
@@ -81,33 +72,17 @@ public class VectorN {
 	 * @param other other {@code VectorN}.
 	 * @return {@link VectorN} object that is dot product of {@code this} and
 	 *         {@code VectorN}.
+	 * @throws IllegalArgumentException if vectors are not the same size.
 	 */
 	public double dot(VectorN other) {
-		return this.x * other.x + this.y * other.y + this.z * other.z;
-	}
-
-	/**
-	 * Creates and returns a new {@link VectorN} object that is vector product of
-	 * {@code this} and {@code VectorN}.
-	 * 
-	 * @param other other {@code VectorN}.
-	 * @return {@link VectorN} object that is vector product of {@code this} and
-	 *         {@code VectorN}.
-	 */
-	public VectorN cross(VectorN other) {
-		return new VectorN(this.y * other.z - this.z * other.y, this.z * other.x - this.x * other.z,
-				this.x * other.y - this.y * other.x);
-	}
-
-	/**
-	 * Creates and returns {@code this} scaled with the given factor.
-	 * 
-	 * @param s factor for scaling.
-	 * @return {@code VectorN} object that is {@code this} scaled with the given
-	 *         factor.
-	 */
-	public VectorN scale(double s) {
-		return new VectorN(this.x * s, this.y * s, this.z * s);
+		if (this.size() != other.size()) {
+			throw new IllegalArgumentException("Vectors must be the same size!");
+		}
+		double dot = 0;
+		for (int i = 0; i < values.size(); i++) {
+			dot += this.values.get(i) * other.values.get(i);
+		}
+		return dot;
 	}
 
 	/**
@@ -115,49 +90,37 @@ public class VectorN {
 	 * 
 	 * @param other other {@code VectorN}.
 	 * @return Cosine of the angle between {@code this} and {@code other}.
+	 * @throws IllegalArgumentException if vectors are not the same size.
 	 */
 	public double cosAngle(VectorN other) {
 		return this.dot(other) / (this.norm() * other.norm());
 	}
 
 	/**
-	 * @return the x coordinate
-	 */
-	public double getX() {
-		return x;
-	}
-
-	/**
-	 * @return the y coordinate
-	 */
-	public double getY() {
-		return y;
-	}
-
-	/**
-	 * @return the z coordinate
-	 */
-	public double getZ() {
-		return z;
-	}
-
-	/**
-	 * This vector to array with three elements.
+	 * Returns the element and the given {@code index}.
 	 * 
-	 * @return this vector as double array with three elements.
+	 * @param index index of the element
+	 * @return the element at the specified position in this list
+	 * @throws IndexOutOfBoundsException if the index is out of range
+	 *                                   ({@code index < 0 || index >= size()})
 	 */
-	public double[] toArray() {
-		return new double[] { x, y, z };
+	public double get(int index) {
+		Objects.checkIndex(index, values.size());
+		return values.get(index);
 	}
 
-	@Override
-	public String toString() {
-		return String.format("(%.6f, %.6f, %.6f)", x, y, z);
+	/**
+	 * Returns a list of values in the vector.
+	 * 
+	 * @return values as {@link List}
+	 */
+	public List<Double> values() {
+		return values;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(x, y, z);
+		return Objects.hash(values);
 	}
 
 	@Override
@@ -169,7 +132,19 @@ public class VectorN {
 		if (!(obj instanceof VectorN))
 			return false;
 		VectorN other = (VectorN) obj;
-		return Math.abs(x - other.x) < precision && Math.abs(y - other.y) < precision && Math.abs(z - other.z) < precision;
+		if (this.size() != other.size()) {
+			return false;
+		}
+		for (int i = 0; i < values.size(); i++) {
+			if (Math.abs(this.values.get(i) - other.values.get(i)) > precision)
+				return false;
+		}
+		return true;
+	}
+
+	@Override
+	public Iterator<Double> iterator() {
+		return values.iterator();
 	}
 
 }
