@@ -15,10 +15,29 @@ import java.util.Objects;
 public class VectorN implements Iterable<Double> {
 
 	/** Vector coordinates. */
-	List<Double> values = new ArrayList<>();
+	List<Double> values;
 
 	/** Precision of the equals method. */
 	private static final double precision = 1e-6;
+
+	/**
+	 * Construct with the given initial size.
+	 * 
+	 * @param size initial size.
+	 */
+	public VectorN(int size) {
+		values = new ArrayList<>(size);
+		for (int i = 0; i < size; ++i) {
+			values.add(0.);
+		}
+	}
+
+	/**
+	 * Default constructor.
+	 */
+	public VectorN() {
+		values = new ArrayList<>();
+	}
 
 	/**
 	 * Adds the given {@code value} to this vector.
@@ -97,7 +116,7 @@ public class VectorN implements Iterable<Double> {
 	}
 
 	/**
-	 * Returns the element and the given {@code index}.
+	 * Returns the element at the given {@code index}.
 	 * 
 	 * @param index index of the element
 	 * @return the element at the specified position in this list
@@ -107,6 +126,31 @@ public class VectorN implements Iterable<Double> {
 	public double get(int index) {
 		Objects.checkIndex(index, values.size());
 		return values.get(index);
+	}
+
+	/**
+	 * Sets the element at the given {@code index}.
+	 * 
+	 * @param index   index of the element
+	 * @param element element to be set to.
+	 * @throws IndexOutOfBoundsException if the index is out of range
+	 *                                   ({@code index < 0 || index >= size()})
+	 */
+	public void set(int index, double element) {
+		Objects.checkIndex(index, values.size());
+		values.set(index, element);
+	}
+
+	/**
+	 * Increment the element at the given {@code index} by one.
+	 * 
+	 * @param index index of the element
+	 * @throws IndexOutOfBoundsException if the index is out of range
+	 *                                   ({@code index < 0 || index >= size()})
+	 */
+	public void increment(int index) {
+		Objects.checkIndex(index, values.size());
+		values.set(index, values.get(index) + 1);
 	}
 
 	/**

@@ -1,33 +1,35 @@
 package hr.fer.zemris.java.hw17.trazilica;
 
+import java.nio.file.Path;
+
 /**
  * Represents one {@link SearchCommand} result of a query.
  * 
  * @author Zvonimir Šimunović
  *
  */
-public class SearchResult {
+public class SearchResult implements Comparable<SearchResult> {
 	/** Path of the file that is searched. */
-	private String path;
+	private Path path;
 
-	/** Calculated tfidf. */
-	private double tfidf;
+	/** Calculated similarity. */
+	private Double sim;
 
 	/**
 	 * Constructor
 	 * 
-	 * @param path  Path of the file that is searched.
-	 * @param tfidf Calculated tfidf.
+	 * @param path Path of the file that is searched.
+	 * @param sim  Calculated tfidf.
 	 */
-	public SearchResult(String path, double tfidf) {
+	public SearchResult(Path path, Double sim) {
 		this.path = path;
-		this.tfidf = tfidf;
+		this.sim = sim;
 	}
 
 	/**
 	 * @return the path of the file that is searched
 	 */
-	public String getPath() {
+	public Path getPath() {
 		return path;
 	}
 
@@ -35,6 +37,11 @@ public class SearchResult {
 	 * @return the calculated tfidf
 	 */
 	public double getTfidf() {
-		return tfidf;
+		return sim;
+	}
+
+	@Override
+	public int compareTo(SearchResult o) {
+		return Double.valueOf(sim).compareTo(o.getTfidf());
 	}
 }

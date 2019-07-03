@@ -1,12 +1,10 @@
 package hr.fer.zemris.java.hw17.trazilica;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +14,7 @@ import hr.fer.zemris.java.hw17.trazilica.commands.ExitCommand;
 import hr.fer.zemris.java.hw17.trazilica.commands.QueryCommand;
 import hr.fer.zemris.java.hw17.trazilica.commands.ResultsCommand;
 import hr.fer.zemris.java.hw17.trazilica.commands.TypeCommand;
+import hr.fer.zemris.java.hw17.trazilica.math.VectorN;
 
 /**
  * Search engine application. Does the searching using the TF-IDF criteria.
@@ -40,7 +39,7 @@ public class Konzola {
 	private static Map<String, SearchCommand> commands = new HashMap<>();
 
 	// Put all commands in the map of commands.
-	{
+	static {
 		commands.put("query", new QueryCommand());
 		commands.put("type", new TypeCommand());
 		commands.put("results", new ResultsCommand());
@@ -76,45 +75,13 @@ public class Konzola {
 			return;
 		}
 
-		try (DirectoryStream<Path> stream = Files.newDirectoryStream(directoryPath)) {
+		setVocabularyAndTf(data, directoryPath, stopWords);
 
-			for (Path file : stream) {
-				// Skip invalid files
-				if (Files.isDirectory(file) || !Files.isReadable(file)) {
-					continue;
-				}
+		data.setNumberOfDocuments(data.getTfValues().size());
 
-				Scanner input = new Scanner(file);
-				List<String> vocabulary = data.getVocabulary();
+		setIdfValues(data);
 
-				while (input.hasNext()) {
-					// Remove non alphabetic characters (split on them)
-					String[] wordsArray = input.next().split("\\P{L}+");
-					
-					for (String word : wordsArray) {
-						if (stopWords.contains(word))
-							continue;
-
-						int index;
-
-						if (vocabulary.contains(word)) {
-							vocabulary.add(word);
-							index = vocabulary.size() - 1;
-						} else {
-							index = vocabulary.indexOf(word);
-						}
-					}
-					// TODO implement vectors and such
-				}
-				
-				input.close();
-
-			}
-		} catch (IOException e) {
-			System.out.println("Error while reading files from the directory.");
-			System.out.println(e.getMessage());
-			return;
-		}
+		calculateTfidf(data);
 
 		System.out.println("Vocabulary size is " + data.getVocabulary().size() + " words.\n");
 
@@ -146,6 +113,111 @@ public class Konzola {
 		}
 
 		sc.close();
+	}
+
+	/**
+	 * Sets the vocabulary and calculates TF values.
+	 * 
+	 * @param data          contains all important data for calculating
+	 * @param directoryPath path to the parent directory of the files we search in
+	 * @param stopWords     stop words that don't go into vocabulary
+	 */
+	private static void setVocabularyAndTf(SearchData data, Path directoryPath, List<String> stopWords) {
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(directoryPath)) {
+
+			Map<Path, VectorN> tfValues = data.getTfValues();
+			List<String> vocabulary = data.getVocabulary();
+
+			for (Path file : stream) {
+				// Skip invalid files
+				if (Files.isDirectory(file) || !Files.isReadable(file)) {
+					continue;
+				}
+
+				VectorN tf = new VectorN(vocabulary.size());
+
+				Scanner input = new Scanner(file);
+
+				while (input.hasNext()) {
+					// Remove non alphabetic characters (split on them)
+					String[] wordsArray = input.next().split("\\P{L}+");
+
+					for (String word : wordsArray) {
+						word = word.toLowerCase();
+						if (stopWords.contains(word) || word.isBlank())
+							continue;
+
+						if (!vocabulary.contains(word)) {
+							vocabulary.add(word);
+							tf.add(1.);
+
+							// Add 0 for this word to every counter
+							for (VectorN v : tfValues.values()) {
+								v.add(0.);
+							}
+						} else {
+							int index = vocabulary.indexOf(word);
+							tf.increment(index);
+						}
+					}
+
+				}
+
+				tfValues.put(file, tf);
+
+				input.close();
+
+			}
+		} catch (IOException e) {
+			System.out.println("Error while reading files from the directory.");
+			System.out.println(e.getMessage());
+			System.exit(1);
+		}
+
+	}
+
+	/**
+	 * Calculate IDF values.
+	 * 
+	 * @param data contains all important data for calculating
+	 */
+	private static void setIdfValues(SearchData data) {
+		VectorN idf = data.getIdfValues();
+
+		List<String> voc = data.getVocabulary();
+		for (int i = 0; i < voc.size(); i++) {
+			double counter = 0;
+			for (VectorN v : data.getTfValues().values()) {
+				if (v.get(i) > 0) {
+					counter++;
+				}
+			}
+			idf.add(Math.log(data.getNumberOfDocuments() / counter));
+
+		}
+
+	}
+
+	/**
+	 * Calculate TF-IDF values.
+	 * 
+	 * @param data contains all important data for calculating
+	 */
+	private static void calculateTfidf(SearchData data) {
+		Map<Path, VectorN> tfdif = data.getTfidfValues();
+		VectorN idf = data.getIdfValues();
+
+		for (Map.Entry<Path, VectorN> entry : data.getTfValues().entrySet()) {
+			VectorN tfdifVector = new VectorN(entry.getValue().size());
+			VectorN tfVal = entry.getValue();
+			for (int i = 0; i < tfVal.size(); i++) {
+				Double val = tfVal.get(i);
+
+				tfdifVector.set(i, val * idf.get(i));
+			}
+
+			tfdif.put(entry.getKey(), tfdifVector);
+		}
 	}
 
 }

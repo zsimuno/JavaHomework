@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import hr.fer.zemris.java.hw17.trazilica.SearchCommand;
 import hr.fer.zemris.java.hw17.trazilica.SearchData;
@@ -40,7 +39,7 @@ public class TypeCommand implements SearchCommand {
 
 		SearchResult res = data.getResults().get(index);
 
-		Path path = Paths.get(res.getPath());
+		Path path = res.getPath();
 
 		if (Files.isDirectory(path) || !Files.isReadable(path)) {
 			System.out.println("Given type is not a file or not readable!");
@@ -48,7 +47,7 @@ public class TypeCommand implements SearchCommand {
 		}
 
 		System.out.println("---------------------------------------------------------------------------");
-		System.out.println("Dokument: " + res.getPath());
+		System.out.println("Dokument: " + path.toString());
 		System.out.println("---------------------------------------------------------------------------");
 
 		// Open the file input and write the file

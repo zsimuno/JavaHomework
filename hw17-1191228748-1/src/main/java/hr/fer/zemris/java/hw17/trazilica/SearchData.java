@@ -1,5 +1,6 @@
 package hr.fer.zemris.java.hw17.trazilica;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,16 +17,22 @@ import hr.fer.zemris.java.hw17.trazilica.math.VectorN;
 public class SearchData {
 
 	/** Vocabulary of all words (except stop words). */
-	List<String> vocabulary = new ArrayList<>();
+	private List<String> vocabulary = new ArrayList<>();
 
 	/** Results of the last query. */
-	List<SearchResult> results = new ArrayList<>();
+	private List<SearchResult> results = new ArrayList<>();
 
 	/** IDF values of words from vocabulary. */
-	VectorN IdfValues = new VectorN();
+	private VectorN IdfValues = new VectorN();
 
 	/** TF vectors for given files (paths). */
-	Map<String, VectorN> tfValues = new HashMap<>();
+	private Map<Path, VectorN> tfValues = new HashMap<>();
+
+	/** TF vectors for given files (paths). */
+	private Map<Path, VectorN> tfidfValues = new HashMap<>();
+
+	/** NUmber of documents we search in. */
+	int numberOfDocuments;
 
 	/**
 	 * @return the vocabulary
@@ -72,15 +79,43 @@ public class SearchData {
 	/**
 	 * @return the tfValues
 	 */
-	public Map<String, VectorN> getTfValues() {
+	public Map<Path, VectorN> getTfValues() {
 		return tfValues;
 	}
 
 	/**
 	 * @param tfValues the tfValues to set
 	 */
-	public void setTfValues(Map<String, VectorN> tfValues) {
+	public void setTfValues(Map<Path, VectorN> tfValues) {
 		this.tfValues = tfValues;
+	}
+
+	/**
+	 * @return the tfidfValues
+	 */
+	public Map<Path, VectorN> getTfidfValues() {
+		return tfidfValues;
+	}
+
+	/**
+	 * @param tfidfValues the tfidfValues to set
+	 */
+	public void setTfidfValues(Map<Path, VectorN> tfidfValues) {
+		this.tfidfValues = tfidfValues;
+	}
+
+	/**
+	 * @return the number Of Documents
+	 */
+	public int getNumberOfDocuments() {
+		return numberOfDocuments;
+	}
+
+	/**
+	 * @param numberOfDocuments the number Of Documents to set
+	 */
+	public void setNumberOfDocuments(int numberOfDocuments) {
+		this.numberOfDocuments = numberOfDocuments;
 	}
 
 }

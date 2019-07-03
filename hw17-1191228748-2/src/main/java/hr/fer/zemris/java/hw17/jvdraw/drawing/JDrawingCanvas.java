@@ -1,5 +1,10 @@
 package hr.fer.zemris.java.hw17.jvdraw.drawing;
 
-public class JDrawingCanvas {
+import javax.swing.JComponent;
+
+public class JDrawingCanvas extends JComponent {
+
+	/** */
+	private static final long serialVersionUID = 1L;
 
 }
