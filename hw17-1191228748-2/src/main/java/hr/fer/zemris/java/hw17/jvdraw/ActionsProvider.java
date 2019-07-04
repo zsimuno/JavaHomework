@@ -5,6 +5,7 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -12,9 +13,11 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
-import hr.fer.zemris.java.hw17.jvdraw.shapes.Circle;
-import hr.fer.zemris.java.hw17.jvdraw.shapes.FilledCircle;
-import hr.fer.zemris.java.hw17.jvdraw.shapes.Line;
+import hr.fer.zemris.java.hw17.jvdraw.drawing.DrawingModel;
+import hr.fer.zemris.java.hw17.jvdraw.geometry.GeometricalObject;
+import hr.fer.zemris.java.hw17.jvdraw.shapes.CircleTool;
+import hr.fer.zemris.java.hw17.jvdraw.shapes.FilledCircleTool;
+import hr.fer.zemris.java.hw17.jvdraw.shapes.LineTool;
 
 /**
  * Provides actions needed in the {@link JVDraw} application.
@@ -34,6 +37,12 @@ public class ActionsProvider {
 	 */
 	public ActionsProvider(JVDraw drawApp) {
 		this.drawApp = drawApp;
+		lineTool = new LineTool(drawApp.getModel(), drawApp.getCanvas(), drawApp.getFgColorArea(),
+				drawApp.getBgColorArea());
+		circleTool = new CircleTool(drawApp.getModel(), drawApp.getCanvas(), drawApp.getFgColorArea(),
+				drawApp.getBgColorArea());
+		filledCircleTool = new FilledCircleTool(drawApp.getModel(), drawApp.getCanvas(), drawApp.getFgColorArea(),
+				drawApp.getBgColorArea());
 		initMenuActions();
 	}
 
@@ -103,16 +112,28 @@ public class ActionsProvider {
 				return;
 			}
 
-			String text;
+			List<String> lines;
 			try {
-				text = Files.readString(file);
+				lines = Files.readAllLines(file);
 			} catch (IOException e1) {
 				JOptionPane.showMessageDialog(drawApp, "Error while reading the file!", "Error!",
 						JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 
-			// TODO read file
+			List<GeometricalObject> objects;
+			try {
+				objects = FileParser.parseText(lines);
+			} catch (Exception e2) {
+				JOptionPane.showMessageDialog(drawApp, "Error while reading the file!", "Error!",
+						JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			
+			DrawingModel model = drawApp.getModel();
+			for (GeometricalObject geometricalObject : objects) {
+				model.add(geometricalObject);
+			}
 		}
 	};
 
@@ -168,11 +189,11 @@ public class ActionsProvider {
 	};
 
 	/** Tool for drawing lines. */
-	private Line lineTool = new Line();
+	private LineTool lineTool;
 	/** Tool for drawing non-filled circles. */
-	private Circle circleTool = new Circle();
+	private CircleTool circleTool;
 	/** Tool for drawing filled circles. */
-	private FilledCircle filledCircleTool = new FilledCircle();
+	private FilledCircleTool filledCircleTool;
 
 	/** Draw lines. */
 	public Action line = new AbstractAction() {
@@ -182,7 +203,7 @@ public class ActionsProvider {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			drawApp.setCurrentState(lineTool);
+			drawApp.setCurrentTool(lineTool);
 		}
 	};
 
@@ -194,7 +215,7 @@ public class ActionsProvider {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			drawApp.setCurrentState(circleTool);
+			drawApp.setCurrentTool(circleTool);
 		}
 	};
 
@@ -206,7 +227,7 @@ public class ActionsProvider {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			drawApp.setCurrentState(filledCircleTool);
+			drawApp.setCurrentTool(filledCircleTool);
 		}
 	};
 

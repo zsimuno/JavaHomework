@@ -1,8 +1,6 @@
 package hr.fer.zemris.java.hw17.jvdraw.geometry;
 
-import hr.fer.zemris.java.hw17.jvdraw.shapes.Circle;
-import hr.fer.zemris.java.hw17.jvdraw.shapes.FilledCircle;
-import hr.fer.zemris.java.hw17.jvdraw.shapes.Line;
+import hr.fer.zemris.java.hw17.jvdraw.geometry.objects.*;
 
 /**
  * Visitor interface for geometrical objects.

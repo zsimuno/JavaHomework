@@ -4,6 +4,12 @@ import java.awt.Color;
 
 import javax.swing.JLabel;
 
+/**
+ * Label that shows the current foreground and current background color.
+ * 
+ * @author Zvonimir Šimunović
+ *
+ */
 public class JColorLabel extends JLabel implements ColorChangeListener {
 
 	/** */

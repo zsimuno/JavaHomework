@@ -30,8 +30,11 @@ public class JColorArea extends JComponent implements IColorProvider {
 		@Override
 		public void mousePressed(MouseEvent e) {
 			Color oldColor = selectedColor;
-			selectedColor = JColorChooser.showDialog(JColorArea.this, "Select color", Color.black);
-			notifyColorChangeListeners(oldColor);
+			Color newColor = JColorChooser.showDialog(JColorArea.this, "Select color", Color.black);
+			if(newColor != null ) {
+				selectedColor = newColor;
+				notifyColorChangeListeners(oldColor);
+			}
 			repaint();
 		}
 	};
@@ -44,11 +47,22 @@ public class JColorArea extends JComponent implements IColorProvider {
 	public JColorArea(Color selectedColor) {
 		this.selectedColor = selectedColor;
 		this.addMouseListener(chooseColor);
+		this.setPreferredSize(new Dimension(15, 15));
 	}
 
 	@Override
 	public Dimension getPreferredSize() {
 		return new Dimension(15, 15);
+	}
+	
+	@Override
+	public Dimension getMaximumSize() {
+		return getPreferredSize();
+	}
+	
+	@Override
+	public Dimension getMinimumSize() {
+		return getPreferredSize();
 	}
 
 	@Override

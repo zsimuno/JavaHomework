@@ -3,6 +3,9 @@ package hr.fer.zemris.java.hw17.jvdraw.geometry;
 import java.util.HashSet;
 import java.util.Set;
 
+import hr.fer.zemris.java.hw17.jvdraw.geometry.editors.GeometricalObjectEditor;
+
+
 /**
  * Represents one geometrical object.
  * 
@@ -54,5 +57,6 @@ public abstract class GeometricalObject {
 			l.geometricalObjectChanged(this);
 		}
 	}
+	
 
 }
