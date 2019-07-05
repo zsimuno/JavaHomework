@@ -46,7 +46,7 @@ public interface Tool {
 	public void mouseDragged(MouseEvent e);
 
 	/**
-	 * Paint with the tool.
+	 * Paint with thiw tool.
 	 * 
 	 * @param g2d graphics we use to paint
 	 */

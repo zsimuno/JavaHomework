@@ -59,6 +59,20 @@ public class Circle extends GeometricalObject {
 		return lineColor;
 	}
 
+	/**
+	 * Sets the changes to this object.
+	 * 
+	 * @param center    point
+	 * @param radius    of the circle
+	 * @param lineColor color of the line
+	 */
+	public void setChange(Point center, int radius, Color lineColor) {
+		this.center = center;
+		this.radius = radius;
+		this.lineColor = lineColor;
+		this.notifyListeners();
+	}
+
 	@Override
 	public void accept(GeometricalObjectVisitor v) {
 		v.visit(this);
@@ -67,7 +81,7 @@ public class Circle extends GeometricalObject {
 
 	@Override
 	public GeometricalObjectEditor createGeometricalObjectEditor() {
-		return new CircleEditor();
+		return new CircleEditor(this);
 	}
 
 	@Override

@@ -39,7 +39,7 @@ public class DrawingModelImpl implements DrawingModel, GeometricalObjectListener
 	public void add(GeometricalObject object) {
 		objects.add(object);
 		object.addGeometricalObjectListener(this);
-		fireObjectsAdded(getSize() - 1, getSize() - 1);
+		fireObjectsAdded(getSize(), getSize());
 		modified = true;
 	}
 

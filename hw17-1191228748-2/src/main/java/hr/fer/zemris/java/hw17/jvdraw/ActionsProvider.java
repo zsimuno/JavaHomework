@@ -1,20 +1,29 @@
 package hr.fer.zemris.java.hw17.jvdraw;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import hr.fer.zemris.java.hw17.jvdraw.drawing.DrawingModel;
 import hr.fer.zemris.java.hw17.jvdraw.geometry.GeometricalObject;
+import hr.fer.zemris.java.hw17.jvdraw.geometry.GeometricalObjectBBCalculator;
+import hr.fer.zemris.java.hw17.jvdraw.geometry.GeometricalObjectPainter;
 import hr.fer.zemris.java.hw17.jvdraw.shapes.CircleTool;
 import hr.fer.zemris.java.hw17.jvdraw.shapes.FilledCircleTool;
 import hr.fer.zemris.java.hw17.jvdraw.shapes.LineTool;
@@ -43,6 +52,7 @@ public class ActionsProvider {
 				drawApp.getBgColorArea());
 		filledCircleTool = new FilledCircleTool(drawApp.getModel(), drawApp.getCanvas(), drawApp.getFgColorArea(),
 				drawApp.getBgColorArea());
+		drawApp.setCurrentTool(lineTool);
 		initMenuActions();
 	}
 
@@ -60,7 +70,7 @@ public class ActionsProvider {
 		save.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_S);
 		save.putValue(Action.SHORT_DESCRIPTION, "Save file to disk");
 
-		saveAs.putValue(Action.NAME, "Save");
+		saveAs.putValue(Action.NAME, "Save as...");
 		saveAs.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift S"));
 		saveAs.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_A);
 		saveAs.putValue(Action.SHORT_DESCRIPTION, "Save file as...");
@@ -106,6 +116,13 @@ public class ActionsProvider {
 				return;
 
 			Path file = jfc.getSelectedFile().toPath();
+			String fileName = file.getFileName().toString();
+			String ext = fileName.substring(fileName.lastIndexOf('.') + 1);
+
+			if (!ext.toLowerCase().equals("jvd")) {
+				JOptionPane.showMessageDialog(drawApp, "Invalid extension", "Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
 
 			if (!Files.isReadable(file)) {
 				JOptionPane.showMessageDialog(drawApp, "Cannot read the file!", "Error!", JOptionPane.ERROR_MESSAGE);
@@ -129,11 +146,16 @@ public class ActionsProvider {
 						JOptionPane.ERROR_MESSAGE);
 				return;
 			}
-			
+
+			drawApp.setSavedFile(file);
+
 			DrawingModel model = drawApp.getModel();
+			model.clear();
 			for (GeometricalObject geometricalObject : objects) {
 				model.add(geometricalObject);
 			}
+			model.clearModifiedFlag();
+
 		}
 	};
 
@@ -145,8 +167,7 @@ public class ActionsProvider {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			// TODO Auto-generated method stub
-
+			Util.save(drawApp);
 		}
 	};
 
@@ -158,8 +179,7 @@ public class ActionsProvider {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			// TODO Auto-generated method stub
-
+			Util.saveAs(drawApp);
 		}
 	};
 
@@ -171,8 +191,56 @@ public class ActionsProvider {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			// TODO Auto-generated method stub
+			File file;
+			String ext;
+			JFileChooser jfc = new JFileChooser();
+			jfc.setDialogTitle("Export file as...");
+			jfc.addChoosableFileFilter(new FileNameExtensionFilter("Images", "jpg", "png", "gif"));
+			while (true) {
+				if (jfc.showSaveDialog(drawApp) != JFileChooser.APPROVE_OPTION) {
+					JOptionPane.showMessageDialog(drawApp, "File not saved", "Info", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
+				file = jfc.getSelectedFile();
+				String fileName = file.getName();
+				ext = fileName.substring(fileName.lastIndexOf('.') + 1);
 
+				if (!ext.equals("jpg") && !ext.equals("png") && !ext.equals("gif")) {
+					JOptionPane.showMessageDialog(drawApp, "Invalid extension! jpg, png and gif are supported", "Info",
+							JOptionPane.INFORMATION_MESSAGE);
+					continue;
+				}
+
+				break;
+			}
+
+			DrawingModel model = drawApp.getModel();
+			GeometricalObjectBBCalculator bbcalc = new GeometricalObjectBBCalculator();
+			for (int i = 0, size = model.getSize(); i < size; i++) {
+				model.getObject(i).accept(bbcalc);
+			}
+			Rectangle box = bbcalc.getBoundingBox();
+
+			BufferedImage image = new BufferedImage(box.width, box.height, BufferedImage.TYPE_3BYTE_BGR);
+			Graphics2D g = image.createGraphics();
+			g.setColor(Color.lightGray);
+			g.fillRect(0, 0, box.width, box.height);
+			g.translate(-box.x, -box.y);
+			GeometricalObjectPainter painter = new GeometricalObjectPainter(g);
+			for (int i = 0, size = model.getSize(); i < size; i++) {
+				model.getObject(i).accept(painter);
+			}
+			g.dispose();
+
+			try {
+				ImageIO.write(image, ext, file);
+			} catch (IOException e1) {
+				JOptionPane.showMessageDialog(drawApp, "Error while writing the file!", "Error!",
+						JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+
+			JOptionPane.showMessageDialog(drawApp, "File exported", "Info", JOptionPane.INFORMATION_MESSAGE);
 		}
 	};
 
@@ -184,7 +252,7 @@ public class ActionsProvider {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			drawApp.dispose();
+			Util.closeApplication(drawApp);
 		}
 	};
 

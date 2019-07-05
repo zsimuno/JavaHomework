@@ -3,17 +3,16 @@ package hr.fer.zemris.java.hw17.jvdraw;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.nio.file.Path;
 
-import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
@@ -25,8 +24,6 @@ import hr.fer.zemris.java.hw17.jvdraw.drawing.DrawingModel;
 import hr.fer.zemris.java.hw17.jvdraw.drawing.DrawingModelImpl;
 import hr.fer.zemris.java.hw17.jvdraw.drawing.DrawingObjectListModel;
 import hr.fer.zemris.java.hw17.jvdraw.drawing.JDrawingCanvas;
-import hr.fer.zemris.java.hw17.jvdraw.geometry.GeometricalObject;
-import hr.fer.zemris.java.hw17.jvdraw.geometry.editors.GeometricalObjectEditor;
 import hr.fer.zemris.java.hw17.jvdraw.tools.Tool;
 
 /**
@@ -43,11 +40,18 @@ public class JVDraw extends JFrame {
 	 * Constructor.
 	 */
 	public JVDraw() {
-		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		setSize(1440, 900);
 		setLocationRelativeTo(null);
-		setSize(1024, 768);
 		setTitle("JVDraw");
 		initGUI();
+
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				Util.closeApplication(JVDraw.this);
+			}
+		});
 
 	}
 
@@ -56,7 +60,7 @@ public class JVDraw extends JFrame {
 	 */
 	private void initGUI() {
 		Container cp = getContentPane();
-		cp.setLayout(new BorderLayout());
+		cp.setLayout(new BorderLayout(1, 10));
 
 		ActionsProvider actions = new ActionsProvider(this);
 
@@ -84,6 +88,7 @@ public class JVDraw extends JFrame {
 
 		ButtonGroup bg = new ButtonGroup();
 		JToggleButton lineButton = new JToggleButton(actions.line);
+		lineButton.setSelected(true);
 		JToggleButton circleButton = new JToggleButton(actions.circle);
 		JToggleButton filledCircleButton = new JToggleButton(actions.filledCircle);
 		bg.add(lineButton);
@@ -98,31 +103,9 @@ public class JVDraw extends JFrame {
 
 		cp.add(canvas, BorderLayout.CENTER);
 
-		JList<GeometricalObject> objectList = new JList<GeometricalObject>(new DrawingObjectListModel(model));
-		cp.add(objectList, BorderLayout.LINE_END);
+		JObjectsList objectList = new JObjectsList(new DrawingObjectListModel(model), this);
 
-		objectList.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent evt) {
-				@SuppressWarnings("unchecked")
-				JList<GeometricalObject> list = (JList<GeometricalObject>) evt.getSource();
-				if (evt.getClickCount() == 2) {
-					int index = list.locationToIndex(evt.getPoint());
-					GeometricalObject clicked = list.getModel().getElementAt(index);
-					GeometricalObjectEditor editor = clicked.createGeometricalObjectEditor();
-					if (JOptionPane.showConfirmDialog(JVDraw.this, editor, "Edit",
-							JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-						try {
-							editor.checkEditing();
-							editor.acceptEditing();
-						} catch (Exception ex) {
-							JOptionPane.showMessageDialog(JVDraw.this, "Data is invalid!", "Error",
-									JOptionPane.INFORMATION_MESSAGE);
-						}
-					}
-				}
-			}
-		});
-		objectList.setBorder(BorderFactory.createLineBorder(Color.black, 2));
+		cp.add(new JScrollPane(objectList), BorderLayout.LINE_END);
 
 		cp.add(new JColorLabel(fgColorArea, bgColorArea), BorderLayout.PAGE_END);
 	}
@@ -140,6 +123,9 @@ public class JVDraw extends JFrame {
 	private JColorArea fgColorArea = new JColorArea(Color.black);
 	/** bg color provider */
 	private JColorArea bgColorArea = new JColorArea(Color.white);
+
+	/** Path to the file if it has been already saved. */
+	private Path savedFile = null;
 
 	/**
 	 * @return the fgColorArea
@@ -184,6 +170,21 @@ public class JVDraw extends JFrame {
 	 */
 	public Tool getCurrentTool() {
 		return currentTool;
+	}
+
+	/**
+	 * @return the path to where this drawing is saved or {@code null} if the file
+	 *         has not been saved
+	 */
+	public Path getSavedFile() {
+		return savedFile;
+	}
+
+	/**
+	 * @param savedFile the path to where this drawing is saved to set
+	 */
+	public void setSavedFile(Path savedFile) {
+		this.savedFile = savedFile;
 	}
 
 	/**

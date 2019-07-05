@@ -28,11 +28,11 @@ public abstract class AbstractTool implements Tool {
 	/** Canvas that we draw on. */
 	protected JDrawingCanvas canvas;
 
-	/** Graphics we use to draw. */
-	protected Graphics2D g2d;
-
 	/** Point of the first click. */
 	protected Point firstClickPoint;
+
+	/** Mouse move point. */
+	protected Point mouseMovePoint;
 
 	/** Is it first click? */
 	protected boolean firstClick = true;
@@ -53,12 +53,6 @@ public abstract class AbstractTool implements Tool {
 	}
 
 	@Override
-	public void paint(Graphics2D g2d) {
-		this.g2d = g2d;
-
-	}
-
-	@Override
 	public void mousePressed(MouseEvent e) {
 	}
 
@@ -68,6 +62,14 @@ public abstract class AbstractTool implements Tool {
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		if (!firstClick) {
+			mouseMovePoint = e.getPoint();
+			canvas.repaint();
+		}
 	}
 
 	/**
@@ -89,10 +91,9 @@ public abstract class AbstractTool implements Tool {
 	 * 
 	 * @param e mouse event
 	 */
-	protected void drawCircleOutline(MouseEvent e) {
-		Point p = e.getPoint();
-		int radius = calculateDistance(firstClickPoint, p);
+	protected void drawCircleOutline(Graphics2D g2d) {
+		int radius = calculateDistance(firstClickPoint, mouseMovePoint);
 		g2d.setColor(fgColor.getCurrentColor());
-		g2d.drawOval(firstClickPoint.x, firstClickPoint.y, radius, radius);
+		g2d.drawOval(firstClickPoint.x - radius, firstClickPoint.y - radius, 2 * radius, 2 * radius);
 	}
 }

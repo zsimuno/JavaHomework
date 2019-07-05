@@ -1,5 +1,6 @@
 package hr.fer.zemris.java.hw17.jvdraw.shapes;
 
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 
 import hr.fer.zemris.java.hw17.jvdraw.color.IColorProvider;
@@ -28,7 +29,6 @@ public class LineTool extends AbstractTool {
 		super(model, canvas, fgColor, bgColor);
 	}
 
-
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		if (firstClick) {
@@ -41,14 +41,11 @@ public class LineTool extends AbstractTool {
 	}
 
 	@Override
-	public void mouseMoved(MouseEvent e) {
-		if(!firstClick) {
+	public void paint(Graphics2D g2d) {
+		if (!firstClick) {
 			g2d.setColor(fgColor.getCurrentColor());
-			g2d.drawLine(firstClickPoint.x, firstClickPoint.y, e.getX(), e.getY());
+			g2d.drawLine(firstClickPoint.x, firstClickPoint.y, mouseMovePoint.x, mouseMovePoint.y);
 		}
-
 	}
-
-
 
 }

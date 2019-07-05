@@ -28,6 +28,11 @@ public class ResultsCommand implements SearchCommand {
 
 		List<SearchResult> results = data.getResults();
 
+		if(results.size() == 0) {
+			System.out.println("No results.");
+			return true;
+		}
+		
 		for (int i = 0; i < results.size(); i++) {
 			SearchResult res = results.get(i);
 			System.out.printf("[ %d](%.4f) %s %n", i, res.getTfidf(), res.getPath());

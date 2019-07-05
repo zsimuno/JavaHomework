@@ -52,7 +52,7 @@ public class FilledCircle extends GeometricalObject {
 
 	/**
 	 * @return the radius of the circle
-	 */ 
+	 */
 	public int getRadius() {
 		return radius;
 	}
@@ -70,6 +70,22 @@ public class FilledCircle extends GeometricalObject {
 	public Color getFillColor() {
 		return fillColor;
 	}
+	
+	/**
+	 * Sets the changes to this object.
+	 * 
+	 * @param center    point
+	 * @param radius    of the circle
+	 * @param lineColor color of the line
+	 * @param fillColor color that fills
+	 */
+	public void setChange(Point center, int radius, Color lineColor, Color fillColor) {
+		this.center = center;
+		this.radius = radius;
+		this.lineColor = lineColor;
+		this.fillColor = fillColor;
+		this.notifyListeners();
+	}
 
 	@Override
 	public void accept(GeometricalObjectVisitor v) {
@@ -79,12 +95,12 @@ public class FilledCircle extends GeometricalObject {
 
 	@Override
 	public GeometricalObjectEditor createGeometricalObjectEditor() {
-		return new FilledCircleEditor();
+		return new FilledCircleEditor(this);
 	}
 
 	@Override
 	public String toString() {
-		return "Circle (" + center.x + "," + center.y + "), " + radius + ","
+		return "FilledCircle (" + center.x + "," + center.y + "), " + radius + ","
 				+ String.format("#%02x%02x%02x", fillColor.getRed(), fillColor.getGreen(), fillColor.getBlue());
 	}
 

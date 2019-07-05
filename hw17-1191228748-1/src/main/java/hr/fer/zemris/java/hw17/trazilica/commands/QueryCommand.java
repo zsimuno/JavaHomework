@@ -74,6 +74,11 @@ public class QueryCommand implements SearchCommand {
 			}
 		}
 
+		if(results.size() == 0) {
+			System.out.println("No results.");
+			return true;
+		}
+		
 		results.sort(Comparator.reverseOrder());
 		for (int i = 0; i < results.size(); i++) {
 			SearchResult res = results.get(i);

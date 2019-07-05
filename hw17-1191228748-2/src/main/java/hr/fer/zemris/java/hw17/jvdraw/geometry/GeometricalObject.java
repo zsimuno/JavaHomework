@@ -52,7 +52,7 @@ public abstract class GeometricalObject {
 	/**
 	 * Notify all listeners that listen to this geometrical object.
 	 */
-	void notifyListeners() {
+	protected void notifyListeners() {
 		for (GeometricalObjectListener l : listeners) {
 			l.geometricalObjectChanged(this);
 		}

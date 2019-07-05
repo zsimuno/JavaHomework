@@ -59,6 +59,20 @@ public class Line extends GeometricalObject {
 		return lineColor;
 	}
 
+	/**
+	 * Sets the changes to this object.
+	 * 
+	 * @param start     start of the line
+	 * @param end       end of the line
+	 * @param lineColor color of the line
+	 */
+	public void setChange(Point start, Point end, Color lineColor) {
+		this.start = start;
+		this.end = end;
+		this.lineColor = lineColor;
+		this.notifyListeners();
+	}
+
 	@Override
 	public void accept(GeometricalObjectVisitor v) {
 		v.visit(this);
@@ -67,7 +81,7 @@ public class Line extends GeometricalObject {
 
 	@Override
 	public GeometricalObjectEditor createGeometricalObjectEditor() {
-		return new LineEditor();
+		return new LineEditor(this);
 	}
 
 	@Override

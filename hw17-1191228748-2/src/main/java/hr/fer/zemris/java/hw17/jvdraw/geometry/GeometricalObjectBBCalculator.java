@@ -23,7 +23,8 @@ public class GeometricalObjectBBCalculator implements GeometricalObjectVisitor {
 	 * @return the bounding box for the complete image
 	 */
 	public Rectangle getBoundingBox() {
-		return boundingBox;
+		return new Rectangle(boundingBox.x, boundingBox.y, boundingBox.width - boundingBox.x,
+				boundingBox.height - boundingBox.y);
 	}
 
 	@Override

@@ -6,6 +6,7 @@ import java.awt.Point;
 import hr.fer.zemris.java.hw17.jvdraw.geometry.objects.Circle;
 import hr.fer.zemris.java.hw17.jvdraw.geometry.objects.FilledCircle;
 import hr.fer.zemris.java.hw17.jvdraw.geometry.objects.Line;
+
 /**
  * Class that paints geometrical objects.
  * 
@@ -39,7 +40,7 @@ public class GeometricalObjectPainter implements GeometricalObjectVisitor {
 		Point center = circle.getCenter();
 		int radius = circle.getRadius();
 		g2d.setColor(circle.getLineColor());
-		g2d.drawOval(center.x, center.y, radius, radius);
+		g2d.drawOval(center.x - radius, center.y - radius, 2 * radius, 2 * radius);
 	}
 
 	@Override
@@ -47,9 +48,9 @@ public class GeometricalObjectPainter implements GeometricalObjectVisitor {
 		Point center = filledCircle.getCenter();
 		int radius = filledCircle.getRadius();
 		g2d.setColor(filledCircle.getFillColor());
-		g2d.fillOval(center.x, center.y, radius, radius);
+		g2d.fillOval(center.x - radius, center.y - radius, 2 * radius, 2 * radius);
 		g2d.setColor(filledCircle.getLineColor());
-		g2d.drawOval(center.x, center.y, radius, radius);
+		g2d.drawOval(center.x - radius, center.y - radius, 2 * radius, 2 * radius);
 
 	}
 

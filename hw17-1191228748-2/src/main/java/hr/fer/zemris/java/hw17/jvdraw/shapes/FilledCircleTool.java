@@ -1,5 +1,6 @@
 package hr.fer.zemris.java.hw17.jvdraw.shapes;
 
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 
 import hr.fer.zemris.java.hw17.jvdraw.color.IColorProvider;
@@ -34,7 +35,7 @@ public class FilledCircleTool extends AbstractTool {
 			firstClick = false;
 			firstClickPoint = e.getPoint();
 		} else {
-			int radius = 0;
+			int radius = calculateDistance(firstClickPoint, e.getPoint());
 			model.add(new FilledCircle(firstClickPoint, radius, fgColor.getCurrentColor(), bgColor.getCurrentColor()));
 			firstClick = true;
 		}
@@ -42,9 +43,12 @@ public class FilledCircleTool extends AbstractTool {
 	}
 
 	@Override
-	public void mouseMoved(MouseEvent e) {
+	public void paint(Graphics2D g2d) {
 		if (!firstClick) {
-			drawCircleOutline(e);
+			int radius = calculateDistance(firstClickPoint, mouseMovePoint);
+			g2d.setColor(bgColor.getCurrentColor());
+			g2d.fillOval(firstClickPoint.x - radius, firstClickPoint.y - radius, 2 * radius, 2 * radius);
+			drawCircleOutline(g2d);
 		}
 	}
 

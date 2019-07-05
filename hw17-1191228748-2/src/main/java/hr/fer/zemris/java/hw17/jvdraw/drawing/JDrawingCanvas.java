@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -28,22 +29,13 @@ public class JDrawingCanvas extends JComponent implements DrawingModelListener {
 	 */
 	public JDrawingCanvas(JVDraw app) {
 		this.drawApp = app;
+		this.setBorder(BorderFactory.createLineBorder(Color.black, 2));
 
 		MouseListener canvasMouseListener = new MouseAdapter() {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				drawApp.getCurrentTool().mouseClicked(e);
-			};
-
-			@Override
-			public void mouseDragged(MouseEvent e) {
-				drawApp.getCurrentTool().mouseDragged(e);
-			};
-
-			@Override
-			public void mouseMoved(MouseEvent e) {
-				drawApp.getCurrentTool().mouseMoved(e);
 			};
 
 			@Override
@@ -56,10 +48,23 @@ public class JDrawingCanvas extends JComponent implements DrawingModelListener {
 				drawApp.getCurrentTool().mouseReleased(e);
 			};
 		};
+		this.addMouseMotionListener(new MouseMotionListener() {
 
-		this.setBorder(BorderFactory.createLineBorder(Color.black, 2));
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				drawApp.getCurrentTool().mouseMoved(e);
+
+			}
+
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				drawApp.getCurrentTool().mouseDragged(e);
+
+			}
+		});
 
 		this.addMouseListener(canvasMouseListener);
+		this.drawApp.getModel().addDrawingModelListener(this);
 	}
 
 	@Override
@@ -69,11 +74,7 @@ public class JDrawingCanvas extends JComponent implements DrawingModelListener {
 		for (int i = 0; i < model.getSize(); i++) {
 			model.getObject(i).accept(painter);
 		}
-
-		if(drawApp.getCurrentTool() != null ) {
-			drawApp.getCurrentTool().paint((Graphics2D) g);
-		}
-		
+		drawApp.getCurrentTool().paint((Graphics2D) g);
 	}
 
 	@Override

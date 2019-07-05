@@ -11,6 +11,7 @@ import java.awt.event.MouseListener;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.swing.BorderFactory;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 
@@ -30,7 +31,7 @@ public class JColorArea extends JComponent implements IColorProvider {
 		@Override
 		public void mousePressed(MouseEvent e) {
 			Color oldColor = selectedColor;
-			Color newColor = JColorChooser.showDialog(JColorArea.this, "Select color", Color.black);
+			Color newColor = JColorChooser.showDialog(JColorArea.this, "Select color", oldColor);
 			if(newColor != null ) {
 				selectedColor = newColor;
 				notifyColorChangeListeners(oldColor);
@@ -47,7 +48,7 @@ public class JColorArea extends JComponent implements IColorProvider {
 	public JColorArea(Color selectedColor) {
 		this.selectedColor = selectedColor;
 		this.addMouseListener(chooseColor);
-		this.setPreferredSize(new Dimension(15, 15));
+		this.setBorder(BorderFactory.createLineBorder(Color.black, 2));
 	}
 
 	@Override
